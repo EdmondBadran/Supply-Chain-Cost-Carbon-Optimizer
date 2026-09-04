@@ -3,6 +3,8 @@ PLAN.md
 MEMORY.md
 ERRORS.md
 
+.claude/
+
 __pycache__/
 *.pyc
 .venv/

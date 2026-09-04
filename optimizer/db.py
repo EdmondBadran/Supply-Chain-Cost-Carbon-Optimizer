@@ -82,3 +82,36 @@ def reset(conn):
     for table in ("effort_tags", "edges", "orders", "nodes"):
         conn.execute(f"DELETE FROM {table}")
     conn.commit()
+
+
+def summary(conn):
+    """What is currently loaded, or None if the database is empty."""
+    row = conn.execute(
+        """
+        SELECT COUNT(*) AS orders,
+               SUM(weight_kg) AS weight_kg,
+               MIN(order_date) AS first_order,
+               MAX(order_date) AS last_order
+        FROM orders
+        """
+    ).fetchone()
+    if not row or not row["orders"]:
+        return None
+
+    nodes = conn.execute(
+        "SELECT node_type, COUNT(*) AS count FROM nodes GROUP BY node_type"
+    ).fetchall()
+    counts = {n["node_type"]: n["count"] for n in nodes}
+
+    return {
+        "orders": row["orders"],
+        "weight_kg": row["weight_kg"] or 0,
+        "first_order": row["first_order"],
+        "last_order": row["last_order"],
+        "warehouses": counts.get("warehouse", 0),
+        "customers": counts.get("customer", 0),
+        "edges": conn.execute("SELECT COUNT(*) FROM edges").fetchone()[0],
+        "countries": conn.execute(
+            "SELECT COUNT(DISTINCT country) FROM nodes WHERE country IS NOT NULL"
+        ).fetchone()[0],
+    }
