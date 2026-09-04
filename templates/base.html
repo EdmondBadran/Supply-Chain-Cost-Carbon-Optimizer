@@ -3,21 +3,39 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Supply Chain Cost and Carbon Optimizer{% endblock %}</title>
+<title>{% block title %}Supply chain cost and carbon optimizer{% endblock %}</title>
+<meta name="description" content="Find the routes in your supply chain that waste money and emit carbon in the same place, then fix the overlap first.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='7' cy='23' r='4' fill='%231a6b4f'/><circle cx='25' cy='9' r='4' fill='%23c2703a'/><path d='M7 23 L25 9' stroke='%231a6b4f' stroke-width='2.5' fill='none'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
+
 <header class="topbar">
-  <a class="brand" href="{{ url_for('index') }}">Cost and Carbon Optimizer</a>
+  <a class="brand" href="{{ url_for('index') }}">
+    <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+      <path d="M7 23 L25 9" stroke="currentColor" stroke-width="2.5" fill="none"/>
+      <circle cx="7" cy="23" r="4" fill="currentColor"/>
+      <circle cx="25" cy="9" r="4" fill="var(--cost)"/>
+    </svg>
+    <span>Cost <em>and</em> carbon optimizer</span>
+  </a>
   {% if summary %}
   <form method="post" action="{{ url_for('clear') }}">
-    <button class="link" type="submit">Clear data</button>
+    <button class="ghost" type="submit">Clear data</button>
   </form>
   {% endif %}
 </header>
 
-<main>
+<main id="main">
 {% block content %}{% endblock %}
 </main>
+
+<footer class="foot">
+  <span>Distances from GeoNames. Emission factors from DEFRA and GLEC ranges.</span>
+</footer>
 </body>
 </html>

@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS edges (
     transport_co2e REAL,
     packaging_co2e REAL,
     warehouse_co2e REAL,
+    returns_co2e REAL,
     UNIQUE (origin_id, dest_id, mode)
 );
 

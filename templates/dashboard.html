@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Network dashboard{% endblock %}
+
+{% block content %}
+
+<section class="board-head">
+  <div>
+    <h1>Where cost and carbon overlap</h1>
+    <p class="sub">
+      Every lane scored on what it costs to serve and what it emits. The
+      flagged ones are where a single change cuts both.
+    </p>
+  </div>
+  <div class="headline">
+    <div class="figure">
+      <span>Annual cost to serve</span>
+      <strong class="cost-ink">${{ "{:,.0f}".format(totals.cost) }}</strong>
+    </div>
+    <div class="figure">
+      <span>Annual emissions</span>
+      <strong class="carbon-ink">{{ "{:,.0f}".format(totals.co2e / 1000) }} t CO2e</strong>
+    </div>
+  </div>
+</section>
+
+<section class="panel map-panel">
+  <div class="panel-head">
+    <div>
+      <h2>The network</h2>
+      <p class="sub">Click any lane or destination to open it.</p>
+    </div>
+    <div class="legend">
+      <span><i class="swatch road"></i>Road</span>
+      <span><i class="swatch rail"></i>Rail</span>
+      <span><i class="swatch sea"></i>Sea</span>
+      <span><i class="swatch air"></i>Air</span>
+      <span><i class="swatch flag"></i>Flagged</span>
+    </div>
+  </div>
+  <div class="map-wrap">
+    <div id="map" role="img" aria-label="World map of the supply chain network, with warehouses, destination cities, and the routes between them coloured by transport mode"></div>
+    <aside id="detail" class="detail"></aside>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="panel-head">
+    <div>
+      <h2>Quick wins</h2>
+      <p class="sub">Ranked by how much of the network's total each change recovers. Tag the effort and the order updates.</p>
+    </div>
+  </div>
+  <div class="wins" id="wins"></div>
+</section>
+
+<div class="split-2">
+  <section class="panel">
+    <h2>Cost by destination</h2>
+    <p class="sub">Top eight by cost to serve.</p>
+    <table class="grid">
+      <thead><tr><th>Destination</th><th>Orders</th><th>Cost</th><th>CO2e</th></tr></thead>
+      <tbody>
+      {% for region in regions %}
+        <tr>
+          <td>{{ region.name }}</td>
+          <td class="num">{{ "{:,}".format(region.orders) }}</td>
+          <td class="num">${{ "{:,.0f}".format(region.cost) }}</td>
+          <td class="num">{{ "{:,.0f}".format(region.co2e / 1000) }} t</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <section class="panel">
+    <h2>Where the money goes</h2>
+    <p class="sub">Cost and carbon split by driver.</p>
+    <table class="grid">
+      <thead><tr><th>Driver</th><th>Cost</th><th>CO2e</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Transport</td>
+          <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
+          <td class="num">{{ "{:,.0f}".format(totals.transport_co2e / 1000) }} t</td>
+        </tr>
+        <tr>
+          <td>Warehouse and packaging</td>
+          <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
+          <td class="num">{{ "{:,.0f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
+        </tr>
+        <tr>
+          <td>Returns</td>
+          <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
+          <td class="num">{{ "{:,.0f}".format(totals.returns_co2e / 1000) }} t</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} lanes.</p>
+  </section>
+</div>
+
+<script id="network-data" type="application/json">{{ network | tojson }}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+{% endblock %}

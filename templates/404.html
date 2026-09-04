@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Page not found{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>That page does not exist<span class="split">but the network does</span></h1>
+    <p>
+      Nothing lives at that address. Head back to the start to load a dataset
+      or open the dashboard.
+    </p>
+    <form method="get" action="{{ url_for('index') }}">
+      <button class="primary" type="submit">Back to the start</button>
+    </form>
+  </div>
+</section>
+{% endblock %}

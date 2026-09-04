@@ -8,8 +8,8 @@
 
 {% if report %}
 <div class="notice ok">
-  Loaded {{ "{:,}".format(report.orders_loaded) }}
-  order{{ "s" if report.orders_loaded != 1 }} into
+  {{ "{:,}".format(report.orders_loaded) }}
+  order{{ "s" if report.orders_loaded != 1 }} across
   {{ report.nodes }} location{{ "s" if report.nodes != 1 }} and
   {{ report.edges }} route{{ "s" if report.edges != 1 }}.
   {%- if report.rows_skipped %}
@@ -18,7 +18,7 @@
 </div>
 {% if report.errors %}
 <details class="errors">
-  <summary>{{ report.errors|length }} row problem{{ "s" if report.errors|length != 1 }}</summary>
+  <summary>Show the {{ report.errors|length }} row{{ "s" if report.errors|length != 1 }} that did not load</summary>
   <table>
     <thead><tr><th>Line</th><th>Problem</th></tr></thead>
     <tbody>
@@ -31,53 +31,69 @@
 {% endif %}
 {% endif %}
 
-{% if summary %}
+{% if not summary %}
+<section class="hero">
+  <div>
+    <h1>Cost and carbon<span class="split">waste the same routes</span></h1>
+    <p>
+      Most supply chains track money in one report and emissions in another,
+      so the routes doing both kinds of damage never surface. Load your order
+      data and this works out what every lane costs to serve and what it
+      emits, then ranks where fixing one fixes the other.
+    </p>
+    <form method="post" action="{{ url_for('sample') }}">
+      <button class="primary" type="submit">Open the sample supply chain</button>
+    </form>
+  </div>
+  <dl class="hero-aside">
+    <dt>Sample network</dt>
+    <dd>1,307 orders</dd>
+    <dt>Warehouses</dt>
+    <dd>4 across 3 continents</dd>
+    <dt>Destinations</dt>
+    <dd>32 cities, 30 countries</dd>
+    <dt>Geocoding</dt>
+    <dd>34,135 cities offline</dd>
+  </dl>
+</section>
+{% else %}
 <section class="panel">
-  <h2>Loaded data</h2>
+  <h2>Loaded network</h2>
+  <p class="sub">Every figure below is derived from the orders you loaded.</p>
   <div class="stats">
-    <div class="stat"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></div>
+    <div class="stat lead"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></div>
     <div class="stat"><span>Warehouses</span><strong>{{ summary.warehouses }}</strong></div>
     <div class="stat"><span>Destinations</span><strong>{{ summary.customers }}</strong></div>
     <div class="stat"><span>Routes</span><strong>{{ summary.edges }}</strong></div>
     <div class="stat"><span>Countries</span><strong>{{ summary.countries }}</strong></div>
-    <div class="stat"><span>Shipped weight</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></div>
+    <div class="stat"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></div>
   </div>
   {% if summary.first_order %}
-  <p class="muted">Orders from {{ summary.first_order }} to {{ summary.last_order }}.</p>
+  <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
   {% endif %}
-  <p class="muted">Cost and carbon analysis lands in the next stage.</p>
-</section>
-{% else %}
-<section class="panel intro">
-  <h1>Find where cost and carbon overlap</h1>
-  <p>
-    Upload your order data and this works out what each route actually costs
-    to serve and what it emits, then ranks the places where fixing one fixes
-    the other.
-  </p>
-  <form method="post" action="{{ url_for('sample') }}">
-    <button class="primary" type="submit">Load the sample dataset</button>
+  <form method="get" action="{{ url_for('dashboard') }}">
+    <button class="primary" type="submit">Open the dashboard</button>
   </form>
-  <p class="muted">1,307 orders, 4 warehouses, 32 cities across 6 continents.</p>
 </section>
 {% endif %}
 
 <section class="panel">
-  <h2>Upload a CSV</h2>
+  <h2>Use your own data</h2>
+  <p class="sub">A CSV export of order lines. Anything it cannot read is reported by line number.</p>
   <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-    <label for="orders">Orders file (required)</label>
+    <label for="orders">Orders file, required</label>
     <input id="orders" type="file" name="orders" accept=".csv" required>
 
-    <label for="warehouses">Warehouse costs (optional)</label>
+    <label for="warehouses">Warehouse costs, optional</label>
     <input id="warehouses" type="file" name="warehouses" accept=".csv">
 
-    <button class="primary" type="submit">Upload and load</button>
+    <button class="primary" type="submit">Upload and analyse</button>
   </form>
 
   <details class="format">
-    <summary>What the orders file needs</summary>
+    <summary>Which columns the orders file needs</summary>
     <p>
-      Required columns: <code>origin_name</code>, <code>origin_city</code>,
+      Required: <code>origin_name</code>, <code>origin_city</code>,
       <code>dest_city</code>, <code>weight_kg</code>, <code>mode</code>.
     </p>
     <p>
@@ -85,14 +101,14 @@
       <code>customer_id</code>, <code>origin_country</code>,
       <code>dest_country</code>, <code>units</code>,
       <code>product_category</code>, <code>order_value</code>,
-      <code>returned</code>, and <code>origin_lat</code> /
+      <code>returned</code>. Add <code>origin_lat</code> /
       <code>origin_lon</code> / <code>dest_lat</code> / <code>dest_lon</code>
-      if a city is too small to be in the lookup table.
+      for anywhere too small for the city lookup.
     </p>
     <p>
       Transport modes: <code>road</code>, <code>rail</code>, <code>sea</code>,
-      <code>air</code>. Common aliases like truck, ground, ship and plane
-      are accepted.
+      <code>air</code>. Aliases like truck, ground, ship and plane are read
+      as the right mode.
     </p>
   </details>
 </section>
