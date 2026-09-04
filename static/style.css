@@ -845,3 +845,192 @@ select:hover { border-color: var(--ink-3); }
     .win { grid-template-columns: 26px minmax(0, 1fr); }
     .win-effort { grid-column: 2; width: 100%; max-width: 200px; }
 }
+
+
+/* Finding banner, node legend, tooltip and zoom */
+
+.finding {
+    max-width: 60ch;
+}
+
+.finding-lead {
+    margin: 0 0 6px;
+    font-size: 1.06rem;
+    line-height: 1.55;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.finding-lead strong {
+    font-weight: 500;
+    color: var(--ink);
+}
+
+.finding-lead .cost-ink,
+.finding-lead .carbon-ink {
+    font-variant-numeric: tabular-nums;
+}
+
+.finding-sub {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--ink-3);
+    text-wrap: pretty;
+}
+
+.legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 12px;
+    color: var(--ink-3);
+}
+
+.legend-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+.legend-group i:not(:first-child) {
+    margin-left: 8px;
+}
+
+.node {
+    display: inline-block;
+    flex: none;
+}
+
+.node.supplier {
+    width: 9px;
+    height: 9px;
+    background: #faf8f4;
+    border: 1.6px solid #6b5bc4;
+}
+
+.node.warehouse {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: var(--carbon);
+}
+
+.node.customer {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #fff;
+    border: 1.6px solid var(--carbon);
+}
+
+.map-holder {
+    position: relative;
+}
+
+#map svg {
+    cursor: grab;
+}
+
+#map svg:active {
+    cursor: grabbing;
+}
+
+.tip {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    min-width: 150px;
+    max-width: 210px;
+    padding: 9px 11px;
+    background: var(--ink);
+    color: #f6f4ef;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    line-height: 1.5;
+    box-shadow: 0 6px 18px -6px rgba(25, 23, 20, 0.5);
+}
+
+.tip strong {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 3px;
+}
+
+.tip span {
+    display: block;
+    font-variant-numeric: tabular-nums;
+}
+
+.tip .cost-ink { color: #eda06b; }
+.tip .carbon-ink { color: #74c4a3; }
+
+.tip-flag {
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(246, 244, 239, 0.22);
+    color: #e8a79c;
+}
+
+.zoom-controls {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 2;
+}
+
+.zoom-controls button {
+    min-width: 30px;
+    height: 30px;
+    padding: 0 9px;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1;
+}
+
+.zoom-controls button:hover {
+    background: #fff;
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+.zoom-controls button:active {
+    transform: translateY(1px);
+}
+
+.leg-tag {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 1px 7px;
+    border-radius: 3px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    vertical-align: 1px;
+    font-weight: 400;
+}
+
+.leg-tag.inbound {
+    background: #efedfa;
+    color: #4a3d9e;
+}
+
+.leg-tag.outbound {
+    background: var(--carbon-soft);
+    color: #10513b;
+}
+
+select:disabled {
+    background: var(--line-soft);
+    color: var(--ink-3);
+    cursor: not-allowed;
+}

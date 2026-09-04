@@ -60,6 +60,19 @@ def read_rows(path):
     return rows
 
 
+def read_supplier_rows(path):
+    with open(path, newline="", encoding="utf-8-sig") as fh:
+        reader = csv.DictReader(fh)
+        names = [name.strip().lower() for name in (reader.fieldnames or [])]
+        missing = {"name", "city", "supplies", "mode", "annual_weight_kg"} - set(names)
+        if missing:
+            raise ValidationError(
+                "supplier file is missing columns: " + ", ".join(sorted(missing))
+            )
+        reader.fieldnames = names
+        return list(reader)
+
+
 def read_warehouse_rows(path):
     with open(path, newline="", encoding="utf-8-sig") as fh:
         reader = csv.DictReader(fh)
@@ -71,10 +84,11 @@ def read_warehouse_rows(path):
         return list(reader)
 
 
-def load(conn, orders_path, warehouses_path=None):
+def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
     """Load a CSV into the node/edge graph. Bad rows are reported, not fatal."""
     rows = read_rows(orders_path)
     warehouse_rows = read_warehouse_rows(warehouses_path) if warehouses_path else None
+    supplier_rows = read_supplier_rows(suppliers_path) if suppliers_path else None
 
     db.init(conn)
     db.reset(conn)
@@ -150,9 +164,14 @@ def load(conn, orders_path, warehouses_path=None):
     if warehouse_rows is not None:
         _apply_warehouse_details(nodes, warehouse_rows, errors)
 
+    inbound = []
+    if supplier_rows is not None:
+        inbound = _apply_suppliers(nodes, supplier_rows, errors)
+
     node_ids = _write_nodes(conn, nodes)
     _write_orders(conn, orders, node_ids)
     edge_count = _build_edges(conn)
+    edge_count += _write_inbound_edges(conn, inbound, node_ids, nodes)
     conn.commit()
 
     return {
@@ -160,8 +179,91 @@ def load(conn, orders_path, warehouses_path=None):
         "rows_skipped": len(errors),
         "nodes": len(node_ids),
         "edges": edge_count,
+        "suppliers": len(inbound),
         "errors": errors[:MAX_REPORTED_ERRORS],
     }
+
+
+def _apply_suppliers(nodes, supplier_rows, errors):
+    """Add supplier nodes and the inbound lanes feeding each warehouse."""
+    inbound = []
+    for position, row in enumerate(supplier_rows, start=2):
+        try:
+            name = _clean(row.get("name"))
+            if not name:
+                raise ValidationError("supplier name is blank")
+
+            feeds = _clean(row.get("supplies"))
+            if feeds not in nodes:
+                raise ValidationError(
+                    f"supplies {feeds or '(blank)'}, which has no orders in the "
+                    "orders file"
+                )
+
+            city = _clean(row.get("city"))
+            country = _clean(row.get("country"))
+            point = _resolve_point(city, country, row.get("lat"), row.get("lon"))
+
+            weight = _number(row.get("annual_weight_kg"), field="annual_weight_kg")
+            if weight is None or weight <= 0:
+                raise ValidationError("annual_weight_kg must be a positive number")
+
+            nodes[name] = {
+                "node_type": "supplier",
+                "city": city,
+                "country": country or None,
+                "lat": point[0],
+                "lon": point[1],
+            }
+            inbound.append(
+                {
+                    "supplier": name,
+                    "warehouse": feeds,
+                    "mode": factors.normalise_mode(row.get("mode")),
+                    "weight_kg": weight,
+                    "shipments": int(
+                        _number(row.get("shipments_per_year"), 12, field="shipments_per_year")
+                    ),
+                    "value": _number(row.get("annual_cost"), 0.0, field="annual_cost"),
+                }
+            )
+        except (ValidationError, ValueError, geo.GeocodeError) as exc:
+            errors.append({"line": position, "problem": f"supplier row: {exc}"})
+    return inbound
+
+
+def _write_inbound_edges(conn, inbound, node_ids, nodes):
+    if not inbound:
+        return 0
+    conn.create_function("haversine", 4, geo.distance_km, deterministic=True)
+    rows = []
+    for lane in inbound:
+        supplier = nodes[lane["supplier"]]
+        warehouse = nodes[lane["warehouse"]]
+        rows.append(
+            (
+                node_ids[lane["supplier"]],
+                node_ids[lane["warehouse"]],
+                lane["mode"],
+                lane["shipments"],
+                lane["weight_kg"],
+                lane["value"],
+                0,
+                geo.distance_km(
+                    supplier["lat"], supplier["lon"], warehouse["lat"], warehouse["lon"]
+                ),
+            )
+        )
+    conn.executemany(
+        """
+        INSERT OR IGNORE INTO edges
+            (origin_id, dest_id, mode, order_count, total_weight_kg,
+             total_value, return_count, distance_km)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """,
+        rows,
+    )
+    return len(rows)
 
 
 def _apply_warehouse_details(nodes, warehouse_rows, errors):

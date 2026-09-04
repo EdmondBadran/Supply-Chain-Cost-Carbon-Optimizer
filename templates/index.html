@@ -87,6 +87,9 @@
     <label for="warehouses">Warehouse costs, optional</label>
     <input id="warehouses" type="file" name="warehouses" accept=".csv">
 
+    <label for="suppliers">Suppliers, optional</label>
+    <input id="suppliers" type="file" name="suppliers" accept=".csv">
+
     <button class="primary" type="submit">Upload and analyse</button>
   </form>
 
@@ -109,6 +112,13 @@
       Transport modes: <code>road</code>, <code>rail</code>, <code>sea</code>,
       <code>air</code>. Aliases like truck, ground, ship and plane are read
       as the right mode.
+    </p>
+    <p>
+      The supplier file needs <code>name</code>, <code>city</code>,
+      <code>supplies</code> (the warehouse it feeds), <code>mode</code> and
+      <code>annual_weight_kg</code>, plus optional <code>country</code>,
+      <code>shipments_per_year</code> and <code>annual_cost</code>. Add it and
+      the chain runs end to end instead of starting at your warehouses.
     </p>
   </details>
 </section>

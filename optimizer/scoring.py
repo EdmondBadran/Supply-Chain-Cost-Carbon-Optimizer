@@ -120,6 +120,7 @@ def rank(conn):
                o.name AS origin_name, o.lat AS origin_lat, o.lon AS origin_lon,
                d.name AS dest_name, d.lat AS dest_lat, d.lon AS dest_lon,
                d.country AS dest_country,
+               o.node_type AS origin_type, d.node_type AS dest_type,
                t.effort AS effort
         FROM edges e
         JOIN nodes o ON o.id = e.origin_id
@@ -137,6 +138,7 @@ def rank(conn):
         lane["cost"] = (
             row["transport_cost"] + row["handling_cost"] + row["returns_cost"]
         )
+        lane["leg"] = "inbound" if row["origin_type"] == "supplier" else "outbound"
         lane["co2e"] = (
             row["transport_co2e"]
             + row["packaging_co2e"]

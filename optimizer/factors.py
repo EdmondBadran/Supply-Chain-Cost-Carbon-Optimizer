@@ -15,11 +15,16 @@ EMISSION_FACTORS = {
     "air": 0.602,
 }
 
+# Air is the one worth stating a source for, because getting it wrong throws
+# every result off. Long haul general air cargo runs roughly 2 to 5 USD per kg,
+# so about 3,000 USD a tonne over a 16,000 km route, which is 0.19 per
+# tonne-km. Air is still roughly 20 times road and 30 times sea, which is
+# what makes it worth moving off, but it is not 100 times.
 COST_FACTORS = {
     "road": 0.12,
     "rail": 0.04,
-    "sea": 0.01,
-    "air": 1.20,
+    "sea": 0.008,
+    "air": 0.19,
 }
 
 # Packaging emissions and cost are charged per order rather than per tonne-km,

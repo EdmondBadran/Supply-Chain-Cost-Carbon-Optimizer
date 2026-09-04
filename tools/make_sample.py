@@ -25,7 +25,7 @@ WAREHOUSES = [
         "name": "Rotterdam DC",
         "city": "Rotterdam",
         "country": "NL",
-        "storage_cost_annual": 1_120_000,
+        "storage_cost_annual": 520_000,
         "energy_kwh_annual": 1_640_000,
         "grid_intensity": 0.27,
     },
@@ -33,7 +33,7 @@ WAREHOUSES = [
         "name": "Shenzhen DC",
         "city": "Shenzhen",
         "country": "CN",
-        "storage_cost_annual": 840_000,
+        "storage_cost_annual": 380_000,
         "energy_kwh_annual": 1_950_000,
         "grid_intensity": 0.58,
     },
@@ -41,7 +41,7 @@ WAREHOUSES = [
         "name": "Memphis DC",
         "city": "Memphis",
         "country": "US",
-        "storage_cost_annual": 1_310_000,
+        "storage_cost_annual": 600_000,
         "energy_kwh_annual": 1_780_000,
         "grid_intensity": 0.39,
     },
@@ -49,7 +49,7 @@ WAREHOUSES = [
         "name": "Dubai DC",
         "city": "Dubai",
         "country": "AE",
-        "storage_cost_annual": 690_000,
+        "storage_cost_annual": 320_000,
         "energy_kwh_annual": 1_240_000,
         "grid_intensity": 0.49,
     },
@@ -92,6 +92,21 @@ LANES = [
     ("Karachi", "PK", "Dubai DC", 175, 1150, "sea", 0.08, 21200),
 ]
 
+# Inbound: where the goods come from before they reach a warehouse. Two of
+# these are deliberately on air freight, which is where the hidden carbon in
+# most real chains turns out to be sitting.
+SUPPLIERS = [
+    ("Pearl River Components", "Dongguan", "CN", "Shenzhen DC", "road", 1_180_000, 240, 3_900_000),
+    ("Haiphong Assembly", "Haiphong", "VN", "Shenzhen DC", "sea", 640_000, 48, 2_100_000),
+    ("Penang Circuits", "George Town", "MY", "Shenzhen DC", "sea", 410_000, 36, 1_640_000),
+    ("Shenzhen Cell Works", "Shenzhen", "CN", "Rotterdam DC", "sea", 890_000, 52, 3_200_000),
+    ("Taipei Precision", "Taipei", "TW", "Rotterdam DC", "air", 210_000, 96, 2_450_000),
+    ("Guadalajara Modules", "Guadalajara", "MX", "Memphis DC", "road", 520_000, 120, 1_780_000),
+    ("Suzhou Optics", "Suzhou", "CN", "Memphis DC", "sea", 730_000, 44, 2_600_000),
+    ("Chennai Polymers", "Chennai", "IN", "Dubai DC", "sea", 380_000, 30, 1_120_000),
+    ("Istanbul Fabrication", "Istanbul", "TR", "Dubai DC", "air", 165_000, 72, 1_380_000),
+]
+
 CATEGORIES = [
     "audio",
     "cables",
@@ -110,6 +125,11 @@ def check_cities():
         except geo.GeocodeError as exc:
             problems.append(str(exc))
     for city, country, *_ in LANES:
+        try:
+            geo.locate(city, country)
+        except geo.GeocodeError as exc:
+            problems.append(str(exc))
+    for _, city, country, *_ in SUPPLIERS:
         try:
             geo.locate(city, country)
         except geo.GeocodeError as exc:
@@ -187,8 +207,28 @@ def main():
         writer.writeheader()
         writer.writerows(WAREHOUSES)
 
-    print(f"{len(rows)} orders across {len(LANES)} lanes and {len(WAREHOUSES)} warehouses")
-    print(f"wrote {orders_path.name} and {warehouses_path.name}")
+    suppliers_path = data_dir / "sample_suppliers.csv"
+    with open(suppliers_path, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.writer(fh)
+        writer.writerow(
+            [
+                "name",
+                "city",
+                "country",
+                "supplies",
+                "mode",
+                "annual_weight_kg",
+                "shipments_per_year",
+                "annual_cost",
+            ]
+        )
+        writer.writerows(SUPPLIERS)
+
+    print(
+        f"{len(rows)} orders across {len(LANES)} lanes, {len(WAREHOUSES)} warehouses "
+        f"and {len(SUPPLIERS)} suppliers"
+    )
+    print(f"wrote {orders_path.name}, {warehouses_path.name} and {suppliers_path.name}")
     return 0
 
 

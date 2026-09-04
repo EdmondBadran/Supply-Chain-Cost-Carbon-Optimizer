@@ -1,5 +1,5 @@
 name,city,country,storage_cost_annual,energy_kwh_annual,grid_intensity
-Rotterdam DC,Rotterdam,NL,1120000,1640000,0.27
-Shenzhen DC,Shenzhen,CN,840000,1950000,0.58
-Memphis DC,Memphis,US,1310000,1780000,0.39
-Dubai DC,Dubai,AE,690000,1240000,0.49
+Rotterdam DC,Rotterdam,NL,520000,1640000,0.27
+Shenzhen DC,Shenzhen,CN,380000,1950000,0.58
+Memphis DC,Memphis,US,600000,1780000,0.39
+Dubai DC,Dubai,AE,320000,1240000,0.49

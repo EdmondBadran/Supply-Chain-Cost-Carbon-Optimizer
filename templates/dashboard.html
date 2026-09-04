@@ -6,19 +6,16 @@
 
 <section class="board-head">
   <div>
-    <h1>Where cost and carbon overlap</h1>
-    <p class="sub">
-      Every lane scored on what it costs to serve and what it emits. The
-      flagged ones are where a single change cuts both.
-    </p>
+    <h1>What your chain is wasting</h1>
+    <div id="finding" class="finding"></div>
   </div>
   <div class="headline">
     <div class="figure">
-      <span>Annual cost to serve</span>
+      <span>Whole chain, per year</span>
       <strong class="cost-ink">${{ "{:,.0f}".format(totals.cost) }}</strong>
     </div>
     <div class="figure">
-      <span>Annual emissions</span>
+      <span>Emissions, per year</span>
       <strong class="carbon-ink">{{ "{:,.0f}".format(totals.co2e / 1000) }} t CO2e</strong>
     </div>
   </div>
@@ -27,19 +24,39 @@
 <section class="panel map-panel">
   <div class="panel-head">
     <div>
-      <h2>The network</h2>
-      <p class="sub">Click any lane or destination to open it.</p>
-    </div>
-    <div class="legend">
-      <span><i class="swatch road"></i>Road</span>
-      <span><i class="swatch rail"></i>Rail</span>
-      <span><i class="swatch sea"></i>Sea</span>
-      <span><i class="swatch air"></i>Air</span>
-      <span><i class="swatch flag"></i>Flagged</span>
+      <h2>Your chain, end to end</h2>
+      <p class="sub">
+        Suppliers feed warehouses, warehouses serve customers. Every line is
+        one route. Hover to read it, click to open it, scroll to zoom.
+      </p>
     </div>
   </div>
+
+  <div class="legend">
+    <span class="legend-group">
+      <i class="node supplier"></i>Supplier
+      <i class="node warehouse"></i>Warehouse
+      <i class="node customer"></i>Customer city
+    </span>
+    <span class="legend-group">
+      <i class="swatch road"></i>Road
+      <i class="swatch rail"></i>Rail
+      <i class="swatch sea"></i>Sea
+      <i class="swatch air"></i>Air
+      <i class="swatch flag"></i>Worth changing
+    </span>
+  </div>
+
   <div class="map-wrap">
-    <div id="map" role="img" aria-label="World map of the supply chain network, with warehouses, destination cities, and the routes between them coloured by transport mode"></div>
+    <div class="map-holder">
+      <div id="map" role="img" aria-label="World map of the supply chain, showing suppliers, warehouses, customer cities and the routes between them coloured by transport mode"></div>
+      <div id="tip" class="tip" hidden></div>
+      <div class="zoom-controls">
+        <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
+        <button id="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+        <button id="zoom-reset" type="button" aria-label="Reset the map view">Reset</button>
+      </div>
+    </div>
     <aside id="detail" class="detail"></aside>
   </div>
 </section>
@@ -47,8 +64,8 @@
 <section class="panel">
   <div class="panel-head">
     <div>
-      <h2>Quick wins</h2>
-      <p class="sub">Ranked by how much of the network's total each change recovers. Tag the effort and the order updates.</p>
+      <h2>Fix these first</h2>
+      <p class="sub">Biggest saving at the top. Say how hard each one would be and the order changes to match what you can actually do.</p>
     </div>
   </div>
   <div class="wins" id="wins"></div>

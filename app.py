@@ -9,6 +9,7 @@ from optimizer import analysis, db, ingest, scoring
 ROOT = Path(__file__).resolve().parent
 SAMPLE_ORDERS = ROOT / "data" / "sample_orders.csv"
 SAMPLE_WAREHOUSES = ROOT / "data" / "sample_warehouses.csv"
+SAMPLE_SUPPLIERS = ROOT / "data" / "sample_suppliers.csv"
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
@@ -98,6 +99,7 @@ def upload():
         return render_error("That is not a CSV file.")
 
     warehouses = request.files.get("warehouses")
+    suppliers = request.files.get("suppliers")
     tmpdir = tempfile.mkdtemp(prefix="sco-")
     try:
         orders_path = Path(tmpdir) / "orders.csv"
@@ -110,9 +112,16 @@ def upload():
             warehouses_path = Path(tmpdir) / "warehouses.csv"
             warehouses.save(warehouses_path)
 
+        suppliers_path = None
+        if suppliers is not None and suppliers.filename:
+            if not suppliers.filename.lower().endswith(".csv"):
+                return render_error("The supplier file is not a CSV.")
+            suppliers_path = Path(tmpdir) / "suppliers.csv"
+            suppliers.save(suppliers_path)
+
         conn = get_conn()
         try:
-            report = ingest.load(conn, orders_path, warehouses_path)
+            report = ingest.load(conn, orders_path, warehouses_path, suppliers_path)
             analysis.run(conn)
             summary = db.summary(conn)
         except ingest.ValidationError as exc:
@@ -131,7 +140,9 @@ def upload():
 def sample():
     conn = get_conn()
     try:
-        report = ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES)
+        report = ingest.load(
+            conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS
+        )
         analysis.run(conn)
     finally:
         conn.close()
@@ -168,7 +179,7 @@ def network_payload(conn):
     ]
     lanes = scoring.rank(conn)
     keep = (
-        "id origin_id dest_id origin_name dest_name mode distance_km order_count "
+        "id origin_id dest_id origin_name dest_name mode distance_km order_count leg "
         "total_weight_kg return_count cost co2e overlap flagged opportunity "
         "priority effort saving_cost_pct saving_co2e_pct network_cost_pct "
         "network_co2e_pct switch transport_cost handling_cost returns_cost "

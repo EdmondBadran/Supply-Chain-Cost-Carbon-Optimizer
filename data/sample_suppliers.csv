@@ -1,0 +1,10 @@
+name,city,country,supplies,mode,annual_weight_kg,shipments_per_year,annual_cost
+Pearl River Components,Dongguan,CN,Shenzhen DC,road,1180000,240,3900000
+Haiphong Assembly,Haiphong,VN,Shenzhen DC,sea,640000,48,2100000
+Penang Circuits,George Town,MY,Shenzhen DC,sea,410000,36,1640000
+Shenzhen Cell Works,Shenzhen,CN,Rotterdam DC,sea,890000,52,3200000
+Taipei Precision,Taipei,TW,Rotterdam DC,air,210000,96,2450000
+Guadalajara Modules,Guadalajara,MX,Memphis DC,road,520000,120,1780000
+Suzhou Optics,Suzhou,CN,Memphis DC,sea,730000,44,2600000
+Chennai Polymers,Chennai,IN,Dubai DC,sea,380000,30,1120000
+Istanbul Fabrication,Istanbul,TR,Dubai DC,air,165000,72,1380000
