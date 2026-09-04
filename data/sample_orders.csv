@@ -1,0 +1,1308 @@
+order_ref,order_date,customer_id,origin_name,origin_city,origin_country,dest_city,dest_country,units,weight_kg,mode,product_category,order_value,returned
+SO-00397,2025-09-01,C-TOK-002,Shenzhen DC,Shenzhen,CN,Tokyo,JP,3,11.59,sea,cases,630.47,0
+SO-00885,2025-09-01,C-LOS-009,Memphis DC,Memphis,US,Los Angeles,US,11,19.62,road,chargers,346.1,1
+SO-00728,2025-09-02,C-NEW-012,Memphis DC,Memphis,US,New York City,US,4,10.73,road,storage,515.86,1
+SO-00811,2025-09-02,C-CHI-005,Memphis DC,Memphis,US,Chicago,US,6,20.87,road,audio,688.15,0
+SO-01033,2025-09-02,C-SAO-013,Memphis DC,Memphis,US,Sao Paulo,BR,16,42.14,sea,cables,545.78,0
+SO-01107,2025-09-02,C-BUE-009,Memphis DC,Memphis,US,Buenos Aires,AR,7,20.76,sea,storage,467.77,0
+SO-01301,2025-09-02,C-KAR-036,Dubai DC,Dubai,AE,Karachi,PK,10,19.72,sea,wearables,305.32,1
+SO-00333,2025-09-03,C-STO-030,Rotterdam DC,Rotterdam,NL,Stockholm,SE,8,17.1,road,chargers,369.43,0
+SO-00495,2025-09-03,C-SIN-015,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,25.17,sea,audio,452.7,0
+SO-00950,2025-09-03,C-TOR-018,Memphis DC,Memphis,US,Toronto,CA,11,22.53,road,cables,683.67,0
+SO-01108,2025-09-03,C-BUE-022,Memphis DC,Memphis,US,Buenos Aires,AR,9,31.02,sea,audio,685.51,0
+SO-01172,2025-09-03,C-CAI-030,Dubai DC,Dubai,AE,Cairo,EG,2,8.6,sea,audio,526.3,0
+SO-00287,2025-09-04,C-WAR-009,Rotterdam DC,Rotterdam,NL,Warsaw,PL,20,32.65,road,cases,643.0,0
+SO-00448,2025-09-04,C-SEO-017,Shenzhen DC,Shenzhen,CN,Seoul,KR,12,24.06,sea,audio,975.33,1
+SO-00717,2025-09-04,C-NEW-017,Memphis DC,Memphis,US,New York City,US,10,24.76,road,storage,617.67,1
+SO-00825,2025-09-04,C-CHI-006,Memphis DC,Memphis,US,Chicago,US,7,25.36,road,audio,1021.49,0
+SO-01183,2025-09-04,C-CAI-005,Dubai DC,Dubai,AE,Cairo,EG,22,31.29,sea,wearables,363.2,0
+SO-00848,2025-09-05,C-CHI-021,Memphis DC,Memphis,US,Chicago,US,8,16.3,road,cases,558.77,0
+SO-00894,2025-09-05,C-LOS-039,Memphis DC,Memphis,US,Los Angeles,US,9,30.02,road,audio,842.01,0
+SO-01244,2025-09-06,C-LAG-033,Dubai DC,Dubai,AE,Lagos,NG,12,25.62,air,audio,257.24,0
+SO-00159,2025-09-07,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,7,25.76,road,cases,640.7,0
+SO-00384,2025-09-07,C-TOK-039,Shenzhen DC,Shenzhen,CN,Tokyo,JP,8,22.48,sea,cases,519.17,0
+SO-00976,2025-09-07,C-TOR-004,Memphis DC,Memphis,US,Toronto,CA,11,17.31,road,chargers,799.36,0
+SO-01061,2025-09-07,C-BOG-029,Memphis DC,Memphis,US,Bogota,CO,7,19.3,air,wearables,524.43,0
+SO-01224,2025-09-07,C-NAI-009,Dubai DC,Dubai,AE,Nairobi,KE,13,19.88,air,storage,285.17,0
+SO-00731,2025-09-08,C-NEW-001,Memphis DC,Memphis,US,New York City,US,8,17.99,road,cases,713.45,0
+SO-00981,2025-09-08,C-TOR-005,Memphis DC,Memphis,US,Toronto,CA,7,23.37,road,cases,433.42,0
+SO-00069,2025-09-09,C-LON-017,Rotterdam DC,Rotterdam,NL,London,GB,3,9.47,road,wearables,561.11,0
+SO-00243,2025-09-09,C-MAD-008,Rotterdam DC,Rotterdam,NL,Madrid,ES,9,17.3,road,cables,962.53,0
+SO-01020,2025-09-10,C-MEX-024,Memphis DC,Memphis,US,Mexico City,MX,5,18.65,road,cables,611.54,0
+SO-00375,2025-09-12,C-TOK-031,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,12.75,sea,chargers,708.82,0
+SO-00575,2025-09-12,C-JAK-008,Shenzhen DC,Shenzhen,CN,Jakarta,ID,10,31.97,sea,chargers,840.1,1
+SO-00641,2025-09-12,C-MUM-015,Shenzhen DC,Shenzhen,CN,Mumbai,IN,7,26.24,sea,cables,671.01,0
+SO-00282,2025-09-13,C-MIL-033,Rotterdam DC,Rotterdam,NL,Milan,IT,10,28.46,road,storage,707.43,0
+SO-00428,2025-09-13,C-SEO-007,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,17.13,sea,cases,505.9,0
+SO-01272,2025-09-13,C-JOH-027,Dubai DC,Dubai,AE,Johannesburg,ZA,7,26.24,sea,wearables,640.73,0
+SO-00637,2025-09-14,C-MUM-023,Shenzhen DC,Shenzhen,CN,Mumbai,IN,20,46.12,sea,wearables,654.91,0
+SO-01014,2025-09-14,C-MEX-013,Memphis DC,Memphis,US,Mexico City,MX,6,15.43,road,audio,442.71,0
+SO-00272,2025-09-15,C-MIL-005,Rotterdam DC,Rotterdam,NL,Milan,IT,1,0.88,road,cables,665.51,0
+SO-00351,2025-09-15,C-DUB-009,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,9.12,air,audio,525.4,0
+SO-00441,2025-09-15,C-SEO-036,Shenzhen DC,Shenzhen,CN,Seoul,KR,7,22.75,sea,wearables,940.62,0
+SO-00718,2025-09-15,C-NEW-026,Memphis DC,Memphis,US,New York City,US,5,19.31,road,wearables,596.77,0
+SO-00827,2025-09-15,C-CHI-031,Memphis DC,Memphis,US,Chicago,US,11,27.69,road,cases,652.76,0
+SO-01264,2025-09-15,C-JOH-005,Dubai DC,Dubai,AE,Johannesburg,ZA,3,7.52,sea,audio,640.73,0
+SO-00021,2025-09-16,C-LON-039,Rotterdam DC,Rotterdam,NL,London,GB,5,21.03,road,cables,645.9,0
+SO-00076,2025-09-16,C-BER-027,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,28.91,road,audio,414.83,0
+SO-00832,2025-09-16,C-CHI-027,Memphis DC,Memphis,US,Chicago,US,4,10.83,road,storage,655.5,0
+SO-01250,2025-09-16,C-JOH-014,Dubai DC,Dubai,AE,Johannesburg,ZA,6,18.25,sea,cables,726.72,0
+SO-00249,2025-09-17,C-MIL-002,Rotterdam DC,Rotterdam,NL,Milan,IT,6,16.93,road,storage,1083.01,0
+SO-00316,2025-09-17,C-WAR-039,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,25.7,road,storage,594.92,0
+SO-00492,2025-09-17,C-SIN-006,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,11.84,sea,chargers,1174.42,0
+SO-00841,2025-09-17,C-CHI-006,Memphis DC,Memphis,US,Chicago,US,3,10.9,road,audio,271.99,1
+SO-01007,2025-09-17,C-MEX-014,Memphis DC,Memphis,US,Mexico City,MX,10,21.07,road,storage,417.1,0
+SO-01038,2025-09-17,C-SAO-025,Memphis DC,Memphis,US,Sao Paulo,BR,9,19.97,sea,storage,530.29,0
+SO-01255,2025-09-17,C-JOH-024,Dubai DC,Dubai,AE,Johannesburg,ZA,5,10.61,sea,audio,1036.07,0
+SO-00191,2025-09-18,C-PAR-039,Rotterdam DC,Rotterdam,NL,Paris,FR,7,24.25,road,audio,971.22,0
+SO-00222,2025-09-18,C-MAD-039,Rotterdam DC,Rotterdam,NL,Madrid,ES,8,24.24,road,cases,787.93,0
+SO-00612,2025-09-18,C-MAN-036,Shenzhen DC,Shenzhen,CN,Manila,PH,1,1.86,sea,cables,547.86,0
+SO-00645,2025-09-18,C-MUM-037,Shenzhen DC,Shenzhen,CN,Mumbai,IN,9,26.9,sea,wearables,650.59,0
+SO-00467,2025-09-19,C-SEO-007,Shenzhen DC,Shenzhen,CN,Seoul,KR,9,14.04,sea,cases,968.89,0
+SO-00475,2025-09-19,C-SIN-037,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,24.54,sea,storage,881.53,0
+SO-00632,2025-09-19,C-MUM-039,Shenzhen DC,Shenzhen,CN,Mumbai,IN,12,18.48,sea,cases,971.61,0
+SO-01148,2025-09-20,C-RIY-025,Dubai DC,Dubai,AE,Riyadh,SA,9,26.91,road,wearables,1142.18,0
+SO-00128,2025-09-21,C-BER-027,Rotterdam DC,Rotterdam,NL,Berlin,DE,3,9.05,road,wearables,1221.99,0
+SO-00140,2025-09-21,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,4,14.51,road,cables,859.05,0
+SO-00676,2025-09-21,C-SYD-004,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,12.36,air,chargers,253.35,0
+SO-00790,2025-09-21,C-NEW-034,Memphis DC,Memphis,US,New York City,US,9,26.2,road,cables,975.71,0
+SO-00132,2025-09-22,C-BER-021,Rotterdam DC,Rotterdam,NL,Berlin,DE,9,35.51,road,audio,919.32,0
+SO-00328,2025-09-22,C-STO-029,Rotterdam DC,Rotterdam,NL,Stockholm,SE,7,14.73,road,storage,607.6,0
+SO-00390,2025-09-22,C-TOK-017,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,17.73,sea,chargers,1016.52,0
+SO-00737,2025-09-22,C-NEW-005,Memphis DC,Memphis,US,New York City,US,5,13.66,road,cables,660.63,1
+SO-00032,2025-09-23,C-LON-023,Rotterdam DC,Rotterdam,NL,London,GB,7,15.59,road,wearables,571.82,0
+SO-00141,2025-09-23,C-PAR-029,Rotterdam DC,Rotterdam,NL,Paris,FR,7,24.02,road,cables,927.54,0
+SO-00419,2025-09-23,C-TOK-006,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,18.32,sea,wearables,1130.21,0
+SO-00520,2025-09-23,C-SIN-016,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,11.98,sea,cables,794.06,0
+SO-00593,2025-09-23,C-MAN-021,Shenzhen DC,Shenzhen,CN,Manila,PH,7,18.93,sea,wearables,759.17,0
+SO-00699,2025-09-23,C-AUC-004,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,6.74,air,audio,919.41,0
+SO-00738,2025-09-23,C-NEW-007,Memphis DC,Memphis,US,New York City,US,4,16.05,road,wearables,759.34,0
+SO-01103,2025-09-23,C-BUE-023,Memphis DC,Memphis,US,Buenos Aires,AR,14,25.18,sea,storage,661.65,0
+SO-00225,2025-09-24,C-MAD-019,Rotterdam DC,Rotterdam,NL,Madrid,ES,7,25.65,road,cases,1035.39,0
+SO-00201,2025-09-25,C-PAR-026,Rotterdam DC,Rotterdam,NL,Paris,FR,7,22.83,road,wearables,729.77,0
+SO-00019,2025-09-26,C-LON-011,Rotterdam DC,Rotterdam,NL,London,GB,6,21.38,road,chargers,476.77,0
+SO-00483,2025-09-26,C-SIN-002,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,20.02,sea,storage,482.62,0
+SO-01091,2025-09-26,C-SAN-039,Memphis DC,Memphis,US,Santiago,CL,4,7.47,sea,audio,514.04,0
+SO-00092,2025-09-27,C-BER-037,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,25.98,road,storage,607.81,0
+SO-00325,2025-09-27,C-STO-019,Rotterdam DC,Rotterdam,NL,Stockholm,SE,15,26.09,road,storage,676.29,0
+SO-00537,2025-09-27,C-BAN-023,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,21.36,sea,cases,874.18,0
+SO-00060,2025-09-28,C-LON-016,Rotterdam DC,Rotterdam,NL,London,GB,11,21.34,road,cables,642.24,0
+SO-01223,2025-09-28,C-NAI-009,Dubai DC,Dubai,AE,Nairobi,KE,9,20.08,air,chargers,354.9,1
+SO-01094,2025-09-29,C-SAN-001,Memphis DC,Memphis,US,Santiago,CL,14,36.78,sea,wearables,871.59,0
+SO-00413,2025-09-30,C-TOK-030,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,16.92,sea,storage,687.83,0
+SO-00533,2025-09-30,C-BAN-027,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,17.49,sea,wearables,838.39,1
+SO-00610,2025-09-30,C-MAN-023,Shenzhen DC,Shenzhen,CN,Manila,PH,8,16.05,sea,storage,605.45,0
+SO-00258,2025-10-01,C-MIL-011,Rotterdam DC,Rotterdam,NL,Milan,IT,5,19.54,road,wearables,847.26,0
+SO-01063,2025-10-01,C-BOG-023,Memphis DC,Memphis,US,Bogota,CO,8,20.35,air,wearables,668.54,0
+SO-00682,2025-10-02,C-SYD-031,Rotterdam DC,Rotterdam,NL,Sydney,AU,13,19.97,air,wearables,1042.33,0
+SO-00888,2025-10-02,C-LOS-013,Memphis DC,Memphis,US,Los Angeles,US,3,9.56,road,chargers,690.64,0
+SO-00803,2025-10-03,C-NEW-023,Memphis DC,Memphis,US,New York City,US,5,17.98,road,cables,644.22,0
+SO-01243,2025-10-03,C-LAG-028,Dubai DC,Dubai,AE,Lagos,NG,6,8.89,air,cases,379.06,1
+SO-00014,2025-10-04,C-LON-008,Rotterdam DC,Rotterdam,NL,London,GB,11,21.34,road,audio,670.41,0
+SO-00766,2025-10-04,C-NEW-038,Memphis DC,Memphis,US,New York City,US,19,27.22,road,cables,1064.79,0
+SO-00967,2025-10-04,C-TOR-038,Memphis DC,Memphis,US,Toronto,CA,7,15.66,road,wearables,337.62,0
+SO-00373,2025-10-05,C-TOK-011,Shenzhen DC,Shenzhen,CN,Tokyo,JP,3,7.0,sea,audio,787.38,0
+SO-00176,2025-10-06,C-PAR-037,Rotterdam DC,Rotterdam,NL,Paris,FR,10,15.81,road,cables,356.78,0
+SO-00449,2025-10-06,C-SEO-019,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,12.4,sea,wearables,881.47,0
+SO-00719,2025-10-06,C-NEW-027,Memphis DC,Memphis,US,New York City,US,7,12.76,road,storage,838.39,0
+SO-01039,2025-10-06,C-SAO-013,Memphis DC,Memphis,US,Sao Paulo,BR,6,17.15,sea,audio,591.34,0
+SO-01124,2025-10-06,C-BUE-013,Memphis DC,Memphis,US,Buenos Aires,AR,20,30.47,sea,cases,444.22,0
+SO-01248,2025-10-06,C-LAG-008,Dubai DC,Dubai,AE,Lagos,NG,7,21.85,air,storage,556.54,1
+SO-00119,2025-10-07,C-BER-020,Rotterdam DC,Rotterdam,NL,Berlin,DE,19,41.05,road,audio,977.95,0
+SO-00314,2025-10-07,C-WAR-026,Rotterdam DC,Rotterdam,NL,Warsaw,PL,11,21.33,road,cases,753.46,0
+SO-00474,2025-10-07,C-SIN-013,Shenzhen DC,Shenzhen,CN,Singapore,SG,9,19.71,sea,storage,340.06,0
+SO-00505,2025-10-07,C-SIN-033,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,18.25,sea,cases,781.46,0
+SO-00863,2025-10-07,C-CHI-008,Memphis DC,Memphis,US,Chicago,US,7,14.51,road,storage,610.58,0
+SO-01163,2025-10-07,C-RIY-006,Dubai DC,Dubai,AE,Riyadh,SA,6,15.8,road,cables,940.78,0
+SO-01231,2025-10-07,C-LAG-033,Dubai DC,Dubai,AE,Lagos,NG,2,5.71,air,cables,238.45,0
+SO-00412,2025-10-08,C-TOK-032,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,17.38,sea,cables,750.21,0
+SO-01282,2025-10-08,C-KAR-014,Dubai DC,Dubai,AE,Karachi,PK,13,26.19,sea,cables,654.55,0
+SO-00270,2025-10-09,C-MIL-026,Rotterdam DC,Rotterdam,NL,Milan,IT,16,23.06,road,storage,425.73,0
+SO-00301,2025-10-09,C-WAR-033,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,23.94,road,audio,1041.21,0
+SO-00353,2025-10-09,C-DUB-014,Rotterdam DC,Rotterdam,NL,Dublin,IE,4,11.27,air,cables,260.92,0
+SO-00945,2025-10-09,C-TOR-024,Memphis DC,Memphis,US,Toronto,CA,5,20.26,road,chargers,726.24,0
+SO-01226,2025-10-09,C-LAG-003,Dubai DC,Dubai,AE,Lagos,NG,13,19.64,air,chargers,209.02,0
+SO-00568,2025-10-10,C-JAK-037,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,28.91,sea,cases,594.05,0
+SO-01215,2025-10-10,C-NAI-017,Dubai DC,Dubai,AE,Nairobi,KE,5,17.14,air,cables,317.82,0
+SO-01233,2025-10-10,C-LAG-012,Dubai DC,Dubai,AE,Lagos,NG,11,23.58,air,cases,310.79,0
+SO-01267,2025-10-10,C-JOH-009,Dubai DC,Dubai,AE,Johannesburg,ZA,8,25.14,sea,wearables,88.64,0
+SO-00399,2025-10-11,C-TOK-026,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,13.69,sea,cables,775.68,0
+SO-00439,2025-10-11,C-SEO-003,Shenzhen DC,Shenzhen,CN,Seoul,KR,10,20.71,sea,wearables,453.9,0
+SO-00461,2025-10-11,C-SEO-039,Shenzhen DC,Shenzhen,CN,Seoul,KR,4,8.35,sea,cases,1086.29,0
+SO-00782,2025-10-11,C-NEW-006,Memphis DC,Memphis,US,New York City,US,12,17.87,road,cases,428.92,0
+SO-00845,2025-10-11,C-CHI-037,Memphis DC,Memphis,US,Chicago,US,7,14.66,road,cases,736.36,0
+SO-00929,2025-10-11,C-LOS-036,Memphis DC,Memphis,US,Los Angeles,US,8,25.83,road,chargers,681.0,1
+SO-00979,2025-10-11,C-TOR-015,Memphis DC,Memphis,US,Toronto,CA,3,7.02,road,chargers,687.4,0
+SO-01123,2025-10-11,C-BUE-003,Memphis DC,Memphis,US,Buenos Aires,AR,4,11.59,sea,chargers,756.57,0
+SO-00445,2025-10-12,C-SEO-039,Shenzhen DC,Shenzhen,CN,Seoul,KR,1,3.6,sea,chargers,634.45,0
+SO-00799,2025-10-12,C-NEW-010,Memphis DC,Memphis,US,New York City,US,8,18.38,road,wearables,680.48,0
+SO-01070,2025-10-12,C-BOG-004,Memphis DC,Memphis,US,Bogota,CO,11,19.77,air,wearables,671.73,0
+SO-00238,2025-10-13,C-MAD-038,Rotterdam DC,Rotterdam,NL,Madrid,ES,13,38.79,road,cables,1019.96,0
+SO-00970,2025-10-13,C-TOR-008,Memphis DC,Memphis,US,Toronto,CA,7,10.9,road,wearables,593.18,0
+SO-01044,2025-10-13,C-SAO-023,Memphis DC,Memphis,US,Sao Paulo,BR,22,32.07,sea,cables,364.84,0
+SO-01090,2025-10-13,C-SAN-030,Memphis DC,Memphis,US,Santiago,CL,11,20.0,sea,wearables,420.69,0
+SO-01166,2025-10-13,C-RIY-028,Dubai DC,Dubai,AE,Riyadh,SA,8,23.66,road,storage,730.38,0
+SO-00426,2025-10-14,C-TOK-016,Shenzhen DC,Shenzhen,CN,Tokyo,JP,5,18.81,sea,chargers,638.39,0
+SO-00603,2025-10-14,C-MAN-003,Shenzhen DC,Shenzhen,CN,Manila,PH,2,6.29,sea,audio,873.57,0
+SO-00705,2025-10-14,C-AUC-001,Rotterdam DC,Rotterdam,NL,Auckland,NZ,4,14.85,air,cases,828.93,0
+SO-00819,2025-10-14,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,6,20.61,road,wearables,694.1,0
+SO-01050,2025-10-14,C-SAO-029,Memphis DC,Memphis,US,Sao Paulo,BR,16,38.83,sea,chargers,276.44,0
+SO-01278,2025-10-14,C-KAR-012,Dubai DC,Dubai,AE,Karachi,PK,6,21.4,sea,audio,621.37,0
+SO-00221,2025-10-15,C-MAD-022,Rotterdam DC,Rotterdam,NL,Madrid,ES,10,22.13,road,cables,634.08,0
+SO-00292,2025-10-15,C-WAR-009,Rotterdam DC,Rotterdam,NL,Warsaw,PL,17,56.34,road,cables,971.85,0
+SO-00099,2025-10-16,C-BER-019,Rotterdam DC,Rotterdam,NL,Berlin,DE,13,38.24,road,wearables,872.09,0
+SO-00535,2025-10-16,C-BAN-028,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,12.38,sea,chargers,535.1,0
+SO-00965,2025-10-16,C-TOR-019,Memphis DC,Memphis,US,Toronto,CA,5,15.15,road,cases,563.55,0
+SO-01162,2025-10-16,C-RIY-034,Dubai DC,Dubai,AE,Riyadh,SA,6,23.44,road,wearables,377.56,0
+SO-00451,2025-10-17,C-SEO-035,Shenzhen DC,Shenzhen,CN,Seoul,KR,1,0.5,sea,cases,544.01,0
+SO-00502,2025-10-17,C-SIN-037,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,11.81,sea,audio,866.11,0
+SO-00681,2025-10-17,C-SYD-025,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,14.3,air,cables,1028.14,0
+SO-00823,2025-10-17,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,14,19.76,road,chargers,1039.95,0
+SO-00954,2025-10-17,C-TOR-013,Memphis DC,Memphis,US,Toronto,CA,3,9.09,road,wearables,1131.18,0
+SO-01188,2025-10-17,C-CAI-036,Dubai DC,Dubai,AE,Cairo,EG,23,35.17,sea,cables,730.82,0
+SO-00462,2025-10-18,C-SEO-036,Shenzhen DC,Shenzhen,CN,Seoul,KR,9,20.53,sea,wearables,619.7,0
+SO-00889,2025-10-18,C-LOS-022,Memphis DC,Memphis,US,Los Angeles,US,10,24.54,road,cables,221.57,0
+SO-00077,2025-10-19,C-BER-003,Rotterdam DC,Rotterdam,NL,Berlin,DE,4,13.1,road,storage,827.94,0
+SO-01047,2025-10-19,C-SAO-023,Memphis DC,Memphis,US,Sao Paulo,BR,8,28.44,sea,storage,530.36,0
+SO-01089,2025-10-19,C-SAN-023,Memphis DC,Memphis,US,Santiago,CL,3,7.06,sea,audio,833.86,0
+SO-00116,2025-10-20,C-BER-030,Rotterdam DC,Rotterdam,NL,Berlin,DE,1,1.49,road,audio,342.69,0
+SO-00339,2025-10-20,C-STO-021,Rotterdam DC,Rotterdam,NL,Stockholm,SE,13,20.05,road,cables,1191.91,0
+SO-00437,2025-10-20,C-SEO-026,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,20.44,sea,storage,574.43,0
+SO-00490,2025-10-20,C-SIN-017,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,11.19,sea,audio,789.06,0
+SO-01113,2025-10-21,C-BUE-021,Memphis DC,Memphis,US,Buenos Aires,AR,8,28.07,sea,cables,632.15,0
+SO-01211,2025-10-21,C-NAI-036,Dubai DC,Dubai,AE,Nairobi,KE,7,19.1,air,cases,506.46,0
+SO-00022,2025-10-22,C-LON-023,Rotterdam DC,Rotterdam,NL,London,GB,9,23.05,road,chargers,505.81,0
+SO-00733,2025-10-22,C-NEW-008,Memphis DC,Memphis,US,New York City,US,4,13.17,road,audio,828.48,0
+SO-01005,2025-10-22,C-MEX-032,Memphis DC,Memphis,US,Mexico City,MX,10,19.24,road,chargers,362.5,0
+SO-01078,2025-10-22,C-BOG-010,Memphis DC,Memphis,US,Bogota,CO,6,23.37,air,chargers,443.15,0
+SO-01292,2025-10-22,C-KAR-015,Dubai DC,Dubai,AE,Karachi,PK,9,20.37,sea,storage,401.81,0
+SO-00340,2025-10-23,C-STO-015,Rotterdam DC,Rotterdam,NL,Stockholm,SE,4,11.96,road,storage,837.59,0
+SO-00344,2025-10-23,C-STO-014,Rotterdam DC,Rotterdam,NL,Stockholm,SE,3,12.2,road,cases,942.42,0
+SO-01015,2025-10-23,C-MEX-010,Memphis DC,Memphis,US,Mexico City,MX,14,23.8,road,audio,501.23,0
+SO-00006,2025-10-24,C-LON-004,Rotterdam DC,Rotterdam,NL,London,GB,7,19.71,road,cables,650.26,0
+SO-00123,2025-10-24,C-BER-015,Rotterdam DC,Rotterdam,NL,Berlin,DE,15,35.76,road,chargers,645.92,0
+SO-00812,2025-10-24,C-CHI-027,Memphis DC,Memphis,US,Chicago,US,7,15.57,road,cables,693.57,0
+SO-01055,2025-10-24,C-SAO-007,Memphis DC,Memphis,US,Sao Paulo,BR,6,21.38,sea,cases,686.15,0
+SO-01071,2025-10-24,C-BOG-007,Memphis DC,Memphis,US,Bogota,CO,7,13.47,air,audio,649.49,1
+SO-00506,2025-10-25,C-SIN-009,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,11.83,sea,cases,462.57,0
+SO-00604,2025-10-25,C-MAN-010,Shenzhen DC,Shenzhen,CN,Manila,PH,1,4.66,sea,chargers,792.58,0
+SO-00100,2025-10-26,C-BER-014,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,18.69,road,wearables,750.99,0
+SO-01297,2025-10-26,C-KAR-016,Dubai DC,Dubai,AE,Karachi,PK,4,10.33,sea,wearables,941.97,0
+SO-00213,2025-10-27,C-MAD-012,Rotterdam DC,Rotterdam,NL,Madrid,ES,10,22.1,road,cables,720.01,0
+SO-00507,2025-10-28,C-SIN-035,Shenzhen DC,Shenzhen,CN,Singapore,SG,2,4.21,sea,wearables,742.8,0
+SO-00816,2025-10-28,C-CHI-014,Memphis DC,Memphis,US,Chicago,US,7,10.63,road,cases,776.32,0
+SO-00886,2025-10-28,C-LOS-016,Memphis DC,Memphis,US,Los Angeles,US,7,18.6,road,storage,430.81,0
+SO-01165,2025-10-28,C-RIY-003,Dubai DC,Dubai,AE,Riyadh,SA,4,12.15,road,cables,500.07,0
+SO-01194,2025-10-28,C-CAI-032,Dubai DC,Dubai,AE,Cairo,EG,6,19.34,sea,cases,504.51,0
+SO-00055,2025-10-29,C-LON-012,Rotterdam DC,Rotterdam,NL,London,GB,8,23.67,road,cases,512.05,0
+SO-00078,2025-10-29,C-BER-036,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,22.36,road,wearables,686.88,0
+SO-00163,2025-10-29,C-PAR-014,Rotterdam DC,Rotterdam,NL,Paris,FR,4,5.64,road,wearables,660.44,0
+SO-00456,2025-10-29,C-SEO-011,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,15.31,sea,storage,971.94,0
+SO-00618,2025-10-29,C-MAN-034,Shenzhen DC,Shenzhen,CN,Manila,PH,8,21.83,sea,cables,930.8,0
+SO-00742,2025-10-29,C-NEW-018,Memphis DC,Memphis,US,New York City,US,1,0.5,road,cases,646.44,0
+SO-01136,2025-10-29,C-RIY-019,Dubai DC,Dubai,AE,Riyadh,SA,6,19.47,road,cases,866.13,0
+SO-00526,2025-10-30,C-BAN-011,Shenzhen DC,Shenzhen,CN,Bangkok,TH,8,20.65,sea,wearables,976.44,0
+SO-00764,2025-10-30,C-NEW-015,Memphis DC,Memphis,US,New York City,US,3,10.66,road,storage,513.77,0
+SO-00838,2025-10-30,C-CHI-021,Memphis DC,Memphis,US,Chicago,US,9,29.89,road,cases,654.7,0
+SO-00937,2025-10-30,C-LOS-005,Memphis DC,Memphis,US,Los Angeles,US,18,29.78,road,storage,548.52,0
+SO-01084,2025-10-30,C-SAN-008,Memphis DC,Memphis,US,Santiago,CL,5,20.44,sea,chargers,773.19,0
+SO-01253,2025-10-30,C-JOH-018,Dubai DC,Dubai,AE,Johannesburg,ZA,14,39.3,sea,cables,604.82,0
+SO-00045,2025-10-31,C-LON-021,Rotterdam DC,Rotterdam,NL,London,GB,3,8.83,road,wearables,343.8,0
+SO-00212,2025-10-31,C-MAD-011,Rotterdam DC,Rotterdam,NL,Madrid,ES,6,22.8,road,storage,856.77,0
+SO-00725,2025-10-31,C-NEW-005,Memphis DC,Memphis,US,New York City,US,7,23.43,road,chargers,511.88,0
+SO-00739,2025-10-31,C-NEW-012,Memphis DC,Memphis,US,New York City,US,6,20.09,road,audio,367.74,0
+SO-00532,2025-11-01,C-BAN-016,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,17.81,sea,chargers,852.67,0
+SO-00565,2025-11-01,C-JAK-012,Shenzhen DC,Shenzhen,CN,Jakarta,ID,6,20.45,sea,storage,1037.4,0
+SO-00015,2025-11-02,C-LON-008,Rotterdam DC,Rotterdam,NL,London,GB,14,29.02,road,storage,753.35,0
+SO-00038,2025-11-02,C-LON-014,Rotterdam DC,Rotterdam,NL,London,GB,6,21.09,road,cables,720.15,0
+SO-00177,2025-11-02,C-PAR-033,Rotterdam DC,Rotterdam,NL,Paris,FR,6,18.83,road,wearables,626.02,0
+SO-00509,2025-11-02,C-SIN-003,Shenzhen DC,Shenzhen,CN,Singapore,SG,8,25.13,sea,audio,1339.54,0
+SO-00661,2025-11-02,C-MUM-005,Shenzhen DC,Shenzhen,CN,Mumbai,IN,11,33.44,sea,wearables,536.23,1
+SO-00887,2025-11-03,C-LOS-011,Memphis DC,Memphis,US,Los Angeles,US,2,8.19,road,chargers,935.24,0
+SO-00256,2025-11-04,C-MIL-025,Rotterdam DC,Rotterdam,NL,Milan,IT,16,28.28,road,audio,678.82,0
+SO-00516,2025-11-04,C-SIN-017,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,13.64,sea,audio,467.06,0
+SO-00855,2025-11-04,C-CHI-019,Memphis DC,Memphis,US,Chicago,US,5,14.97,road,chargers,446.92,0
+SO-01065,2025-11-04,C-BOG-021,Memphis DC,Memphis,US,Bogota,CO,12,35.26,air,wearables,323.1,0
+SO-01227,2025-11-04,C-LAG-039,Dubai DC,Dubai,AE,Lagos,NG,9,20.63,air,storage,603.59,0
+SO-00393,2025-11-05,C-TOK-001,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,8.01,sea,chargers,1330.92,0
+SO-01283,2025-11-05,C-KAR-013,Dubai DC,Dubai,AE,Karachi,PK,5,10.78,sea,audio,480.03,0
+SO-00861,2025-11-06,C-CHI-008,Memphis DC,Memphis,US,Chicago,US,3,12.09,road,storage,594.76,0
+SO-01083,2025-11-06,C-SAN-008,Memphis DC,Memphis,US,Santiago,CL,10,20.87,sea,wearables,1078.08,0
+SO-00476,2025-11-07,C-SIN-016,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,8.43,sea,cables,407.94,0
+SO-00629,2025-11-07,C-MUM-033,Shenzhen DC,Shenzhen,CN,Mumbai,IN,19,38.19,sea,chargers,504.2,0
+SO-00654,2025-11-07,C-MUM-036,Shenzhen DC,Shenzhen,CN,Mumbai,IN,25,40.46,sea,cables,461.03,0
+SO-00257,2025-11-08,C-MIL-027,Rotterdam DC,Rotterdam,NL,Milan,IT,5,13.34,road,storage,630.53,0
+SO-01173,2025-11-08,C-CAI-002,Dubai DC,Dubai,AE,Cairo,EG,5,16.51,sea,storage,591.41,0
+SO-01258,2025-11-08,C-JOH-010,Dubai DC,Dubai,AE,Johannesburg,ZA,4,15.71,sea,wearables,567.66,0
+SO-00700,2025-11-09,C-AUC-022,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,13.0,air,storage,673.29,0
+SO-00808,2025-11-09,C-CHI-002,Memphis DC,Memphis,US,Chicago,US,5,13.88,road,cases,907.36,0
+SO-00971,2025-11-09,C-TOR-026,Memphis DC,Memphis,US,Toronto,CA,7,24.95,road,wearables,702.74,0
+SO-00165,2025-11-10,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,5,20.63,road,cases,648.68,0
+SO-00364,2025-11-10,C-DUB-006,Rotterdam DC,Rotterdam,NL,Dublin,IE,5,9.97,air,cables,391.57,0
+SO-00429,2025-11-10,C-SEO-033,Shenzhen DC,Shenzhen,CN,Seoul,KR,16,28.86,sea,wearables,786.18,0
+SO-00763,2025-11-10,C-NEW-033,Memphis DC,Memphis,US,New York City,US,6,19.57,road,cables,823.81,0
+SO-00931,2025-11-10,C-LOS-003,Memphis DC,Memphis,US,Los Angeles,US,11,20.35,road,chargers,506.37,0
+SO-01157,2025-11-10,C-RIY-022,Dubai DC,Dubai,AE,Riyadh,SA,4,13.49,road,cables,1177.26,0
+SO-00252,2025-11-11,C-MIL-033,Rotterdam DC,Rotterdam,NL,Milan,IT,6,23.04,road,cases,427.61,0
+SO-00626,2025-11-11,C-MUM-020,Shenzhen DC,Shenzhen,CN,Mumbai,IN,7,24.98,sea,storage,640.2,0
+SO-00778,2025-11-11,C-NEW-018,Memphis DC,Memphis,US,New York City,US,2,5.31,road,cables,507.46,0
+SO-00840,2025-11-11,C-CHI-001,Memphis DC,Memphis,US,Chicago,US,6,21.71,road,wearables,566.75,0
+SO-01079,2025-11-11,C-BOG-038,Memphis DC,Memphis,US,Bogota,CO,6,22.02,air,cases,478.09,0
+SO-01122,2025-11-11,C-BUE-026,Memphis DC,Memphis,US,Buenos Aires,AR,20,31.9,sea,cases,496.23,0
+SO-00653,2025-11-12,C-MUM-025,Shenzhen DC,Shenzhen,CN,Mumbai,IN,7,26.5,sea,wearables,561.94,0
+SO-00712,2025-11-12,C-AUC-032,Rotterdam DC,Rotterdam,NL,Auckland,NZ,4,14.85,air,wearables,1008.11,0
+SO-01199,2025-11-12,C-CAI-010,Dubai DC,Dubai,AE,Cairo,EG,9,33.87,sea,audio,590.69,0
+SO-00063,2025-11-13,C-LON-005,Rotterdam DC,Rotterdam,NL,London,GB,6,12.02,road,cases,683.29,0
+SO-00105,2025-11-13,C-BER-038,Rotterdam DC,Rotterdam,NL,Berlin,DE,7,12.19,road,storage,535.36,0
+SO-00217,2025-11-13,C-MAD-020,Rotterdam DC,Rotterdam,NL,Madrid,ES,1,4.34,road,wearables,476.28,0
+SO-00756,2025-11-13,C-NEW-039,Memphis DC,Memphis,US,New York City,US,5,13.27,road,cables,863.26,0
+SO-00913,2025-11-13,C-LOS-009,Memphis DC,Memphis,US,Los Angeles,US,12,22.34,road,storage,828.63,0
+SO-01102,2025-11-13,C-BUE-024,Memphis DC,Memphis,US,Buenos Aires,AR,14,26.58,sea,cables,623.03,0
+SO-01298,2025-11-13,C-KAR-014,Dubai DC,Dubai,AE,Karachi,PK,7,24.71,sea,storage,572.05,0
+SO-00432,2025-11-14,C-SEO-032,Shenzhen DC,Shenzhen,CN,Seoul,KR,4,13.83,sea,cases,978.59,0
+SO-00522,2025-11-14,C-SIN-002,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,16.05,sea,storage,1206.2,1
+SO-00525,2025-11-14,C-BAN-039,Shenzhen DC,Shenzhen,CN,Bangkok,TH,12,19.99,sea,cables,742.88,0
+SO-00793,2025-11-14,C-NEW-005,Memphis DC,Memphis,US,New York City,US,5,12.84,road,chargers,840.07,0
+SO-00975,2025-11-14,C-TOR-023,Memphis DC,Memphis,US,Toronto,CA,9,13.37,road,audio,1105.89,0
+SO-00129,2025-11-15,C-BER-006,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,37.43,road,cases,841.47,0
+SO-00380,2025-11-15,C-TOK-007,Shenzhen DC,Shenzhen,CN,Tokyo,JP,3,8.61,sea,chargers,621.48,0
+SO-00640,2025-11-15,C-MUM-029,Shenzhen DC,Shenzhen,CN,Mumbai,IN,5,16.75,sea,cases,932.08,0
+SO-00693,2025-11-15,C-SYD-010,Rotterdam DC,Rotterdam,NL,Sydney,AU,12,21.26,air,cables,395.9,0
+SO-00406,2025-11-16,C-TOK-003,Shenzhen DC,Shenzhen,CN,Tokyo,JP,5,13.01,sea,cases,622.7,1
+SO-00613,2025-11-16,C-MAN-023,Shenzhen DC,Shenzhen,CN,Manila,PH,4,14.45,sea,wearables,320.46,1
+SO-00480,2025-11-17,C-SIN-002,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,11.36,sea,wearables,518.87,0
+SO-01011,2025-11-17,C-MEX-014,Memphis DC,Memphis,US,Mexico City,MX,7,29.39,road,wearables,589.17,0
+SO-00111,2025-11-18,C-BER-004,Rotterdam DC,Rotterdam,NL,Berlin,DE,4,14.69,road,chargers,956.95,0
+SO-00512,2025-11-18,C-SIN-033,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,19.81,sea,audio,478.9,0
+SO-00735,2025-11-18,C-NEW-023,Memphis DC,Memphis,US,New York City,US,9,25.07,road,storage,863.42,0
+SO-00921,2025-11-18,C-LOS-034,Memphis DC,Memphis,US,Los Angeles,US,6,15.28,road,cables,628.94,0
+SO-01109,2025-11-19,C-BUE-037,Memphis DC,Memphis,US,Buenos Aires,AR,20,34.52,sea,storage,452.29,0
+SO-01204,2025-11-19,C-NAI-025,Dubai DC,Dubai,AE,Nairobi,KE,5,9.93,air,wearables,426.46,0
+SO-01276,2025-11-19,C-JOH-032,Dubai DC,Dubai,AE,Johannesburg,ZA,24,33.67,sea,chargers,509.64,0
+SO-00856,2025-11-20,C-CHI-022,Memphis DC,Memphis,US,Chicago,US,9,24.76,road,cables,971.67,0
+SO-00994,2025-11-20,C-MEX-014,Memphis DC,Memphis,US,Mexico City,MX,9,19.56,road,cables,689.66,0
+SO-00098,2025-11-21,C-BER-021,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,26.78,road,chargers,939.59,0
+SO-00101,2025-11-21,C-BER-003,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,25.14,road,audio,790.65,0
+SO-00143,2025-11-21,C-PAR-010,Rotterdam DC,Rotterdam,NL,Paris,FR,9,24.79,road,audio,770.53,0
+SO-01092,2025-11-21,C-SAN-023,Memphis DC,Memphis,US,Santiago,CL,13,28.12,sea,storage,357.53,0
+SO-00463,2025-11-22,C-SEO-038,Shenzhen DC,Shenzhen,CN,Seoul,KR,3,9.12,sea,chargers,684.84,0
+SO-00469,2025-11-22,C-SEO-007,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,12.61,sea,cases,634.47,0
+SO-00633,2025-11-22,C-MUM-029,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,22.91,sea,cases,659.59,0
+SO-00377,2025-11-23,C-TOK-030,Shenzhen DC,Shenzhen,CN,Tokyo,JP,3,10.87,sea,cables,842.05,0
+SO-00531,2025-11-23,C-BAN-035,Shenzhen DC,Shenzhen,CN,Bangkok,TH,7,22.94,sea,wearables,544.1,0
+SO-00666,2025-11-23,C-SYD-037,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,23.6,air,wearables,973.49,0
+SO-00946,2025-11-23,C-TOR-026,Memphis DC,Memphis,US,Toronto,CA,7,21.16,road,audio,985.48,0
+SO-00991,2025-11-23,C-MEX-033,Memphis DC,Memphis,US,Mexico City,MX,4,15.75,road,chargers,647.14,0
+SO-00149,2025-11-24,C-PAR-030,Rotterdam DC,Rotterdam,NL,Paris,FR,11,18.81,road,cases,664.96,0
+SO-00271,2025-11-24,C-MIL-013,Rotterdam DC,Rotterdam,NL,Milan,IT,14,24.93,road,storage,867.65,0
+SO-00519,2025-11-24,C-SIN-001,Shenzhen DC,Shenzhen,CN,Singapore,SG,9,21.62,sea,audio,746.23,0
+SO-00552,2025-11-24,C-BAN-037,Shenzhen DC,Shenzhen,CN,Bangkok,TH,14,24.63,sea,cables,977.0,0
+SO-00623,2025-11-24,C-MUM-034,Shenzhen DC,Shenzhen,CN,Mumbai,IN,11,26.87,sea,chargers,561.98,1
+SO-00658,2025-11-24,C-MUM-037,Shenzhen DC,Shenzhen,CN,Mumbai,IN,14,28.85,sea,wearables,835.75,0
+SO-00750,2025-11-24,C-NEW-020,Memphis DC,Memphis,US,New York City,US,10,24.35,road,cases,704.55,0
+SO-00956,2025-11-24,C-TOR-006,Memphis DC,Memphis,US,Toronto,CA,15,22.4,road,cases,343.26,0
+SO-01067,2025-11-24,C-BOG-021,Memphis DC,Memphis,US,Bogota,CO,6,21.91,air,wearables,671.13,1
+SO-00131,2025-11-25,C-BER-037,Rotterdam DC,Rotterdam,NL,Berlin,DE,13,21.77,road,cases,1042.74,1
+SO-01238,2025-11-26,C-LAG-007,Dubai DC,Dubai,AE,Lagos,NG,7,21.36,air,storage,304.75,0
+SO-00962,2025-11-27,C-TOR-017,Memphis DC,Memphis,US,Toronto,CA,8,17.3,road,chargers,951.51,0
+SO-00285,2025-11-28,C-MIL-038,Rotterdam DC,Rotterdam,NL,Milan,IT,5,16.09,road,storage,880.91,0
+SO-00422,2025-11-28,C-TOK-011,Shenzhen DC,Shenzhen,CN,Tokyo,JP,8,19.52,sea,cables,903.92,0
+SO-00586,2025-11-28,C-JAK-006,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,23.5,sea,cables,494.56,0
+SO-01118,2025-11-28,C-BUE-031,Memphis DC,Memphis,US,Buenos Aires,AR,13,28.47,sea,wearables,559.54,0
+SO-00624,2025-11-29,C-MUM-024,Shenzhen DC,Shenzhen,CN,Mumbai,IN,14,28.85,sea,audio,590.3,0
+SO-00957,2025-11-29,C-TOR-038,Memphis DC,Memphis,US,Toronto,CA,14,22.04,road,chargers,429.56,0
+SO-01051,2025-11-29,C-SAO-014,Memphis DC,Memphis,US,Sao Paulo,BR,4,14.72,sea,cases,478.22,0
+SO-00184,2025-11-30,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,6,23.37,road,wearables,422.34,0
+SO-00865,2025-11-30,C-CHI-020,Memphis DC,Memphis,US,Chicago,US,12,25.69,road,wearables,681.41,0
+SO-01129,2025-11-30,C-RIY-024,Dubai DC,Dubai,AE,Riyadh,SA,7,26.79,road,cables,565.47,0
+SO-00040,2025-12-01,C-LON-016,Rotterdam DC,Rotterdam,NL,London,GB,4,8.78,road,wearables,723.28,0
+SO-00596,2025-12-01,C-MAN-030,Shenzhen DC,Shenzhen,CN,Manila,PH,5,16.38,sea,cases,391.77,0
+SO-00933,2025-12-01,C-LOS-039,Memphis DC,Memphis,US,Los Angeles,US,6,12.96,road,cables,958.08,0
+SO-00093,2025-12-02,C-BER-003,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,25.3,road,cases,643.94,0
+SO-00879,2025-12-02,C-LOS-009,Memphis DC,Memphis,US,Los Angeles,US,8,23.76,road,cables,555.97,0
+SO-00911,2025-12-02,C-LOS-024,Memphis DC,Memphis,US,Los Angeles,US,5,15.52,road,audio,796.21,0
+SO-00988,2025-12-02,C-MEX-001,Memphis DC,Memphis,US,Mexico City,MX,9,17.16,road,audio,431.7,0
+SO-00322,2025-12-03,C-STO-014,Rotterdam DC,Rotterdam,NL,Stockholm,SE,10,23.68,road,chargers,665.44,0
+SO-00573,2025-12-03,C-JAK-027,Shenzhen DC,Shenzhen,CN,Jakarta,ID,4,7.75,sea,cables,594.45,0
+SO-00740,2025-12-03,C-NEW-012,Memphis DC,Memphis,US,New York City,US,12,24.1,road,cables,765.11,0
+SO-01119,2025-12-03,C-BUE-039,Memphis DC,Memphis,US,Buenos Aires,AR,11,35.4,sea,cables,837.9,0
+SO-00352,2025-12-04,C-DUB-005,Rotterdam DC,Rotterdam,NL,Dublin,IE,4,13.45,air,cases,340.28,0
+SO-00504,2025-12-04,C-SIN-021,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,22.25,sea,chargers,1296.68,0
+SO-00320,2025-12-05,C-STO-024,Rotterdam DC,Rotterdam,NL,Stockholm,SE,13,24.99,road,storage,489.21,0
+SO-00013,2025-12-06,C-LON-020,Rotterdam DC,Rotterdam,NL,London,GB,6,23.67,road,storage,458.54,0
+SO-00895,2025-12-06,C-LOS-001,Memphis DC,Memphis,US,Los Angeles,US,5,9.42,road,cables,844.63,0
+SO-01009,2025-12-06,C-MEX-019,Memphis DC,Memphis,US,Mexico City,MX,11,19.81,road,cables,651.41,0
+SO-00644,2025-12-07,C-MUM-002,Shenzhen DC,Shenzhen,CN,Mumbai,IN,7,24.41,sea,audio,621.06,0
+SO-01206,2025-12-07,C-NAI-006,Dubai DC,Dubai,AE,Nairobi,KE,7,17.7,air,audio,761.46,0
+SO-00109,2025-12-08,C-BER-010,Rotterdam DC,Rotterdam,NL,Berlin,DE,9,23.11,road,cables,798.02,0
+SO-00268,2025-12-08,C-MIL-037,Rotterdam DC,Rotterdam,NL,Milan,IT,5,18.91,road,chargers,765.43,0
+SO-00651,2025-12-08,C-MUM-021,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,21.07,sea,cables,816.27,0
+SO-00656,2025-12-08,C-MUM-023,Shenzhen DC,Shenzhen,CN,Mumbai,IN,18,25.27,sea,storage,395.01,0
+SO-00602,2025-12-09,C-MAN-002,Shenzhen DC,Shenzhen,CN,Manila,PH,6,24.16,sea,audio,744.18,0
+SO-00621,2025-12-09,C-MUM-017,Shenzhen DC,Shenzhen,CN,Mumbai,IN,9,25.35,sea,cables,839.68,0
+SO-00646,2025-12-09,C-MUM-023,Shenzhen DC,Shenzhen,CN,Mumbai,IN,12,18.4,sea,audio,641.49,0
+SO-01169,2025-12-09,C-CAI-031,Dubai DC,Dubai,AE,Cairo,EG,6,16.43,sea,storage,744.27,0
+SO-00830,2025-12-10,C-CHI-001,Memphis DC,Memphis,US,Chicago,US,6,20.24,road,wearables,428.81,0
+SO-00835,2025-12-10,C-CHI-007,Memphis DC,Memphis,US,Chicago,US,10,34.66,road,audio,960.38,0
+SO-00890,2025-12-10,C-LOS-009,Memphis DC,Memphis,US,Los Angeles,US,13,20.36,road,cables,867.25,0
+SO-01054,2025-12-10,C-SAO-007,Memphis DC,Memphis,US,Sao Paulo,BR,9,30.06,sea,wearables,704.63,0
+SO-01265,2025-12-10,C-JOH-032,Dubai DC,Dubai,AE,Johannesburg,ZA,8,25.87,sea,wearables,584.08,0
+SO-00418,2025-12-11,C-TOK-012,Shenzhen DC,Shenzhen,CN,Tokyo,JP,9,19.86,sea,cables,742.23,0
+SO-01287,2025-12-11,C-KAR-039,Dubai DC,Dubai,AE,Karachi,PK,3,5.52,sea,wearables,217.86,0
+SO-00619,2025-12-12,C-MAN-028,Shenzhen DC,Shenzhen,CN,Manila,PH,4,13.08,sea,cases,966.86,0
+SO-00638,2025-12-12,C-MUM-028,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,21.16,sea,chargers,703.31,0
+SO-00684,2025-12-12,C-SYD-033,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,14.54,air,storage,801.82,0
+SO-00694,2025-12-12,C-SYD-035,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,12.09,air,chargers,923.73,0
+SO-00097,2025-12-13,C-BER-001,Rotterdam DC,Rotterdam,NL,Berlin,DE,15,24.41,road,chargers,791.85,1
+SO-00161,2025-12-13,C-PAR-018,Rotterdam DC,Rotterdam,NL,Paris,FR,6,13.02,road,cables,813.63,0
+SO-00182,2025-12-13,C-PAR-022,Rotterdam DC,Rotterdam,NL,Paris,FR,1,2.72,road,chargers,382.59,0
+SO-00484,2025-12-13,C-SIN-022,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,13.81,sea,chargers,638.61,0
+SO-00639,2025-12-13,C-MUM-019,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,11.85,sea,cables,555.41,0
+SO-00877,2025-12-13,C-LOS-022,Memphis DC,Memphis,US,Los Angeles,US,12,19.92,road,audio,573.27,0
+SO-01085,2025-12-13,C-SAN-017,Memphis DC,Memphis,US,Santiago,CL,14,27.75,sea,wearables,493.86,1
+SO-00007,2025-12-14,C-LON-033,Rotterdam DC,Rotterdam,NL,London,GB,6,15.64,road,audio,594.28,1
+SO-00047,2025-12-14,C-LON-010,Rotterdam DC,Rotterdam,NL,London,GB,6,25.0,road,cables,626.38,1
+SO-00546,2025-12-14,C-BAN-019,Shenzhen DC,Shenzhen,CN,Bangkok,TH,1,3.26,sea,wearables,807.35,0
+SO-00959,2025-12-14,C-TOR-009,Memphis DC,Memphis,US,Toronto,CA,12,27.73,road,wearables,541.36,0
+SO-00460,2025-12-15,C-SEO-003,Shenzhen DC,Shenzhen,CN,Seoul,KR,7,22.69,sea,wearables,448.29,0
+SO-00753,2025-12-15,C-NEW-033,Memphis DC,Memphis,US,New York City,US,7,18.47,road,cases,548.37,0
+SO-00767,2025-12-15,C-NEW-003,Memphis DC,Memphis,US,New York City,US,5,19.13,road,cases,528.39,0
+SO-00002,2025-12-16,C-LON-009,Rotterdam DC,Rotterdam,NL,London,GB,8,17.54,road,audio,502.57,0
+SO-00280,2025-12-16,C-MIL-010,Rotterdam DC,Rotterdam,NL,Milan,IT,6,18.86,road,storage,836.53,0
+SO-00347,2025-12-16,C-DUB-025,Rotterdam DC,Rotterdam,NL,Dublin,IE,2,6.44,air,cases,435.47,0
+SO-01126,2025-12-16,C-BUE-023,Memphis DC,Memphis,US,Buenos Aires,AR,5,18.77,sea,cables,753.56,1
+SO-00357,2025-12-17,C-DUB-009,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,11.71,air,audio,434.27,0
+SO-00860,2025-12-17,C-CHI-015,Memphis DC,Memphis,US,Chicago,US,6,23.21,road,storage,1122.08,0
+SO-00156,2025-12-18,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,9,17.72,road,audio,898.15,0
+SO-00337,2025-12-18,C-STO-033,Rotterdam DC,Rotterdam,NL,Stockholm,SE,6,16.33,road,cases,938.98,0
+SO-01304,2025-12-18,C-KAR-036,Dubai DC,Dubai,AE,Karachi,PK,10,22.86,sea,chargers,769.62,0
+SO-00150,2025-12-19,C-PAR-031,Rotterdam DC,Rotterdam,NL,Paris,FR,6,20.66,road,cables,645.81,0
+SO-00787,2025-12-19,C-NEW-035,Memphis DC,Memphis,US,New York City,US,4,9.16,road,cables,829.78,0
+SO-01181,2025-12-19,C-CAI-034,Dubai DC,Dubai,AE,Cairo,EG,14,32.37,sea,storage,834.8,0
+SO-00288,2025-12-20,C-WAR-033,Rotterdam DC,Rotterdam,NL,Warsaw,PL,7,18.86,road,storage,594.81,0
+SO-00884,2025-12-20,C-LOS-018,Memphis DC,Memphis,US,Los Angeles,US,2,8.82,road,cases,584.11,0
+SO-00003,2025-12-21,C-LON-038,Rotterdam DC,Rotterdam,NL,London,GB,5,18.66,road,storage,645.04,0
+SO-00452,2025-12-21,C-SEO-018,Shenzhen DC,Shenzhen,CN,Seoul,KR,11,18.33,sea,cables,364.2,0
+SO-01105,2025-12-21,C-BUE-004,Memphis DC,Memphis,US,Buenos Aires,AR,14,22.43,sea,storage,576.95,0
+SO-01294,2025-12-21,C-KAR-020,Dubai DC,Dubai,AE,Karachi,PK,7,16.69,sea,cases,639.57,0
+SO-00157,2025-12-22,C-PAR-017,Rotterdam DC,Rotterdam,NL,Paris,FR,5,15.39,road,cables,880.46,0
+SO-00321,2025-12-22,C-STO-018,Rotterdam DC,Rotterdam,NL,Stockholm,SE,3,7.53,road,cables,777.63,0
+SO-00350,2025-12-22,C-DUB-007,Rotterdam DC,Rotterdam,NL,Dublin,IE,5,9.77,air,wearables,419.85,0
+SO-00354,2025-12-22,C-DUB-034,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,9.56,air,storage,577.37,0
+SO-00577,2025-12-22,C-JAK-021,Shenzhen DC,Shenzhen,CN,Jakarta,ID,3,11.39,sea,cables,787.63,0
+SO-00018,2025-12-23,C-LON-012,Rotterdam DC,Rotterdam,NL,London,GB,9,17.36,road,wearables,795.99,0
+SO-00025,2025-12-23,C-LON-025,Rotterdam DC,Rotterdam,NL,London,GB,2,7.43,road,cables,609.81,0
+SO-00374,2025-12-23,C-TOK-030,Shenzhen DC,Shenzhen,CN,Tokyo,JP,12,21.82,sea,storage,843.83,0
+SO-00391,2025-12-23,C-TOK-014,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,9.03,sea,chargers,919.02,0
+SO-00727,2025-12-23,C-NEW-037,Memphis DC,Memphis,US,New York City,US,5,14.73,road,cables,855.94,0
+SO-00822,2025-12-23,C-CHI-005,Memphis DC,Memphis,US,Chicago,US,12,24.55,road,cases,855.42,0
+SO-01167,2025-12-23,C-RIY-007,Dubai DC,Dubai,AE,Riyadh,SA,5,19.57,road,cables,827.52,0
+SO-00136,2025-12-24,C-PAR-036,Rotterdam DC,Rotterdam,NL,Paris,FR,11,24.47,road,wearables,968.02,0
+SO-00244,2025-12-24,C-MAD-015,Rotterdam DC,Rotterdam,NL,Madrid,ES,4,16.72,road,wearables,313.46,0
+SO-00858,2025-12-24,C-CHI-002,Memphis DC,Memphis,US,Chicago,US,7,25.53,road,cables,784.37,0
+SO-00204,2025-12-25,C-MAD-015,Rotterdam DC,Rotterdam,NL,Madrid,ES,13,31.97,road,storage,708.61,0
+SO-00478,2025-12-25,C-SIN-003,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,18.14,sea,chargers,720.38,0
+SO-00648,2025-12-25,C-MUM-002,Shenzhen DC,Shenzhen,CN,Mumbai,IN,13,24.85,sea,chargers,471.43,0
+SO-00722,2025-12-25,C-NEW-036,Memphis DC,Memphis,US,New York City,US,7,21.4,road,chargers,831.61,0
+SO-00899,2025-12-25,C-LOS-027,Memphis DC,Memphis,US,Los Angeles,US,8,21.45,road,chargers,542.42,0
+SO-00148,2025-12-26,C-PAR-029,Rotterdam DC,Rotterdam,NL,Paris,FR,12,28.65,road,audio,718.15,0
+SO-00381,2025-12-26,C-TOK-027,Shenzhen DC,Shenzhen,CN,Tokyo,JP,11,25.68,sea,chargers,587.31,0
+SO-00611,2025-12-26,C-MAN-039,Shenzhen DC,Shenzhen,CN,Manila,PH,11,19.17,sea,chargers,686.52,0
+SO-00708,2025-12-26,C-AUC-009,Rotterdam DC,Rotterdam,NL,Auckland,NZ,7,14.45,air,audio,941.39,0
+SO-00788,2025-12-26,C-NEW-005,Memphis DC,Memphis,US,New York City,US,3,11.24,road,storage,597.15,0
+SO-00806,2025-12-26,C-CHI-030,Memphis DC,Memphis,US,Chicago,US,5,14.85,road,chargers,675.33,0
+SO-01242,2025-12-26,C-LAG-027,Dubai DC,Dubai,AE,Lagos,NG,10,39.35,air,audio,366.36,1
+SO-00226,2025-12-27,C-MAD-027,Rotterdam DC,Rotterdam,NL,Madrid,ES,13,29.36,road,storage,986.61,0
+SO-00239,2025-12-27,C-MAD-022,Rotterdam DC,Rotterdam,NL,Madrid,ES,12,19.71,road,cables,722.74,0
+SO-00255,2025-12-27,C-MIL-032,Rotterdam DC,Rotterdam,NL,Milan,IT,8,16.03,road,cables,843.31,0
+SO-00382,2025-12-27,C-TOK-036,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,11.72,sea,cases,829.21,0
+SO-00479,2025-12-27,C-SIN-001,Shenzhen DC,Shenzhen,CN,Singapore,SG,10,18.74,sea,cases,590.29,0
+SO-00482,2025-12-27,C-SIN-028,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,16.15,sea,chargers,762.28,0
+SO-00780,2025-12-27,C-NEW-002,Memphis DC,Memphis,US,New York City,US,6,17.87,road,audio,362.53,0
+SO-00795,2025-12-27,C-NEW-005,Memphis DC,Memphis,US,New York City,US,5,14.15,road,wearables,615.91,0
+SO-00999,2025-12-27,C-MEX-012,Memphis DC,Memphis,US,Mexico City,MX,12,33.11,road,cases,1012.68,0
+SO-01120,2025-12-27,C-BUE-016,Memphis DC,Memphis,US,Buenos Aires,AR,21,34.66,sea,audio,549.11,0
+SO-00355,2025-12-28,C-DUB-022,Rotterdam DC,Rotterdam,NL,Dublin,IE,2,4.9,air,storage,378.58,1
+SO-00982,2025-12-28,C-TOR-013,Memphis DC,Memphis,US,Toronto,CA,11,29.48,road,chargers,797.33,0
+SO-00995,2025-12-28,C-MEX-014,Memphis DC,Memphis,US,Mexico City,MX,11,23.73,road,cables,515.74,0
+SO-00044,2025-12-29,C-LON-008,Rotterdam DC,Rotterdam,NL,London,GB,4,14.23,road,storage,421.3,0
+SO-00303,2025-12-29,C-WAR-029,Rotterdam DC,Rotterdam,NL,Warsaw,PL,16,44.46,road,wearables,399.1,0
+SO-00711,2025-12-29,C-AUC-033,Rotterdam DC,Rotterdam,NL,Auckland,NZ,2,7.45,air,audio,562.9,0
+SO-00813,2025-12-29,C-CHI-012,Memphis DC,Memphis,US,Chicago,US,12,25.66,road,chargers,1008.76,0
+SO-00940,2025-12-29,C-LOS-035,Memphis DC,Memphis,US,Los Angeles,US,7,27.8,road,audio,891.8,0
+SO-00983,2025-12-29,C-TOR-032,Memphis DC,Memphis,US,Toronto,CA,14,26.03,road,wearables,985.28,0
+SO-01001,2025-12-29,C-MEX-032,Memphis DC,Memphis,US,Mexico City,MX,8,20.75,road,cases,581.53,1
+SO-00405,2025-12-30,C-TOK-036,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,21.98,sea,cables,789.82,0
+SO-01175,2025-12-30,C-CAI-013,Dubai DC,Dubai,AE,Cairo,EG,10,23.73,sea,wearables,831.71,1
+SO-00218,2025-12-31,C-MAD-023,Rotterdam DC,Rotterdam,NL,Madrid,ES,6,20.37,road,audio,777.32,0
+SO-00317,2025-12-31,C-WAR-006,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,32.43,road,audio,636.65,0
+SO-00430,2025-12-31,C-SEO-027,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,11.95,sea,storage,622.3,0
+SO-00771,2025-12-31,C-NEW-039,Memphis DC,Memphis,US,New York City,US,7,22.13,road,wearables,595.81,0
+SO-00917,2025-12-31,C-LOS-018,Memphis DC,Memphis,US,Los Angeles,US,3,12.58,road,audio,708.08,0
+SO-01225,2025-12-31,C-NAI-016,Dubai DC,Dubai,AE,Nairobi,KE,10,20.75,air,storage,617.63,0
+SO-01241,2025-12-31,C-LAG-008,Dubai DC,Dubai,AE,Lagos,NG,4,13.62,air,audio,550.08,0
+SO-00117,2026-01-01,C-BER-009,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,20.84,road,cables,791.34,0
+SO-00216,2026-01-01,C-MAD-038,Rotterdam DC,Rotterdam,NL,Madrid,ES,16,29.72,road,chargers,638.89,0
+SO-00327,2026-01-01,C-STO-031,Rotterdam DC,Rotterdam,NL,Stockholm,SE,6,14.06,road,storage,441.94,0
+SO-00457,2026-01-01,C-SEO-006,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,16.09,sea,cables,1267.48,0
+SO-00510,2026-01-01,C-SIN-008,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,20.75,sea,storage,876.72,0
+SO-00625,2026-01-01,C-MUM-005,Shenzhen DC,Shenzhen,CN,Mumbai,IN,16,24.75,sea,wearables,215.54,0
+SO-00798,2026-01-01,C-NEW-004,Memphis DC,Memphis,US,New York City,US,6,15.89,road,cables,659.54,0
+SO-00834,2026-01-01,C-CHI-039,Memphis DC,Memphis,US,Chicago,US,2,8.91,road,wearables,442.12,0
+SO-01213,2026-01-01,C-NAI-022,Dubai DC,Dubai,AE,Nairobi,KE,15,24.12,air,storage,432.49,1
+SO-00671,2026-01-02,C-SYD-015,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,9.52,air,cables,978.86,0
+SO-00883,2026-01-02,C-LOS-014,Memphis DC,Memphis,US,Los Angeles,US,8,17.84,road,chargers,889.33,0
+SO-01035,2026-01-02,C-SAO-007,Memphis DC,Memphis,US,Sao Paulo,BR,7,17.22,sea,wearables,698.91,0
+SO-01187,2026-01-02,C-CAI-006,Dubai DC,Dubai,AE,Cairo,EG,14,22.44,sea,cables,644.55,1
+SO-01214,2026-01-02,C-NAI-025,Dubai DC,Dubai,AE,Nairobi,KE,4,11.71,air,cases,479.83,0
+SO-00102,2026-01-04,C-BER-016,Rotterdam DC,Rotterdam,NL,Berlin,DE,21,32.47,road,storage,523.37,0
+SO-00296,2026-01-04,C-WAR-032,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,16.82,road,audio,312.95,0
+SO-00438,2026-01-04,C-SEO-003,Shenzhen DC,Shenzhen,CN,Seoul,KR,11,26.54,sea,cables,1407.4,0
+SO-00734,2026-01-04,C-NEW-009,Memphis DC,Memphis,US,New York City,US,11,18.05,road,storage,537.47,0
+SO-00757,2026-01-04,C-NEW-007,Memphis DC,Memphis,US,New York City,US,5,14.53,road,chargers,567.59,0
+SO-01115,2026-01-04,C-BUE-003,Memphis DC,Memphis,US,Buenos Aires,AR,21,31.86,sea,storage,472.51,0
+SO-00183,2026-01-05,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,7,11.36,road,chargers,399.77,0
+SO-00188,2026-01-05,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,4,15.0,road,chargers,790.51,1
+SO-00346,2026-01-05,C-STO-005,Rotterdam DC,Rotterdam,NL,Stockholm,SE,4,11.81,road,chargers,737.3,0
+SO-00548,2026-01-05,C-BAN-012,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,12.58,sea,cables,873.38,1
+SO-00622,2026-01-05,C-MUM-018,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,17.56,sea,storage,295.43,0
+SO-00730,2026-01-05,C-NEW-004,Memphis DC,Memphis,US,New York City,US,11,21.3,road,wearables,388.88,0
+SO-01202,2026-01-05,C-NAI-008,Dubai DC,Dubai,AE,Nairobi,KE,23,35.89,air,audio,376.32,0
+SO-00200,2026-01-06,C-PAR-033,Rotterdam DC,Rotterdam,NL,Paris,FR,8,15.39,road,wearables,1030.82,0
+SO-00254,2026-01-06,C-MIL-026,Rotterdam DC,Rotterdam,NL,Milan,IT,14,21.43,road,chargers,757.08,0
+SO-00368,2026-01-06,C-DUB-005,Rotterdam DC,Rotterdam,NL,Dublin,IE,2,5.92,air,storage,401.59,0
+SO-00557,2026-01-07,C-BAN-022,Shenzhen DC,Shenzhen,CN,Bangkok,TH,11,25.08,sea,cables,745.03,0
+SO-00616,2026-01-07,C-MAN-021,Shenzhen DC,Shenzhen,CN,Manila,PH,4,14.53,sea,wearables,772.28,0
+SO-00941,2026-01-07,C-TOR-028,Memphis DC,Memphis,US,Toronto,CA,4,14.97,road,cables,750.74,0
+SO-00274,2026-01-08,C-MIL-009,Rotterdam DC,Rotterdam,NL,Milan,IT,2,9.48,road,cables,700.29,0
+SO-00977,2026-01-08,C-TOR-022,Memphis DC,Memphis,US,Toronto,CA,7,19.27,road,cases,969.42,0
+SO-01018,2026-01-08,C-MEX-037,Memphis DC,Memphis,US,Mexico City,MX,11,31.38,road,storage,760.35,0
+SO-00436,2026-01-09,C-SEO-011,Shenzhen DC,Shenzhen,CN,Seoul,KR,2,6.1,sea,chargers,914.54,0
+SO-00897,2026-01-09,C-LOS-017,Memphis DC,Memphis,US,Los Angeles,US,4,15.83,road,cables,414.65,0
+SO-01189,2026-01-09,C-CAI-016,Dubai DC,Dubai,AE,Cairo,EG,5,16.09,sea,cases,693.65,0
+SO-01222,2026-01-09,C-NAI-019,Dubai DC,Dubai,AE,Nairobi,KE,6,21.4,air,cables,690.85,0
+SO-00958,2026-01-10,C-TOR-023,Memphis DC,Memphis,US,Toronto,CA,6,15.63,road,wearables,716.72,0
+SO-01043,2026-01-10,C-SAO-020,Memphis DC,Memphis,US,Sao Paulo,BR,12,27.09,sea,wearables,634.62,1
+SO-01114,2026-01-10,C-BUE-016,Memphis DC,Memphis,US,Buenos Aires,AR,7,22.85,sea,audio,508.5,0
+SO-00665,2026-01-11,C-SYD-001,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,10.65,air,cases,642.18,0
+SO-00679,2026-01-11,C-SYD-002,Rotterdam DC,Rotterdam,NL,Sydney,AU,8,17.71,air,chargers,865.18,0
+SO-01132,2026-01-11,C-RIY-033,Dubai DC,Dubai,AE,Riyadh,SA,4,16.21,road,audio,940.04,0
+SO-00028,2026-01-13,C-LON-002,Rotterdam DC,Rotterdam,NL,London,GB,12,20.17,road,wearables,691.08,0
+SO-00048,2026-01-13,C-LON-018,Rotterdam DC,Rotterdam,NL,London,GB,7,20.91,road,cables,798.55,0
+SO-00246,2026-01-13,C-MAD-021,Rotterdam DC,Rotterdam,NL,Madrid,ES,7,15.53,road,wearables,864.2,0
+SO-00278,2026-01-13,C-MIL-022,Rotterdam DC,Rotterdam,NL,Milan,IT,8,21.46,road,storage,468.85,0
+SO-00541,2026-01-13,C-BAN-036,Shenzhen DC,Shenzhen,CN,Bangkok,TH,7,16.62,sea,audio,845.95,0
+SO-00649,2026-01-13,C-MUM-009,Shenzhen DC,Shenzhen,CN,Mumbai,IN,5,17.91,sea,chargers,721.99,0
+SO-00713,2026-01-13,C-AUC-014,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,8.42,air,cables,1325.22,0
+SO-00715,2026-01-13,C-AUC-013,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,9.14,air,cables,989.32,0
+SO-01302,2026-01-13,C-KAR-020,Dubai DC,Dubai,AE,Karachi,PK,6,23.27,sea,cases,524.18,0
+SO-00241,2026-01-14,C-MAD-038,Rotterdam DC,Rotterdam,NL,Madrid,ES,5,11.79,road,wearables,1072.2,0
+SO-00487,2026-01-14,C-SIN-007,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,18.4,sea,wearables,411.03,0
+SO-00659,2026-01-14,C-MUM-022,Shenzhen DC,Shenzhen,CN,Mumbai,IN,8,31.23,sea,audio,519.64,0
+SO-00910,2026-01-14,C-LOS-026,Memphis DC,Memphis,US,Los Angeles,US,6,24.79,road,cables,1035.98,0
+SO-01156,2026-01-14,C-RIY-023,Dubai DC,Dubai,AE,Riyadh,SA,5,18.54,road,cases,544.53,0
+SO-00193,2026-01-15,C-PAR-018,Rotterdam DC,Rotterdam,NL,Paris,FR,6,21.27,road,chargers,679.12,0
+SO-00664,2026-01-15,C-SYD-018,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,18.99,air,chargers,1155.23,0
+SO-01021,2026-01-15,C-MEX-027,Memphis DC,Memphis,US,Mexico City,MX,18,26.08,road,wearables,621.25,0
+SO-01058,2026-01-15,C-BOG-002,Memphis DC,Memphis,US,Bogota,CO,9,21.01,air,audio,384.27,0
+SO-00447,2026-01-16,C-SEO-028,Shenzhen DC,Shenzhen,CN,Seoul,KR,3,6.13,sea,cables,926.63,0
+SO-00655,2026-01-16,C-MUM-010,Shenzhen DC,Shenzhen,CN,Mumbai,IN,11,21.35,sea,chargers,521.73,0
+SO-00736,2026-01-16,C-NEW-003,Memphis DC,Memphis,US,New York City,US,12,18.03,road,chargers,917.62,0
+SO-00859,2026-01-16,C-CHI-008,Memphis DC,Memphis,US,Chicago,US,4,12.67,road,cases,733.75,0
+SO-00966,2026-01-16,C-TOR-026,Memphis DC,Memphis,US,Toronto,CA,9,19.07,road,storage,698.35,0
+SO-01261,2026-01-16,C-JOH-039,Dubai DC,Dubai,AE,Johannesburg,ZA,9,30.58,sea,audio,782.67,0
+SO-00556,2026-01-17,C-BAN-029,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,13.69,sea,storage,1055.83,0
+SO-00597,2026-01-17,C-MAN-021,Shenzhen DC,Shenzhen,CN,Manila,PH,6,22.82,sea,wearables,652.22,0
+SO-00668,2026-01-17,C-SYD-034,Rotterdam DC,Rotterdam,NL,Sydney,AU,9,14.56,air,wearables,929.04,0
+SO-01235,2026-01-17,C-LAG-031,Dubai DC,Dubai,AE,Lagos,NG,11,32.32,air,wearables,571.39,0
+SO-00674,2026-01-18,C-SYD-027,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,9.56,air,storage,992.1,0
+SO-00701,2026-01-18,C-AUC-032,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,10.78,air,cables,909.42,0
+SO-00054,2026-01-19,C-LON-014,Rotterdam DC,Rotterdam,NL,London,GB,11,29.46,road,audio,965.91,0
+SO-00820,2026-01-19,C-CHI-021,Memphis DC,Memphis,US,Chicago,US,9,19.44,road,wearables,433.0,0
+SO-01176,2026-01-19,C-CAI-023,Dubai DC,Dubai,AE,Cairo,EG,8,23.82,sea,cables,658.55,0
+SO-01219,2026-01-19,C-NAI-007,Dubai DC,Dubai,AE,Nairobi,KE,4,15.04,air,cases,517.5,0
+SO-00115,2026-01-20,C-BER-031,Rotterdam DC,Rotterdam,NL,Berlin,DE,9,26.03,road,storage,1003.77,0
+SO-00973,2026-01-20,C-TOR-019,Memphis DC,Memphis,US,Toronto,CA,6,22.04,road,cables,753.73,0
+SO-01004,2026-01-20,C-MEX-022,Memphis DC,Memphis,US,Mexico City,MX,11,26.83,road,chargers,646.2,0
+SO-01232,2026-01-20,C-LAG-033,Dubai DC,Dubai,AE,Lagos,NG,13,19.91,air,cases,407.32,1
+SO-00925,2026-01-21,C-LOS-005,Memphis DC,Memphis,US,Los Angeles,US,3,7.3,road,audio,540.11,0
+SO-01013,2026-01-21,C-MEX-024,Memphis DC,Memphis,US,Mexico City,MX,3,11.02,road,chargers,657.45,0
+SO-00146,2026-01-23,C-PAR-001,Rotterdam DC,Rotterdam,NL,Paris,FR,7,14.18,road,chargers,780.98,0
+SO-01008,2026-01-23,C-MEX-013,Memphis DC,Memphis,US,Mexico City,MX,11,26.62,road,audio,785.67,0
+SO-00211,2026-01-24,C-MAD-016,Rotterdam DC,Rotterdam,NL,Madrid,ES,10,25.23,road,wearables,875.15,0
+SO-00232,2026-01-24,C-MAD-027,Rotterdam DC,Rotterdam,NL,Madrid,ES,6,17.76,road,chargers,348.45,0
+SO-00494,2026-01-25,C-SIN-015,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,15.9,sea,storage,1028.79,0
+SO-00528,2026-01-25,C-BAN-036,Shenzhen DC,Shenzhen,CN,Bangkok,TH,3,11.28,sea,audio,798.23,0
+SO-00542,2026-01-25,C-BAN-017,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,21.93,sea,storage,593.15,0
+SO-00904,2026-01-25,C-LOS-034,Memphis DC,Memphis,US,Los Angeles,US,5,16.98,road,wearables,624.25,1
+SO-01112,2026-01-25,C-BUE-015,Memphis DC,Memphis,US,Buenos Aires,AR,8,14.89,sea,audio,345.37,0
+SO-01208,2026-01-25,C-NAI-026,Dubai DC,Dubai,AE,Nairobi,KE,6,15.07,air,audio,524.4,0
+SO-00421,2026-01-26,C-TOK-035,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,8.91,sea,storage,887.77,0
+SO-00551,2026-01-26,C-BAN-003,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,19.07,sea,audio,541.2,0
+SO-00900,2026-01-26,C-LOS-004,Memphis DC,Memphis,US,Los Angeles,US,7,17.96,road,cases,883.24,0
+SO-01030,2026-01-26,C-SAO-013,Memphis DC,Memphis,US,Sao Paulo,BR,10,25.47,sea,cases,674.09,0
+SO-00112,2026-01-27,C-BER-031,Rotterdam DC,Rotterdam,NL,Berlin,DE,13,25.85,road,storage,552.56,1
+SO-00231,2026-01-27,C-MAD-014,Rotterdam DC,Rotterdam,NL,Madrid,ES,12,26.64,road,wearables,348.48,0
+SO-00242,2026-01-27,C-MAD-007,Rotterdam DC,Rotterdam,NL,Madrid,ES,20,42.81,road,wearables,1035.54,0
+SO-00348,2026-01-27,C-DUB-006,Rotterdam DC,Rotterdam,NL,Dublin,IE,5,7.04,air,cables,235.54,0
+SO-00388,2026-01-27,C-TOK-009,Shenzhen DC,Shenzhen,CN,Tokyo,JP,2,7.15,sea,cases,645.56,0
+SO-00415,2026-01-27,C-TOK-025,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,13.95,sea,wearables,929.28,0
+SO-00576,2026-01-27,C-JAK-020,Shenzhen DC,Shenzhen,CN,Jakarta,ID,5,18.74,sea,storage,784.9,0
+SO-00837,2026-01-27,C-CHI-015,Memphis DC,Memphis,US,Chicago,US,8,24.8,road,cables,935.65,0
+SO-01207,2026-01-27,C-NAI-022,Dubai DC,Dubai,AE,Nairobi,KE,5,20.32,air,audio,554.87,0
+SO-00030,2026-01-28,C-LON-039,Rotterdam DC,Rotterdam,NL,London,GB,8,16.19,road,audio,402.35,0
+SO-00416,2026-01-28,C-TOK-021,Shenzhen DC,Shenzhen,CN,Tokyo,JP,12,25.28,sea,wearables,815.71,0
+SO-00703,2026-01-29,C-AUC-028,Rotterdam DC,Rotterdam,NL,Auckland,NZ,6,12.35,air,storage,1394.7,0
+SO-00969,2026-01-29,C-TOR-016,Memphis DC,Memphis,US,Toronto,CA,4,13.19,road,audio,788.8,0
+SO-00543,2026-01-30,C-BAN-024,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,9.2,sea,cases,683.71,0
+SO-00578,2026-01-30,C-JAK-029,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,24.36,sea,storage,778.25,0
+SO-00710,2026-01-30,C-AUC-008,Rotterdam DC,Rotterdam,NL,Auckland,NZ,6,15.67,air,wearables,1098.17,0
+SO-00932,2026-01-30,C-LOS-029,Memphis DC,Memphis,US,Los Angeles,US,16,26.9,road,chargers,459.14,0
+SO-01036,2026-01-30,C-SAO-039,Memphis DC,Memphis,US,Sao Paulo,BR,9,18.29,sea,cables,612.88,1
+SO-01177,2026-01-30,C-CAI-020,Dubai DC,Dubai,AE,Cairo,EG,3,12.3,sea,chargers,551.59,0
+SO-01201,2026-01-30,C-NAI-035,Dubai DC,Dubai,AE,Nairobi,KE,11,26.35,air,cables,188.6,0
+SO-00485,2026-01-31,C-SIN-012,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,21.35,sea,chargers,642.14,0
+SO-01042,2026-01-31,C-SAO-009,Memphis DC,Memphis,US,Sao Paulo,BR,8,18.58,sea,cases,786.0,0
+SO-01077,2026-01-31,C-BOG-011,Memphis DC,Memphis,US,Bogota,CO,10,30.05,air,cables,611.71,0
+SO-01130,2026-01-31,C-RIY-016,Dubai DC,Dubai,AE,Riyadh,SA,8,30.38,road,cables,580.25,0
+SO-01229,2026-01-31,C-LAG-018,Dubai DC,Dubai,AE,Lagos,NG,10,32.55,air,cables,656.42,0
+SO-01303,2026-01-31,C-KAR-032,Dubai DC,Dubai,AE,Karachi,PK,12,22.9,sea,chargers,602.03,0
+SO-00269,2026-02-01,C-MIL-034,Rotterdam DC,Rotterdam,NL,Milan,IT,8,18.01,road,wearables,862.74,0
+SO-00276,2026-02-01,C-MIL-026,Rotterdam DC,Rotterdam,NL,Milan,IT,7,22.4,road,cables,625.75,0
+SO-00376,2026-02-01,C-TOK-034,Shenzhen DC,Shenzhen,CN,Tokyo,JP,11,23.12,sea,chargers,705.21,0
+SO-00378,2026-02-01,C-TOK-029,Shenzhen DC,Shenzhen,CN,Tokyo,JP,14,23.12,sea,wearables,691.03,1
+SO-01239,2026-02-01,C-LAG-038,Dubai DC,Dubai,AE,Lagos,NG,16,22.99,air,chargers,497.72,0
+SO-00194,2026-02-02,C-PAR-016,Rotterdam DC,Rotterdam,NL,Paris,FR,10,24.67,road,audio,867.45,0
+SO-00312,2026-02-02,C-WAR-015,Rotterdam DC,Rotterdam,NL,Warsaw,PL,10,20.95,road,wearables,740.48,0
+SO-00579,2026-02-02,C-JAK-027,Shenzhen DC,Shenzhen,CN,Jakarta,ID,9,21.22,sea,cases,1000.64,0
+SO-00704,2026-02-02,C-AUC-022,Rotterdam DC,Rotterdam,NL,Auckland,NZ,6,20.66,air,audio,756.17,0
+SO-00919,2026-02-02,C-LOS-012,Memphis DC,Memphis,US,Los Angeles,US,8,14.29,road,wearables,1002.31,1
+SO-01048,2026-02-02,C-SAO-034,Memphis DC,Memphis,US,Sao Paulo,BR,7,26.03,sea,cases,605.22,0
+SO-00721,2026-02-03,C-NEW-021,Memphis DC,Memphis,US,New York City,US,10,17.32,road,chargers,406.95,0
+SO-01045,2026-02-03,C-SAO-022,Memphis DC,Memphis,US,Sao Paulo,BR,13,34.22,sea,cases,759.59,0
+SO-01072,2026-02-03,C-BOG-025,Memphis DC,Memphis,US,Bogota,CO,10,34.36,air,cables,518.4,0
+SO-00511,2026-02-04,C-SIN-013,Shenzhen DC,Shenzhen,CN,Singapore,SG,8,24.22,sea,wearables,570.67,1
+SO-00534,2026-02-04,C-BAN-027,Shenzhen DC,Shenzhen,CN,Bangkok,TH,11,23.16,sea,audio,956.23,0
+SO-00944,2026-02-04,C-TOR-036,Memphis DC,Memphis,US,Toronto,CA,7,16.14,road,wearables,871.14,0
+SO-01180,2026-02-04,C-CAI-028,Dubai DC,Dubai,AE,Cairo,EG,6,21.54,sea,storage,335.08,0
+SO-00234,2026-02-05,C-MAD-034,Rotterdam DC,Rotterdam,NL,Madrid,ES,13,43.77,road,audio,638.8,0
+SO-00360,2026-02-05,C-DUB-038,Rotterdam DC,Rotterdam,NL,Dublin,IE,6,10.22,air,wearables,381.31,0
+SO-00398,2026-02-06,C-TOK-021,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,19.59,sea,cases,542.43,1
+SO-00770,2026-02-06,C-NEW-009,Memphis DC,Memphis,US,New York City,US,9,17.99,road,wearables,712.93,0
+SO-00224,2026-02-08,C-MAD-035,Rotterdam DC,Rotterdam,NL,Madrid,ES,4,13.03,road,cables,826.99,0
+SO-00273,2026-02-08,C-MIL-005,Rotterdam DC,Rotterdam,NL,Milan,IT,19,27.04,road,cases,789.99,0
+SO-00297,2026-02-08,C-WAR-008,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,23.75,road,cables,694.28,1
+SO-00383,2026-02-08,C-TOK-020,Shenzhen DC,Shenzhen,CN,Tokyo,JP,2,5.63,sea,audio,369.41,0
+SO-00609,2026-02-08,C-MAN-039,Shenzhen DC,Shenzhen,CN,Manila,PH,5,19.55,sea,chargers,407.52,0
+SO-00815,2026-02-08,C-CHI-031,Memphis DC,Memphis,US,Chicago,US,8,24.05,road,wearables,624.15,0
+SO-01010,2026-02-08,C-MEX-032,Memphis DC,Memphis,US,Mexico City,MX,6,20.9,road,audio,605.55,0
+SO-01161,2026-02-08,C-RIY-028,Dubai DC,Dubai,AE,Riyadh,SA,11,22.95,road,cables,248.48,0
+SO-00500,2026-02-09,C-SIN-033,Shenzhen DC,Shenzhen,CN,Singapore,SG,12,19.53,sea,audio,1038.12,0
+SO-00503,2026-02-09,C-SIN-031,Shenzhen DC,Shenzhen,CN,Singapore,SG,10,16.55,sea,audio,1224.24,0
+SO-00775,2026-02-09,C-NEW-003,Memphis DC,Memphis,US,New York City,US,8,25.3,road,cases,819.44,0
+SO-00299,2026-02-10,C-WAR-039,Rotterdam DC,Rotterdam,NL,Warsaw,PL,14,30.07,road,storage,994.76,0
+SO-00387,2026-02-10,C-TOK-029,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,20.07,sea,cases,721.19,0
+SO-00662,2026-02-11,C-SYD-031,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,14.54,air,cables,709.72,0
+SO-00826,2026-02-11,C-CHI-039,Memphis DC,Memphis,US,Chicago,US,8,21.88,road,audio,670.12,0
+SO-00923,2026-02-11,C-LOS-037,Memphis DC,Memphis,US,Los Angeles,US,11,22.08,road,storage,935.61,0
+SO-00464,2026-02-12,C-SEO-030,Shenzhen DC,Shenzhen,CN,Seoul,KR,1,0.5,sea,wearables,694.61,0
+SO-00617,2026-02-12,C-MAN-019,Shenzhen DC,Shenzhen,CN,Manila,PH,3,11.28,sea,audio,304.56,1
+SO-00752,2026-02-12,C-NEW-002,Memphis DC,Memphis,US,New York City,US,6,24.41,road,storage,998.4,0
+SO-00776,2026-02-12,C-NEW-031,Memphis DC,Memphis,US,New York City,US,9,13.74,road,cases,318.53,0
+SO-00818,2026-02-12,C-CHI-033,Memphis DC,Memphis,US,Chicago,US,8,27.72,road,storage,524.17,0
+SO-00008,2026-02-13,C-LON-033,Rotterdam DC,Rotterdam,NL,London,GB,5,11.37,road,cases,775.58,0
+SO-00065,2026-02-13,C-LON-002,Rotterdam DC,Rotterdam,NL,London,GB,5,16.39,road,chargers,488.96,0
+SO-00286,2026-02-13,C-MIL-032,Rotterdam DC,Rotterdam,NL,Milan,IT,6,25.09,road,cables,824.41,0
+SO-00330,2026-02-13,C-STO-024,Rotterdam DC,Rotterdam,NL,Stockholm,SE,6,17.34,road,cables,951.01,0
+SO-00523,2026-02-13,C-SIN-015,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,17.63,sea,storage,735.61,0
+SO-00868,2026-02-13,C-CHI-031,Memphis DC,Memphis,US,Chicago,US,10,17.44,road,cases,750.98,0
+SO-00998,2026-02-13,C-MEX-009,Memphis DC,Memphis,US,Mexico City,MX,6,20.38,road,wearables,923.88,0
+SO-00088,2026-02-14,C-BER-001,Rotterdam DC,Rotterdam,NL,Berlin,DE,7,23.23,road,audio,622.44,0
+SO-00772,2026-02-14,C-NEW-005,Memphis DC,Memphis,US,New York City,US,6,19.3,road,wearables,799.32,0
+SO-00964,2026-02-14,C-TOR-031,Memphis DC,Memphis,US,Toronto,CA,6,21.48,road,storage,769.7,0
+SO-00984,2026-02-14,C-MEX-031,Memphis DC,Memphis,US,Mexico City,MX,1,3.11,road,audio,638.46,0
+SO-00058,2026-02-15,C-LON-002,Rotterdam DC,Rotterdam,NL,London,GB,14,34.36,road,cases,826.96,0
+SO-00118,2026-02-15,C-BER-023,Rotterdam DC,Rotterdam,NL,Berlin,DE,9,31.26,road,audio,981.88,0
+SO-00472,2026-02-15,C-SEO-036,Shenzhen DC,Shenzhen,CN,Seoul,KR,8,22.01,sea,audio,665.8,0
+SO-00599,2026-02-15,C-MAN-022,Shenzhen DC,Shenzhen,CN,Manila,PH,7,22.45,sea,cables,778.11,0
+SO-00690,2026-02-15,C-SYD-001,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,16.1,air,cases,938.43,0
+SO-00743,2026-02-15,C-NEW-025,Memphis DC,Memphis,US,New York City,US,7,18.67,road,audio,763.92,0
+SO-00304,2026-02-16,C-WAR-025,Rotterdam DC,Rotterdam,NL,Warsaw,PL,9,23.57,road,cases,520.52,0
+SO-00336,2026-02-16,C-STO-011,Rotterdam DC,Rotterdam,NL,Stockholm,SE,5,11.29,road,storage,548.35,1
+SO-00864,2026-02-16,C-CHI-023,Memphis DC,Memphis,US,Chicago,US,4,16.81,road,storage,1052.51,1
+SO-00871,2026-02-16,C-CHI-006,Memphis DC,Memphis,US,Chicago,US,8,31.05,road,audio,532.56,0
+SO-00989,2026-02-16,C-MEX-017,Memphis DC,Memphis,US,Mexico City,MX,6,10.65,road,cases,931.14,0
+SO-00152,2026-02-17,C-PAR-030,Rotterdam DC,Rotterdam,NL,Paris,FR,4,14.27,road,chargers,1256.56,0
+SO-00517,2026-02-17,C-SIN-012,Shenzhen DC,Shenzhen,CN,Singapore,SG,11,25.86,sea,audio,798.46,0
+SO-00583,2026-02-17,C-JAK-034,Shenzhen DC,Shenzhen,CN,Jakarta,ID,6,17.49,sea,wearables,454.55,0
+SO-01016,2026-02-17,C-MEX-013,Memphis DC,Memphis,US,Mexico City,MX,13,20.17,road,cables,259.24,0
+SO-01121,2026-02-17,C-BUE-026,Memphis DC,Memphis,US,Buenos Aires,AR,10,34.85,sea,audio,562.21,1
+SO-01159,2026-02-17,C-RIY-015,Dubai DC,Dubai,AE,Riyadh,SA,9,30.41,road,chargers,537.01,0
+SO-00104,2026-02-18,C-BER-022,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,29.73,road,cables,922.06,0
+SO-00142,2026-02-19,C-PAR-037,Rotterdam DC,Rotterdam,NL,Paris,FR,4,14.16,road,wearables,498.83,0
+SO-00147,2026-02-19,C-PAR-032,Rotterdam DC,Rotterdam,NL,Paris,FR,5,19.81,road,audio,999.79,1
+SO-00606,2026-02-19,C-MAN-032,Shenzhen DC,Shenzhen,CN,Manila,PH,8,22.87,sea,chargers,552.62,0
+SO-00145,2026-02-20,C-PAR-039,Rotterdam DC,Rotterdam,NL,Paris,FR,6,16.7,road,audio,942.2,0
+SO-00749,2026-02-20,C-NEW-001,Memphis DC,Memphis,US,New York City,US,4,11.42,road,storage,872.4,0
+SO-00773,2026-02-20,C-NEW-022,Memphis DC,Memphis,US,New York City,US,4,11.96,road,storage,617.19,0
+SO-00170,2026-02-21,C-PAR-034,Rotterdam DC,Rotterdam,NL,Paris,FR,9,22.29,road,storage,806.91,0
+SO-00810,2026-02-21,C-CHI-001,Memphis DC,Memphis,US,Chicago,US,5,18.09,road,cables,698.65,0
+SO-01184,2026-02-21,C-CAI-001,Dubai DC,Dubai,AE,Cairo,EG,13,23.14,sea,audio,441.49,0
+SO-01262,2026-02-21,C-JOH-028,Dubai DC,Dubai,AE,Johannesburg,ZA,9,32.04,sea,audio,287.26,0
+SO-00499,2026-02-22,C-SIN-030,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,10.13,sea,cases,818.03,0
+SO-00570,2026-02-22,C-JAK-010,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,16.53,sea,audio,747.35,0
+SO-00761,2026-02-23,C-NEW-032,Memphis DC,Memphis,US,New York City,US,4,15.89,road,audio,567.68,0
+SO-00833,2026-02-23,C-CHI-025,Memphis DC,Memphis,US,Chicago,US,13,31.83,road,storage,740.2,0
+SO-01170,2026-02-23,C-CAI-001,Dubai DC,Dubai,AE,Cairo,EG,4,14.68,sea,audio,499.67,0
+SO-01185,2026-02-23,C-CAI-032,Dubai DC,Dubai,AE,Cairo,EG,11,36.45,sea,cables,521.86,0
+SO-01237,2026-02-23,C-LAG-021,Dubai DC,Dubai,AE,Lagos,NG,7,23.74,air,chargers,477.37,0
+SO-00227,2026-02-24,C-MAD-009,Rotterdam DC,Rotterdam,NL,Madrid,ES,5,13.29,road,cables,399.42,0
+SO-00332,2026-02-24,C-STO-002,Rotterdam DC,Rotterdam,NL,Stockholm,SE,9,19.47,road,storage,909.13,0
+SO-00407,2026-02-24,C-TOK-017,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,22.62,sea,storage,1166.12,0
+SO-00587,2026-02-24,C-JAK-015,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,23.56,sea,storage,326.09,0
+SO-00687,2026-02-24,C-SYD-017,Rotterdam DC,Rotterdam,NL,Sydney,AU,6,15.51,air,storage,759.37,0
+SO-01220,2026-02-24,C-NAI-019,Dubai DC,Dubai,AE,Nairobi,KE,10,28.46,air,storage,448.01,0
+SO-00207,2026-02-25,C-MAD-007,Rotterdam DC,Rotterdam,NL,Madrid,ES,21,44.08,road,audio,767.98,0
+SO-00635,2026-02-25,C-MUM-025,Shenzhen DC,Shenzhen,CN,Mumbai,IN,12,29.73,sea,audio,512.54,0
+SO-00678,2026-02-25,C-SYD-035,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,14.39,air,storage,686.34,0
+SO-01198,2026-02-25,C-CAI-002,Dubai DC,Dubai,AE,Cairo,EG,14,40.98,sea,audio,609.8,0
+SO-00039,2026-02-26,C-LON-011,Rotterdam DC,Rotterdam,NL,London,GB,6,18.3,road,cables,563.61,0
+SO-00667,2026-02-26,C-SYD-004,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,13.59,air,chargers,907.41,0
+SO-00777,2026-02-27,C-NEW-026,Memphis DC,Memphis,US,New York City,US,3,9.73,road,wearables,650.71,0
+SO-00844,2026-02-27,C-CHI-006,Memphis DC,Memphis,US,Chicago,US,13,26.08,road,cases,396.68,0
+SO-01209,2026-02-27,C-NAI-018,Dubai DC,Dubai,AE,Nairobi,KE,3,11.99,air,chargers,489.41,0
+SO-00247,2026-02-28,C-MAD-011,Rotterdam DC,Rotterdam,NL,Madrid,ES,11,33.31,road,wearables,701.31,0
+SO-00265,2026-02-28,C-MIL-010,Rotterdam DC,Rotterdam,NL,Milan,IT,6,17.3,road,cables,700.06,0
+SO-00677,2026-02-28,C-SYD-015,Rotterdam DC,Rotterdam,NL,Sydney,AU,2,9.81,air,cases,1275.15,0
+SO-00797,2026-02-28,C-NEW-007,Memphis DC,Memphis,US,New York City,US,9,19.09,road,chargers,896.74,0
+SO-01147,2026-02-28,C-RIY-038,Dubai DC,Dubai,AE,Riyadh,SA,20,33.79,road,cables,1048.9,0
+SO-00130,2026-03-01,C-BER-026,Rotterdam DC,Rotterdam,NL,Berlin,DE,5,13.95,road,storage,588.42,0
+SO-00395,2026-03-01,C-TOK-005,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,17.99,sea,wearables,544.64,0
+SO-00563,2026-03-01,C-JAK-005,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,22.49,sea,audio,600.49,0
+SO-00113,2026-03-02,C-BER-002,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,29.52,road,cables,861.12,0
+SO-00498,2026-03-02,C-SIN-030,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,12.61,sea,wearables,437.58,1
+SO-00650,2026-03-02,C-MUM-037,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,18.11,sea,chargers,706.02,0
+SO-00784,2026-03-02,C-NEW-033,Memphis DC,Memphis,US,New York City,US,8,18.76,road,wearables,485.45,0
+SO-00934,2026-03-02,C-LOS-037,Memphis DC,Memphis,US,Los Angeles,US,4,10.29,road,storage,717.62,0
+SO-00952,2026-03-02,C-TOR-033,Memphis DC,Memphis,US,Toronto,CA,10,18.65,road,audio,753.4,0
+SO-01291,2026-03-02,C-KAR-033,Dubai DC,Dubai,AE,Karachi,PK,14,37.91,sea,cables,865.08,0
+SO-00031,2026-03-03,C-LON-004,Rotterdam DC,Rotterdam,NL,London,GB,5,14.77,road,storage,844.57,1
+SO-00037,2026-03-03,C-LON-006,Rotterdam DC,Rotterdam,NL,London,GB,4,8.73,road,chargers,668.6,0
+SO-00138,2026-03-03,C-PAR-038,Rotterdam DC,Rotterdam,NL,Paris,FR,2,8.35,road,chargers,849.95,0
+SO-00284,2026-03-03,C-MIL-024,Rotterdam DC,Rotterdam,NL,Milan,IT,5,16.75,road,wearables,432.6,0
+SO-00306,2026-03-03,C-WAR-034,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,22.91,road,cases,1103.76,0
+SO-00702,2026-03-03,C-AUC-032,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,10.34,air,cables,881.74,0
+SO-00759,2026-03-03,C-NEW-027,Memphis DC,Memphis,US,New York City,US,6,9.08,road,cables,687.44,0
+SO-01269,2026-03-03,C-JOH-036,Dubai DC,Dubai,AE,Johannesburg,ZA,15,39.99,sea,chargers,720.01,0
+SO-00220,2026-03-04,C-MAD-021,Rotterdam DC,Rotterdam,NL,Madrid,ES,9,33.82,road,chargers,397.93,0
+SO-00417,2026-03-04,C-TOK-037,Shenzhen DC,Shenzhen,CN,Tokyo,JP,11,17.71,sea,wearables,887.43,0
+SO-01134,2026-03-04,C-RIY-036,Dubai DC,Dubai,AE,Riyadh,SA,16,25.31,road,audio,1149.89,0
+SO-01139,2026-03-04,C-RIY-016,Dubai DC,Dubai,AE,Riyadh,SA,6,21.21,road,cases,1063.02,0
+SO-00073,2026-03-05,C-LON-001,Rotterdam DC,Rotterdam,NL,London,GB,1,0.5,road,wearables,891.8,0
+SO-00236,2026-03-05,C-MAD-002,Rotterdam DC,Rotterdam,NL,Madrid,ES,8,24.38,road,chargers,660.33,0
+SO-00723,2026-03-05,C-NEW-023,Memphis DC,Memphis,US,New York City,US,8,19.22,road,audio,647.3,0
+SO-00862,2026-03-05,C-CHI-024,Memphis DC,Memphis,US,Chicago,US,5,13.95,road,storage,568.11,0
+SO-01217,2026-03-05,C-NAI-008,Dubai DC,Dubai,AE,Nairobi,KE,7,19.51,air,storage,568.45,0
+SO-01080,2026-03-06,C-SAN-011,Memphis DC,Memphis,US,Santiago,CL,6,14.48,sea,audio,652.21,0
+SO-01037,2026-03-07,C-SAO-023,Memphis DC,Memphis,US,Sao Paulo,BR,11,24.92,sea,cases,693.28,0
+SO-01127,2026-03-07,C-RIY-024,Dubai DC,Dubai,AE,Riyadh,SA,14,22.08,road,storage,586.51,0
+SO-00372,2026-03-08,C-TOK-007,Shenzhen DC,Shenzhen,CN,Tokyo,JP,13,21.59,sea,cables,865.17,0
+SO-00454,2026-03-08,C-SEO-018,Shenzhen DC,Shenzhen,CN,Seoul,KR,7,15.64,sea,wearables,609.73,0
+SO-00909,2026-03-08,C-LOS-035,Memphis DC,Memphis,US,Los Angeles,US,8,14.79,road,cables,552.75,0
+SO-00172,2026-03-09,C-PAR-007,Rotterdam DC,Rotterdam,NL,Paris,FR,6,16.63,road,cables,902.6,0
+SO-00197,2026-03-09,C-PAR-007,Rotterdam DC,Rotterdam,NL,Paris,FR,13,20.63,road,cables,801.55,0
+SO-00481,2026-03-09,C-SIN-026,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,12.75,sea,chargers,939.19,0
+SO-00574,2026-03-09,C-JAK-002,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,29.17,sea,cables,556.31,0
+SO-00042,2026-03-10,C-LON-022,Rotterdam DC,Rotterdam,NL,London,GB,6,16.67,road,chargers,174.54,0
+SO-00049,2026-03-10,C-LON-003,Rotterdam DC,Rotterdam,NL,London,GB,12,19.29,road,storage,580.23,0
+SO-01268,2026-03-10,C-JOH-010,Dubai DC,Dubai,AE,Johannesburg,ZA,7,21.36,sea,cases,381.47,1
+SO-00070,2026-03-11,C-LON-024,Rotterdam DC,Rotterdam,NL,London,GB,10,25.73,road,wearables,446.86,0
+SO-00075,2026-03-11,C-BER-008,Rotterdam DC,Rotterdam,NL,Berlin,DE,19,31.18,road,storage,453.12,0
+SO-00277,2026-03-11,C-MIL-029,Rotterdam DC,Rotterdam,NL,Milan,IT,10,16.09,road,wearables,554.5,0
+SO-00471,2026-03-12,C-SEO-012,Shenzhen DC,Shenzhen,CN,Seoul,KR,4,11.2,sea,cables,840.39,0
+SO-00642,2026-03-12,C-MUM-023,Shenzhen DC,Shenzhen,CN,Mumbai,IN,13,27.18,sea,audio,600.39,1
+SO-01002,2026-03-12,C-MEX-001,Memphis DC,Memphis,US,Mexico City,MX,10,21.49,road,wearables,657.67,1
+SO-01029,2026-03-12,C-SAO-006,Memphis DC,Memphis,US,Sao Paulo,BR,13,33.94,sea,chargers,292.25,0
+SO-01096,2026-03-12,C-SAN-029,Memphis DC,Memphis,US,Santiago,CL,9,27.91,sea,storage,533.46,1
+SO-00189,2026-03-13,C-PAR-022,Rotterdam DC,Rotterdam,NL,Paris,FR,8,24.23,road,cables,801.33,0
+SO-00264,2026-03-13,C-MIL-029,Rotterdam DC,Rotterdam,NL,Milan,IT,16,32.05,road,wearables,434.09,0
+SO-00692,2026-03-13,C-SYD-026,Rotterdam DC,Rotterdam,NL,Sydney,AU,8,14.44,air,wearables,1063.1,0
+SO-00905,2026-03-13,C-LOS-013,Memphis DC,Memphis,US,Los Angeles,US,9,21.68,road,chargers,521.28,1
+SO-00538,2026-03-14,C-BAN-021,Shenzhen DC,Shenzhen,CN,Bangkok,TH,9,18.81,sea,storage,446.69,0
+SO-00614,2026-03-14,C-MAN-004,Shenzhen DC,Shenzhen,CN,Manila,PH,5,20.73,sea,cases,300.45,0
+SO-01069,2026-03-14,C-BOG-032,Memphis DC,Memphis,US,Bogota,CO,8,26.65,air,cables,505.5,0
+SO-01249,2026-03-14,C-JOH-038,Dubai DC,Dubai,AE,Johannesburg,ZA,6,18.63,sea,audio,804.24,1
+SO-00072,2026-03-15,C-LON-006,Rotterdam DC,Rotterdam,NL,London,GB,8,20.36,road,audio,798.81,0
+SO-00289,2026-03-15,C-WAR-032,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,16.23,road,cables,735.76,0
+SO-01179,2026-03-15,C-CAI-034,Dubai DC,Dubai,AE,Cairo,EG,15,22.77,sea,wearables,558.9,0
+SO-00486,2026-03-16,C-SIN-016,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,17.41,sea,cases,638.5,0
+SO-00628,2026-03-16,C-MUM-034,Shenzhen DC,Shenzhen,CN,Mumbai,IN,13,27.63,sea,cases,454.82,0
+SO-00342,2026-03-17,C-STO-015,Rotterdam DC,Rotterdam,NL,Stockholm,SE,8,19.34,road,cases,905.01,0
+SO-00345,2026-03-17,C-STO-027,Rotterdam DC,Rotterdam,NL,Stockholm,SE,6,20.38,road,audio,391.79,0
+SO-01087,2026-03-17,C-SAN-039,Memphis DC,Memphis,US,Santiago,CL,18,29.94,sea,audio,729.77,0
+SO-01146,2026-03-17,C-RIY-033,Dubai DC,Dubai,AE,Riyadh,SA,11,33.44,road,chargers,414.93,0
+SO-00035,2026-03-18,C-LON-030,Rotterdam DC,Rotterdam,NL,London,GB,7,14.89,road,cases,522.54,0
+SO-00817,2026-03-18,C-CHI-007,Memphis DC,Memphis,US,Chicago,US,6,20.08,road,chargers,556.25,0
+SO-01137,2026-03-18,C-RIY-029,Dubai DC,Dubai,AE,Riyadh,SA,5,14.7,road,cases,806.99,0
+SO-00023,2026-03-19,C-LON-010,Rotterdam DC,Rotterdam,NL,London,GB,4,6.61,road,wearables,490.34,0
+SO-00228,2026-03-19,C-MAD-013,Rotterdam DC,Rotterdam,NL,Madrid,ES,17,29.66,road,cables,1109.76,1
+SO-00514,2026-03-19,C-SIN-005,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,13.68,sea,wearables,657.61,0
+SO-00987,2026-03-19,C-MEX-036,Memphis DC,Memphis,US,Mexico City,MX,7,16.63,road,wearables,613.79,0
+SO-01082,2026-03-19,C-SAN-018,Memphis DC,Memphis,US,Santiago,CL,7,18.75,sea,storage,721.85,0
+SO-00053,2026-03-20,C-LON-004,Rotterdam DC,Rotterdam,NL,London,GB,10,21.98,road,audio,863.37,0
+SO-00878,2026-03-20,C-LOS-032,Memphis DC,Memphis,US,Los Angeles,US,7,21.56,road,audio,875.96,0
+SO-01306,2026-03-20,C-KAR-032,Dubai DC,Dubai,AE,Karachi,PK,8,31.37,sea,cases,556.09,0
+SO-00746,2026-03-21,C-NEW-003,Memphis DC,Memphis,US,New York City,US,3,8.19,road,audio,334.27,1
+SO-01068,2026-03-21,C-BOG-032,Memphis DC,Memphis,US,Bogota,CO,15,26.51,air,cases,115.21,0
+SO-00190,2026-03-22,C-PAR-029,Rotterdam DC,Rotterdam,NL,Paris,FR,3,7.8,road,cases,648.45,0
+SO-00309,2026-03-22,C-WAR-011,Rotterdam DC,Rotterdam,NL,Warsaw,PL,13,35.85,road,audio,991.24,0
+SO-00394,2026-03-22,C-TOK-007,Shenzhen DC,Shenzhen,CN,Tokyo,JP,3,12.71,sea,wearables,311.58,0
+SO-00675,2026-03-22,C-SYD-033,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,10.77,air,cables,383.36,0
+SO-01257,2026-03-22,C-JOH-016,Dubai DC,Dubai,AE,Johannesburg,ZA,12,36.22,sea,audio,883.13,0
+SO-00302,2026-03-23,C-WAR-030,Rotterdam DC,Rotterdam,NL,Warsaw,PL,4,10.27,road,cases,976.27,0
+SO-00686,2026-03-23,C-SYD-027,Rotterdam DC,Rotterdam,NL,Sydney,AU,14,19.56,air,cases,1053.09,0
+SO-00219,2026-03-24,C-MAD-031,Rotterdam DC,Rotterdam,NL,Madrid,ES,3,7.47,road,cables,1086.19,0
+SO-00488,2026-03-24,C-SIN-007,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,20.19,sea,cases,515.07,0
+SO-00248,2026-03-25,C-MIL-032,Rotterdam DC,Rotterdam,NL,Milan,IT,6,17.55,road,chargers,520.62,0
+SO-00607,2026-03-25,C-MAN-010,Shenzhen DC,Shenzhen,CN,Manila,PH,12,19.86,sea,cables,588.08,0
+SO-00985,2026-03-25,C-MEX-022,Memphis DC,Memphis,US,Mexico City,MX,10,23.84,road,chargers,578.35,0
+SO-01290,2026-03-25,C-KAR-035,Dubai DC,Dubai,AE,Karachi,PK,8,21.79,sea,wearables,798.79,0
+SO-00081,2026-03-26,C-BER-009,Rotterdam DC,Rotterdam,NL,Berlin,DE,13,42.05,road,chargers,831.79,0
+SO-00250,2026-03-26,C-MIL-007,Rotterdam DC,Rotterdam,NL,Milan,IT,12,36.02,road,cases,646.76,0
+SO-00326,2026-03-26,C-STO-010,Rotterdam DC,Rotterdam,NL,Stockholm,SE,5,13.9,road,storage,687.77,0
+SO-00592,2026-03-26,C-MAN-024,Shenzhen DC,Shenzhen,CN,Manila,PH,17,23.36,sea,audio,629.02,0
+SO-00762,2026-03-26,C-NEW-016,Memphis DC,Memphis,US,New York City,US,8,18.97,road,wearables,783.46,0
+SO-01106,2026-03-26,C-BUE-030,Memphis DC,Memphis,US,Buenos Aires,AR,9,30.59,sea,storage,589.29,0
+SO-00151,2026-03-27,C-PAR-028,Rotterdam DC,Rotterdam,NL,Paris,FR,8,21.95,road,wearables,866.35,0
+SO-00408,2026-03-27,C-TOK-032,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,8.38,sea,cables,879.27,0
+SO-00547,2026-03-27,C-BAN-007,Shenzhen DC,Shenzhen,CN,Bangkok,TH,3,12.96,sea,storage,699.94,0
+SO-01041,2026-03-27,C-SAO-031,Memphis DC,Memphis,US,Sao Paulo,BR,6,22.2,sea,cables,467.13,1
+SO-01095,2026-03-27,C-SAN-032,Memphis DC,Memphis,US,Santiago,CL,11,21.63,sea,chargers,534.39,0
+SO-00497,2026-03-28,C-SIN-023,Shenzhen DC,Shenzhen,CN,Singapore,SG,16,23.65,sea,wearables,500.77,0
+SO-00751,2026-03-28,C-NEW-035,Memphis DC,Memphis,US,New York City,US,5,13.72,road,wearables,402.93,0
+SO-00872,2026-03-28,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,7,22.83,road,storage,488.97,1
+SO-00178,2026-03-29,C-PAR-003,Rotterdam DC,Rotterdam,NL,Paris,FR,11,31.36,road,storage,610.77,0
+SO-00202,2026-03-31,C-PAR-034,Rotterdam DC,Rotterdam,NL,Paris,FR,10,17.74,road,storage,770.72,0
+SO-00581,2026-03-31,C-JAK-008,Shenzhen DC,Shenzhen,CN,Jakarta,ID,9,28.4,sea,wearables,625.67,0
+SO-00796,2026-03-31,C-NEW-021,Memphis DC,Memphis,US,New York City,US,3,11.59,road,storage,685.17,0
+SO-00062,2026-04-01,C-LON-007,Rotterdam DC,Rotterdam,NL,London,GB,10,27.89,road,audio,430.75,0
+SO-01203,2026-04-01,C-NAI-013,Dubai DC,Dubai,AE,Nairobi,KE,12,29.96,air,cases,457.46,0
+SO-00036,2026-04-02,C-LON-015,Rotterdam DC,Rotterdam,NL,London,GB,7,17.8,road,cases,368.0,0
+SO-00293,2026-04-02,C-WAR-022,Rotterdam DC,Rotterdam,NL,Warsaw,PL,10,26.38,road,storage,688.85,0
+SO-00491,2026-04-02,C-SIN-032,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,16.02,sea,wearables,1123.04,0
+SO-00800,2026-04-02,C-NEW-025,Memphis DC,Memphis,US,New York City,US,7,10.52,road,cases,902.62,0
+SO-00918,2026-04-02,C-LOS-038,Memphis DC,Memphis,US,Los Angeles,US,8,20.22,road,cables,942.1,0
+SO-01153,2026-04-02,C-RIY-037,Dubai DC,Dubai,AE,Riyadh,SA,8,14.48,road,audio,728.49,0
+SO-00133,2026-04-03,C-BER-011,Rotterdam DC,Rotterdam,NL,Berlin,DE,7,20.4,road,cases,736.97,0
+SO-00951,2026-04-03,C-TOR-018,Memphis DC,Memphis,US,Toronto,CA,9,16.87,road,storage,666.24,0
+SO-01052,2026-04-03,C-SAO-021,Memphis DC,Memphis,US,Sao Paulo,BR,14,31.47,sea,cables,441.67,0
+SO-00106,2026-04-04,C-BER-002,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,19.46,road,cases,668.04,0
+SO-00155,2026-04-04,C-PAR-008,Rotterdam DC,Rotterdam,NL,Paris,FR,8,18.38,road,chargers,696.53,0
+SO-00181,2026-04-04,C-PAR-023,Rotterdam DC,Rotterdam,NL,Paris,FR,21,41.02,road,chargers,627.45,0
+SO-00275,2026-04-04,C-MIL-007,Rotterdam DC,Rotterdam,NL,Milan,IT,9,26.55,road,chargers,770.68,0
+SO-00786,2026-04-04,C-NEW-003,Memphis DC,Memphis,US,New York City,US,6,23.76,road,storage,778.39,0
+SO-01270,2026-04-04,C-JOH-001,Dubai DC,Dubai,AE,Johannesburg,ZA,17,26.21,sea,storage,353.55,1
+SO-00400,2026-04-05,C-TOK-004,Shenzhen DC,Shenzhen,CN,Tokyo,JP,5,16.19,sea,cases,1150.75,0
+SO-00363,2026-04-06,C-DUB-035,Rotterdam DC,Rotterdam,NL,Dublin,IE,7,12.1,air,cases,508.07,0
+SO-00744,2026-04-06,C-NEW-024,Memphis DC,Memphis,US,New York City,US,1,0.5,road,cases,364.89,0
+SO-01097,2026-04-06,C-SAN-032,Memphis DC,Memphis,US,Santiago,CL,6,22.27,sea,cables,954.31,1
+SO-00369,2026-04-07,C-TOK-033,Shenzhen DC,Shenzhen,CN,Tokyo,JP,9,25.47,sea,cables,810.82,0
+SO-00663,2026-04-07,C-SYD-006,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,14.09,air,cases,712.7,0
+SO-00882,2026-04-07,C-LOS-019,Memphis DC,Memphis,US,Los Angeles,US,7,19.31,road,storage,1021.5,0
+SO-00024,2026-04-08,C-LON-001,Rotterdam DC,Rotterdam,NL,London,GB,4,12.27,road,wearables,378.92,0
+SO-00392,2026-04-09,C-TOK-005,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,20.68,sea,storage,985.84,0
+SO-00396,2026-04-09,C-TOK-033,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,16.88,sea,cases,730.46,0
+SO-00530,2026-04-09,C-BAN-024,Shenzhen DC,Shenzhen,CN,Bangkok,TH,7,22.02,sea,wearables,1074.85,0
+SO-01023,2026-04-09,C-SAO-004,Memphis DC,Memphis,US,Sao Paulo,BR,13,21.78,sea,cables,898.59,0
+SO-01135,2026-04-09,C-RIY-013,Dubai DC,Dubai,AE,Riyadh,SA,9,20.05,road,wearables,629.55,0
+SO-00411,2026-04-10,C-TOK-039,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,10.44,sea,wearables,927.84,0
+SO-00524,2026-04-10,C-BAN-020,Shenzhen DC,Shenzhen,CN,Bangkok,TH,3,11.65,sea,audio,538.86,0
+SO-01274,2026-04-10,C-JOH-002,Dubai DC,Dubai,AE,Johannesburg,ZA,14,30.25,sea,cases,583.77,0
+SO-00206,2026-04-11,C-MAD-032,Rotterdam DC,Rotterdam,NL,Madrid,ES,10,34.37,road,storage,750.81,0
+SO-01006,2026-04-11,C-MEX-029,Memphis DC,Memphis,US,Mexico City,MX,7,23.28,road,storage,474.16,0
+SO-00657,2026-04-12,C-MUM-030,Shenzhen DC,Shenzhen,CN,Mumbai,IN,9,31.09,sea,chargers,679.76,0
+SO-01066,2026-04-12,C-BOG-010,Memphis DC,Memphis,US,Bogota,CO,5,17.79,air,chargers,624.72,0
+SO-00010,2026-04-13,C-LON-039,Rotterdam DC,Rotterdam,NL,London,GB,13,23.08,road,cases,622.33,0
+SO-00539,2026-04-13,C-BAN-004,Shenzhen DC,Shenzhen,CN,Bangkok,TH,4,14.37,sea,cases,631.95,0
+SO-00571,2026-04-13,C-JAK-005,Shenzhen DC,Shenzhen,CN,Jakarta,ID,6,18.33,sea,chargers,520.75,0
+SO-01012,2026-04-13,C-MEX-016,Memphis DC,Memphis,US,Mexico City,MX,12,31.12,road,storage,495.18,0
+SO-00167,2026-04-14,C-PAR-001,Rotterdam DC,Rotterdam,NL,Paris,FR,4,11.39,road,cases,858.44,0
+SO-01076,2026-04-14,C-BOG-008,Memphis DC,Memphis,US,Bogota,CO,8,26.61,air,cables,573.26,0
+SO-01221,2026-04-14,C-NAI-005,Dubai DC,Dubai,AE,Nairobi,KE,11,25.17,air,storage,837.85,0
+SO-00955,2026-04-15,C-TOR-025,Memphis DC,Memphis,US,Toronto,CA,5,19.08,road,audio,954.38,0
+SO-00349,2026-04-16,C-DUB-032,Rotterdam DC,Rotterdam,NL,Dublin,IE,5,9.98,air,audio,232.65,1
+SO-00567,2026-04-16,C-JAK-026,Shenzhen DC,Shenzhen,CN,Jakarta,ID,9,23.13,sea,audio,863.54,0
+SO-00847,2026-04-16,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,9,18.04,road,cables,921.79,0
+SO-00901,2026-04-16,C-LOS-016,Memphis DC,Memphis,US,Los Angeles,US,7,19.12,road,wearables,700.36,0
+SO-00938,2026-04-16,C-LOS-038,Memphis DC,Memphis,US,Los Angeles,US,7,24.81,road,chargers,590.7,0
+SO-01117,2026-04-17,C-BUE-019,Memphis DC,Memphis,US,Buenos Aires,AR,11,25.13,sea,wearables,435.67,0
+SO-00056,2026-04-18,C-LON-032,Rotterdam DC,Rotterdam,NL,London,GB,6,21.39,road,wearables,821.31,0
+SO-00308,2026-04-18,C-WAR-018,Rotterdam DC,Rotterdam,NL,Warsaw,PL,1,1.35,road,wearables,416.93,0
+SO-00379,2026-04-18,C-TOK-009,Shenzhen DC,Shenzhen,CN,Tokyo,JP,12,17.8,sea,chargers,888.25,0
+SO-01218,2026-04-18,C-NAI-009,Dubai DC,Dubai,AE,Nairobi,KE,1,3.27,air,wearables,768.17,0
+SO-01245,2026-04-18,C-LAG-033,Dubai DC,Dubai,AE,Lagos,NG,24,34.41,air,chargers,148.66,0
+SO-01263,2026-04-18,C-JOH-038,Dubai DC,Dubai,AE,Johannesburg,ZA,14,29.79,sea,cables,506.16,0
+SO-00529,2026-04-19,C-BAN-026,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,20.2,sea,wearables,544.89,0
+SO-01145,2026-04-19,C-RIY-001,Dubai DC,Dubai,AE,Riyadh,SA,12,26.46,road,chargers,596.55,0
+SO-00331,2026-04-21,C-STO-035,Rotterdam DC,Rotterdam,NL,Stockholm,SE,4,11.69,road,audio,729.79,0
+SO-00714,2026-04-21,C-AUC-020,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,11.18,air,audio,1086.19,0
+SO-00846,2026-04-21,C-CHI-035,Memphis DC,Memphis,US,Chicago,US,6,17.33,road,cables,613.47,0
+SO-01125,2026-04-21,C-BUE-024,Memphis DC,Memphis,US,Buenos Aires,AR,7,21.92,sea,storage,525.76,0
+SO-00046,2026-04-22,C-LON-033,Rotterdam DC,Rotterdam,NL,London,GB,10,22.37,road,cables,698.21,0
+SO-00096,2026-04-22,C-BER-011,Rotterdam DC,Rotterdam,NL,Berlin,DE,9,22.7,road,chargers,431.1,0
+SO-00209,2026-04-22,C-MAD-038,Rotterdam DC,Rotterdam,NL,Madrid,ES,9,28.34,road,cables,1007.34,0
+SO-00601,2026-04-22,C-MAN-035,Shenzhen DC,Shenzhen,CN,Manila,PH,7,18.17,sea,chargers,468.12,0
+SO-01190,2026-04-22,C-CAI-023,Dubai DC,Dubai,AE,Cairo,EG,6,24.83,sea,wearables,639.58,0
+SO-00237,2026-04-23,C-MAD-001,Rotterdam DC,Rotterdam,NL,Madrid,ES,6,21.41,road,chargers,535.49,0
+SO-00295,2026-04-23,C-WAR-004,Rotterdam DC,Rotterdam,NL,Warsaw,PL,13,44.34,road,chargers,523.9,0
+SO-00385,2026-04-23,C-TOK-022,Shenzhen DC,Shenzhen,CN,Tokyo,JP,11,22.44,sea,audio,612.05,0
+SO-01086,2026-04-23,C-SAN-020,Memphis DC,Memphis,US,Santiago,CL,11,34.08,sea,chargers,473.86,0
+SO-00805,2026-04-24,C-CHI-039,Memphis DC,Memphis,US,Chicago,US,14,26.88,road,wearables,725.93,0
+SO-01093,2026-04-24,C-SAN-034,Memphis DC,Memphis,US,Santiago,CL,13,27.24,sea,wearables,728.01,0
+SO-01150,2026-04-24,C-RIY-008,Dubai DC,Dubai,AE,Riyadh,SA,11,19.71,road,storage,981.27,0
+SO-01196,2026-04-24,C-CAI-002,Dubai DC,Dubai,AE,Cairo,EG,11,29.39,sea,storage,362.45,0
+SO-00090,2026-04-25,C-BER-028,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,35.0,road,chargers,914.39,0
+SO-00185,2026-04-25,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,8,25.26,road,cases,764.63,0
+SO-00290,2026-04-25,C-WAR-013,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,9.37,road,chargers,693.52,0
+SO-00697,2026-04-25,C-AUC-038,Rotterdam DC,Rotterdam,NL,Auckland,NZ,4,11.47,air,cables,703.7,0
+SO-00012,2026-04-26,C-LON-037,Rotterdam DC,Rotterdam,NL,London,GB,5,15.98,road,storage,697.42,0
+SO-00801,2026-04-26,C-NEW-030,Memphis DC,Memphis,US,New York City,US,19,28.31,road,cases,843.34,0
+SO-00968,2026-04-26,C-TOR-028,Memphis DC,Memphis,US,Toronto,CA,4,7.29,road,audio,854.43,0
+SO-00335,2026-04-27,C-STO-031,Rotterdam DC,Rotterdam,NL,Stockholm,SE,4,15.84,road,audio,696.32,0
+SO-00410,2026-04-27,C-TOK-013,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,5.74,sea,wearables,1010.05,0
+SO-00549,2026-04-27,C-BAN-038,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,20.87,sea,chargers,682.04,0
+SO-00829,2026-04-27,C-CHI-001,Memphis DC,Memphis,US,Chicago,US,5,19.81,road,cases,830.06,0
+SO-01252,2026-04-27,C-JOH-007,Dubai DC,Dubai,AE,Johannesburg,ZA,6,16.87,sea,chargers,366.62,0
+SO-00067,2026-04-28,C-LON-026,Rotterdam DC,Rotterdam,NL,London,GB,4,15.42,road,wearables,828.48,0
+SO-00074,2026-04-28,C-LON-018,Rotterdam DC,Rotterdam,NL,London,GB,6,15.65,road,chargers,324.03,0
+SO-00873,2026-04-28,C-CHI-007,Memphis DC,Memphis,US,Chicago,US,10,30.44,road,cases,701.53,0
+SO-00928,2026-04-28,C-LOS-013,Memphis DC,Memphis,US,Los Angeles,US,9,28.93,road,wearables,537.44,0
+SO-00935,2026-04-28,C-LOS-034,Memphis DC,Memphis,US,Los Angeles,US,10,17.6,road,chargers,653.6,0
+SO-00175,2026-04-29,C-PAR-017,Rotterdam DC,Rotterdam,NL,Paris,FR,6,15.07,road,chargers,802.72,0
+SO-00329,2026-04-29,C-STO-029,Rotterdam DC,Rotterdam,NL,Stockholm,SE,18,36.07,road,chargers,757.82,0
+SO-01059,2026-04-29,C-BOG-010,Memphis DC,Memphis,US,Bogota,CO,12,25.72,air,storage,525.12,0
+SO-01151,2026-04-29,C-RIY-019,Dubai DC,Dubai,AE,Riyadh,SA,9,19.87,road,chargers,740.39,0
+SO-00334,2026-04-30,C-STO-005,Rotterdam DC,Rotterdam,NL,Stockholm,SE,11,25.55,road,storage,600.59,0
+SO-00802,2026-04-30,C-NEW-014,Memphis DC,Memphis,US,New York City,US,6,19.65,road,cases,577.09,0
+SO-01100,2026-04-30,C-SAN-001,Memphis DC,Memphis,US,Santiago,CL,12,19.94,sea,cases,1072.42,0
+SO-00124,2026-05-01,C-BER-032,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,25.94,road,chargers,668.0,0
+SO-00620,2026-05-01,C-MUM-006,Shenzhen DC,Shenzhen,CN,Mumbai,IN,2,8.18,sea,chargers,424.4,0
+SO-01160,2026-05-01,C-RIY-026,Dubai DC,Dubai,AE,Riyadh,SA,10,22.5,road,cases,635.5,0
+SO-01251,2026-05-01,C-JOH-010,Dubai DC,Dubai,AE,Johannesburg,ZA,7,19.81,sea,cables,787.43,0
+SO-00144,2026-05-02,C-PAR-019,Rotterdam DC,Rotterdam,NL,Paris,FR,7,23.57,road,cases,743.15,0
+SO-00210,2026-05-02,C-MAD-012,Rotterdam DC,Rotterdam,NL,Madrid,ES,13,31.21,road,cables,766.68,0
+SO-00171,2026-05-03,C-PAR-016,Rotterdam DC,Rotterdam,NL,Paris,FR,7,17.73,road,cases,736.96,0
+SO-00427,2026-05-03,C-SEO-028,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,18.26,sea,wearables,935.2,0
+SO-01305,2026-05-03,C-KAR-019,Dubai DC,Dubai,AE,Karachi,PK,4,15.55,sea,chargers,382.31,0
+SO-00992,2026-05-04,C-MEX-001,Memphis DC,Memphis,US,Mexico City,MX,6,20.0,road,audio,606.22,0
+SO-01032,2026-05-04,C-SAO-034,Memphis DC,Memphis,US,Sao Paulo,BR,22,51.23,sea,cases,361.35,0
+SO-01273,2026-05-04,C-JOH-014,Dubai DC,Dubai,AE,Johannesburg,ZA,8,24.76,sea,audio,699.67,0
+SO-00424,2026-05-05,C-TOK-026,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,17.73,sea,wearables,1522.47,0
+SO-00558,2026-05-05,C-BAN-005,Shenzhen DC,Shenzhen,CN,Bangkok,TH,8,22.15,sea,storage,607.91,1
+SO-00652,2026-05-05,C-MUM-002,Shenzhen DC,Shenzhen,CN,Mumbai,IN,9,12.97,sea,chargers,618.91,0
+SO-00680,2026-05-05,C-SYD-022,Rotterdam DC,Rotterdam,NL,Sydney,AU,3,11.55,air,wearables,321.97,0
+SO-00683,2026-05-05,C-SYD-001,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,13.84,air,cables,946.16,0
+SO-00828,2026-05-05,C-CHI-035,Memphis DC,Memphis,US,Chicago,US,10,22.9,road,cases,789.09,0
+SO-01053,2026-05-05,C-SAO-011,Memphis DC,Memphis,US,Sao Paulo,BR,4,13.46,sea,wearables,607.97,0
+SO-00262,2026-05-06,C-MIL-028,Rotterdam DC,Rotterdam,NL,Milan,IT,10,27.48,road,audio,710.45,0
+SO-00598,2026-05-06,C-MAN-014,Shenzhen DC,Shenzhen,CN,Manila,PH,7,20.45,sea,wearables,498.1,0
+SO-00716,2026-05-06,C-NEW-001,Memphis DC,Memphis,US,New York City,US,8,19.3,road,cases,664.06,0
+SO-01073,2026-05-06,C-BOG-009,Memphis DC,Memphis,US,Bogota,CO,14,25.71,air,cables,389.63,1
+SO-01230,2026-05-06,C-LAG-012,Dubai DC,Dubai,AE,Lagos,NG,13,27.31,air,chargers,127.33,0
+SO-00765,2026-05-07,C-NEW-019,Memphis DC,Memphis,US,New York City,US,5,15.81,road,wearables,706.59,0
+SO-00809,2026-05-07,C-CHI-011,Memphis DC,Memphis,US,Chicago,US,5,18.26,road,cables,771.5,0
+SO-00927,2026-05-07,C-LOS-016,Memphis DC,Memphis,US,Los Angeles,US,8,28.8,road,chargers,604.13,0
+SO-00094,2026-05-08,C-BER-013,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,26.71,road,cables,419.97,0
+SO-00298,2026-05-08,C-WAR-039,Rotterdam DC,Rotterdam,NL,Warsaw,PL,14,25.73,road,wearables,668.95,0
+SO-00365,2026-05-08,C-DUB-031,Rotterdam DC,Rotterdam,NL,Dublin,IE,7,13.51,air,storage,621.76,0
+SO-00425,2026-05-08,C-TOK-011,Shenzhen DC,Shenzhen,CN,Tokyo,JP,5,17.21,sea,chargers,902.25,0
+SO-00881,2026-05-08,C-LOS-035,Memphis DC,Memphis,US,Los Angeles,US,5,11.97,road,chargers,440.85,0
+SO-00942,2026-05-08,C-TOR-031,Memphis DC,Memphis,US,Toronto,CA,6,23.66,road,storage,753.48,0
+SO-00943,2026-05-09,C-TOR-002,Memphis DC,Memphis,US,Toronto,CA,8,18.41,road,storage,612.47,0
+SO-01104,2026-05-09,C-BUE-019,Memphis DC,Memphis,US,Buenos Aires,AR,12,34.41,sea,wearables,513.29,0
+SO-00521,2026-05-10,C-SIN-003,Shenzhen DC,Shenzhen,CN,Singapore,SG,4,16.01,sea,wearables,956.25,0
+SO-00779,2026-05-10,C-NEW-032,Memphis DC,Memphis,US,New York City,US,6,19.15,road,audio,1105.61,0
+SO-01060,2026-05-10,C-BOG-007,Memphis DC,Memphis,US,Bogota,CO,8,23.57,air,storage,551.7,0
+SO-00831,2026-05-11,C-CHI-015,Memphis DC,Memphis,US,Chicago,US,7,22.5,road,audio,847.44,0
+SO-00915,2026-05-11,C-LOS-016,Memphis DC,Memphis,US,Los Angeles,US,9,19.26,road,cases,736.18,0
+SO-01141,2026-05-11,C-RIY-027,Dubai DC,Dubai,AE,Riyadh,SA,8,26.64,road,audio,660.72,0
+SO-00233,2026-05-12,C-MAD-011,Rotterdam DC,Rotterdam,NL,Madrid,ES,4,11.16,road,cases,605.58,0
+SO-00540,2026-05-12,C-BAN-014,Shenzhen DC,Shenzhen,CN,Bangkok,TH,8,18.6,sea,storage,676.62,0
+SO-01228,2026-05-12,C-LAG-003,Dubai DC,Dubai,AE,Lagos,NG,5,16.68,air,storage,620.89,0
+SO-00110,2026-05-13,C-BER-021,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,26.31,road,chargers,875.83,0
+SO-00930,2026-05-13,C-LOS-025,Memphis DC,Memphis,US,Los Angeles,US,6,11.06,road,audio,407.39,0
+SO-01074,2026-05-13,C-BOG-005,Memphis DC,Memphis,US,Bogota,CO,7,20.11,air,storage,667.75,0
+SO-01236,2026-05-13,C-LAG-033,Dubai DC,Dubai,AE,Lagos,NG,12,23.74,air,audio,543.84,1
+SO-00168,2026-05-14,C-PAR-023,Rotterdam DC,Rotterdam,NL,Paris,FR,14,29.89,road,storage,804.13,0
+SO-00358,2026-05-15,C-DUB-009,Rotterdam DC,Rotterdam,NL,Dublin,IE,4,10.92,air,cables,668.71,0
+SO-00972,2026-05-15,C-TOR-012,Memphis DC,Memphis,US,Toronto,CA,4,13.64,road,cases,631.79,0
+SO-00433,2026-05-16,C-SEO-015,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,16.08,sea,cases,818.74,0
+SO-00754,2026-05-16,C-NEW-011,Memphis DC,Memphis,US,New York City,US,8,27.02,road,wearables,961.75,0
+SO-01025,2026-05-16,C-SAO-014,Memphis DC,Memphis,US,Sao Paulo,BR,11,34.85,sea,cases,560.14,0
+SO-01234,2026-05-16,C-LAG-031,Dubai DC,Dubai,AE,Lagos,NG,4,10.98,air,cases,167.98,0
+SO-00027,2026-05-17,C-LON-029,Rotterdam DC,Rotterdam,NL,London,GB,3,9.32,road,cases,854.54,0
+SO-00912,2026-05-17,C-LOS-010,Memphis DC,Memphis,US,Los Angeles,US,6,18.13,road,storage,863.36,0
+SO-00554,2026-05-19,C-BAN-020,Shenzhen DC,Shenzhen,CN,Bangkok,TH,13,19.43,sea,chargers,655.65,0
+SO-00875,2026-05-19,C-LOS-029,Memphis DC,Memphis,US,Los Angeles,US,11,24.27,road,cases,598.64,0
+SO-00916,2026-05-19,C-LOS-031,Memphis DC,Memphis,US,Los Angeles,US,1,1.69,road,cases,181.86,0
+SO-01049,2026-05-19,C-SAO-021,Memphis DC,Memphis,US,Sao Paulo,BR,9,19.79,sea,storage,596.66,1
+SO-00160,2026-05-20,C-PAR-030,Rotterdam DC,Rotterdam,NL,Paris,FR,3,10.13,road,wearables,461.95,0
+SO-00215,2026-05-20,C-MAD-017,Rotterdam DC,Rotterdam,NL,Madrid,ES,19,29.41,road,audio,933.28,0
+SO-00402,2026-05-20,C-TOK-002,Shenzhen DC,Shenzhen,CN,Tokyo,JP,16,22.94,sea,cases,1093.64,0
+SO-00001,2026-05-21,C-LON-021,Rotterdam DC,Rotterdam,NL,London,GB,4,13.73,road,cases,560.47,0
+SO-00154,2026-05-21,C-PAR-015,Rotterdam DC,Rotterdam,NL,Paris,FR,16,30.81,road,cases,683.76,0
+SO-01174,2026-05-21,C-CAI-019,Dubai DC,Dubai,AE,Cairo,EG,3,11.89,sea,chargers,237.23,0
+SO-00079,2026-05-22,C-BER-018,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,22.27,road,storage,627.05,0
+SO-00108,2026-05-22,C-BER-011,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,22.17,road,storage,1002.21,0
+SO-00198,2026-05-22,C-PAR-033,Rotterdam DC,Rotterdam,NL,Paris,FR,9,20.36,road,wearables,376.24,0
+SO-00203,2026-05-22,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,6,24.97,road,wearables,719.42,0
+SO-00569,2026-05-22,C-JAK-002,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,33.15,sea,cases,683.25,0
+SO-00990,2026-05-22,C-MEX-038,Memphis DC,Memphis,US,Mexico City,MX,8,23.49,road,chargers,1138.44,0
+SO-01101,2026-05-22,C-BUE-010,Memphis DC,Memphis,US,Buenos Aires,AR,17,33.55,sea,audio,672.98,0
+SO-00758,2026-05-23,C-NEW-019,Memphis DC,Memphis,US,New York City,US,7,18.62,road,wearables,698.07,0
+SO-00083,2026-05-24,C-BER-024,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,15.67,road,storage,798.31,0
+SO-00849,2026-05-24,C-CHI-018,Memphis DC,Memphis,US,Chicago,US,13,31.86,road,wearables,518.49,0
+SO-00870,2026-05-24,C-CHI-023,Memphis DC,Memphis,US,Chicago,US,20,28.1,road,cases,798.18,1
+SO-01116,2026-05-24,C-BUE-025,Memphis DC,Memphis,US,Buenos Aires,AR,2,8.36,sea,chargers,577.54,0
+SO-01254,2026-05-24,C-JOH-019,Dubai DC,Dubai,AE,Johannesburg,ZA,15,36.25,sea,storage,338.68,0
+SO-01279,2026-05-24,C-KAR-005,Dubai DC,Dubai,AE,Karachi,PK,8,17.68,sea,cases,510.21,0
+SO-00009,2026-05-25,C-LON-014,Rotterdam DC,Rotterdam,NL,London,GB,5,20.24,road,wearables,772.36,0
+SO-01192,2026-05-25,C-CAI-026,Dubai DC,Dubai,AE,Cairo,EG,5,18.93,sea,audio,674.01,0
+SO-00085,2026-05-26,C-BER-001,Rotterdam DC,Rotterdam,NL,Berlin,DE,10,26.24,road,cables,755.65,0
+SO-00158,2026-05-26,C-PAR-024,Rotterdam DC,Rotterdam,NL,Paris,FR,3,10.08,road,audio,736.18,0
+SO-00259,2026-05-26,C-MIL-010,Rotterdam DC,Rotterdam,NL,Milan,IT,6,9.29,road,cables,840.42,0
+SO-00948,2026-05-26,C-TOR-015,Memphis DC,Memphis,US,Toronto,CA,7,20.58,road,cables,902.71,0
+SO-00016,2026-05-27,C-LON-037,Rotterdam DC,Rotterdam,NL,London,GB,14,23.45,road,audio,624.92,0
+SO-00370,2026-05-27,C-TOK-026,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,24.0,sea,cases,664.25,1
+SO-00518,2026-05-27,C-SIN-015,Shenzhen DC,Shenzhen,CN,Singapore,SG,6,19.39,sea,storage,1070.85,0
+SO-00936,2026-05-27,C-LOS-013,Memphis DC,Memphis,US,Los Angeles,US,6,25.08,road,audio,238.51,0
+SO-01307,2026-05-27,C-KAR-018,Dubai DC,Dubai,AE,Karachi,PK,10,15.84,sea,cases,705.86,0
+SO-00107,2026-05-28,C-BER-012,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,24.94,road,wearables,589.84,0
+SO-00584,2026-05-28,C-JAK-005,Shenzhen DC,Shenzhen,CN,Jakarta,ID,6,16.67,sea,audio,823.3,0
+SO-00789,2026-05-28,C-NEW-004,Memphis DC,Memphis,US,New York City,US,5,15.12,road,cables,240.67,0
+SO-00082,2026-05-29,C-BER-021,Rotterdam DC,Rotterdam,NL,Berlin,DE,12,30.71,road,wearables,510.94,0
+SO-00443,2026-05-29,C-SEO-012,Shenzhen DC,Shenzhen,CN,Seoul,KR,4,13.31,sea,chargers,891.38,0
+SO-00669,2026-05-29,C-SYD-031,Rotterdam DC,Rotterdam,NL,Sydney,AU,3,6.08,air,audio,756.26,0
+SO-01024,2026-05-29,C-SAO-007,Memphis DC,Memphis,US,Sao Paulo,BR,11,31.78,sea,storage,504.78,0
+SO-00253,2026-05-30,C-MIL-020,Rotterdam DC,Rotterdam,NL,Milan,IT,6,14.57,road,chargers,746.07,0
+SO-00459,2026-05-30,C-SEO-008,Shenzhen DC,Shenzhen,CN,Seoul,KR,13,18.41,sea,chargers,1013.88,0
+SO-00550,2026-05-30,C-BAN-012,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,13.87,sea,wearables,653.39,1
+SO-00643,2026-05-30,C-MUM-021,Shenzhen DC,Shenzhen,CN,Mumbai,IN,9,19.69,sea,cases,722.98,0
+SO-00792,2026-05-30,C-NEW-038,Memphis DC,Memphis,US,New York City,US,7,19.8,road,chargers,577.82,0
+SO-00794,2026-05-30,C-NEW-015,Memphis DC,Memphis,US,New York City,US,5,20.26,road,audio,1355.07,0
+SO-00993,2026-05-30,C-MEX-016,Memphis DC,Memphis,US,Mexico City,MX,12,22.37,road,storage,483.79,0
+SO-01028,2026-05-30,C-SAO-027,Memphis DC,Memphis,US,Sao Paulo,BR,7,29.36,sea,cables,546.82,0
+SO-01064,2026-05-30,C-BOG-006,Memphis DC,Memphis,US,Bogota,CO,5,11.05,air,wearables,352.14,0
+SO-00195,2026-05-31,C-PAR-001,Rotterdam DC,Rotterdam,NL,Paris,FR,9,25.21,road,wearables,511.97,0
+SO-00729,2026-05-31,C-NEW-017,Memphis DC,Memphis,US,New York City,US,7,20.17,road,wearables,536.25,0
+SO-00869,2026-05-31,C-CHI-014,Memphis DC,Memphis,US,Chicago,US,1,0.5,road,audio,487.51,0
+SO-01040,2026-05-31,C-SAO-039,Memphis DC,Memphis,US,Sao Paulo,BR,15,42.62,sea,chargers,755.11,0
+SO-01284,2026-05-31,C-KAR-009,Dubai DC,Dubai,AE,Karachi,PK,9,18.67,sea,audio,502.79,0
+SO-00371,2026-06-01,C-TOK-035,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,12.63,sea,audio,669.19,0
+SO-00591,2026-06-01,C-JAK-005,Shenzhen DC,Shenzhen,CN,Jakarta,ID,22,30.26,sea,cases,1103.38,0
+SO-00672,2026-06-01,C-SYD-002,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,7.73,air,wearables,1283.52,0
+SO-01110,2026-06-01,C-BUE-020,Memphis DC,Memphis,US,Buenos Aires,AR,8,26.84,sea,wearables,461.29,0
+SO-00821,2026-06-02,C-CHI-025,Memphis DC,Memphis,US,Chicago,US,5,9.7,road,chargers,769.41,0
+SO-01193,2026-06-02,C-CAI-014,Dubai DC,Dubai,AE,Cairo,EG,10,36.08,sea,wearables,868.49,0
+SO-00196,2026-06-03,C-PAR-019,Rotterdam DC,Rotterdam,NL,Paris,FR,2,7.74,road,cases,829.54,0
+SO-00281,2026-06-03,C-MIL-025,Rotterdam DC,Rotterdam,NL,Milan,IT,21,30.51,road,storage,975.22,0
+SO-00420,2026-06-03,C-TOK-024,Shenzhen DC,Shenzhen,CN,Tokyo,JP,4,11.05,sea,wearables,890.26,0
+SO-00902,2026-06-03,C-LOS-030,Memphis DC,Memphis,US,Los Angeles,US,6,17.96,road,audio,959.74,0
+SO-00926,2026-06-04,C-LOS-016,Memphis DC,Memphis,US,Los Angeles,US,7,16.29,road,cases,371.2,0
+SO-01133,2026-06-04,C-RIY-013,Dubai DC,Dubai,AE,Riyadh,SA,7,18.62,road,audio,641.55,0
+SO-00017,2026-06-05,C-LON-028,Rotterdam DC,Rotterdam,NL,London,GB,3,9.79,road,cables,390.62,0
+SO-00564,2026-06-05,C-JAK-014,Shenzhen DC,Shenzhen,CN,Jakarta,ID,3,13.01,sea,wearables,515.31,0
+SO-01128,2026-06-05,C-RIY-021,Dubai DC,Dubai,AE,Riyadh,SA,4,8.49,road,wearables,479.38,0
+SO-00470,2026-06-06,C-SEO-001,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,12.13,sea,chargers,1235.66,0
+SO-00760,2026-06-06,C-NEW-032,Memphis DC,Memphis,US,New York City,US,3,11.49,road,wearables,291.13,0
+SO-00903,2026-06-06,C-LOS-012,Memphis DC,Memphis,US,Los Angeles,US,9,20.24,road,cases,673.47,0
+SO-00939,2026-06-06,C-LOS-019,Memphis DC,Memphis,US,Los Angeles,US,12,21.3,road,storage,885.05,0
+SO-01140,2026-06-06,C-RIY-010,Dubai DC,Dubai,AE,Riyadh,SA,8,26.93,road,storage,873.79,0
+SO-00294,2026-06-07,C-WAR-028,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,28.96,road,cases,568.57,0
+SO-00695,2026-06-07,C-SYD-012,Rotterdam DC,Rotterdam,NL,Sydney,AU,3,8.01,air,audio,371.57,0
+SO-00963,2026-06-07,C-TOR-022,Memphis DC,Memphis,US,Toronto,CA,5,17.78,road,cables,803.46,0
+SO-01143,2026-06-07,C-RIY-021,Dubai DC,Dubai,AE,Riyadh,SA,7,13.57,road,wearables,639.55,0
+SO-01300,2026-06-07,C-KAR-002,Dubai DC,Dubai,AE,Karachi,PK,4,15.77,sea,chargers,626.5,0
+SO-00261,2026-06-08,C-MIL-038,Rotterdam DC,Rotterdam,NL,Milan,IT,9,23.25,road,audio,603.01,0
+SO-00631,2026-06-08,C-MUM-030,Shenzhen DC,Shenzhen,CN,Mumbai,IN,10,33.82,sea,cables,864.69,0
+SO-00720,2026-06-08,C-NEW-007,Memphis DC,Memphis,US,New York City,US,9,25.78,road,cables,951.04,0
+SO-01266,2026-06-08,C-JOH-021,Dubai DC,Dubai,AE,Johannesburg,ZA,8,18.7,sea,audio,848.19,0
+SO-00050,2026-06-09,C-LON-032,Rotterdam DC,Rotterdam,NL,London,GB,8,28.38,road,cases,303.53,0
+SO-00307,2026-06-09,C-WAR-007,Rotterdam DC,Rotterdam,NL,Warsaw,PL,11,28.36,road,audio,995.08,0
+SO-00566,2026-06-09,C-JAK-038,Shenzhen DC,Shenzhen,CN,Jakarta,ID,3,11.1,sea,chargers,497.6,0
+SO-00874,2026-06-09,C-CHI-025,Memphis DC,Memphis,US,Chicago,US,8,20.33,road,storage,1020.58,0
+SO-00892,2026-06-09,C-LOS-039,Memphis DC,Memphis,US,Los Angeles,US,4,14.36,road,cables,314.55,0
+SO-00442,2026-06-10,C-SEO-021,Shenzhen DC,Shenzhen,CN,Seoul,KR,5,11.46,sea,cables,887.41,0
+SO-01000,2026-06-10,C-MEX-003,Memphis DC,Memphis,US,Mexico City,MX,8,26.75,road,audio,809.4,0
+SO-00139,2026-06-11,C-PAR-029,Rotterdam DC,Rotterdam,NL,Paris,FR,8,20.11,road,storage,707.62,0
+SO-00600,2026-06-11,C-MAN-013,Shenzhen DC,Shenzhen,CN,Manila,PH,4,12.06,sea,wearables,323.04,0
+SO-00768,2026-06-11,C-NEW-027,Memphis DC,Memphis,US,New York City,US,11,32.69,road,chargers,557.91,0
+SO-00876,2026-06-11,C-LOS-022,Memphis DC,Memphis,US,Los Angeles,US,6,16.48,road,chargers,296.44,0
+SO-01019,2026-06-11,C-MEX-023,Memphis DC,Memphis,US,Mexico City,MX,8,21.91,road,audio,869.15,0
+SO-00011,2026-06-12,C-LON-038,Rotterdam DC,Rotterdam,NL,London,GB,5,16.83,road,cases,667.56,0
+SO-00033,2026-06-13,C-LON-012,Rotterdam DC,Rotterdam,NL,London,GB,6,14.04,road,chargers,745.32,0
+SO-00707,2026-06-13,C-AUC-018,Rotterdam DC,Rotterdam,NL,Auckland,NZ,1,5.67,air,chargers,879.49,0
+SO-00755,2026-06-13,C-NEW-036,Memphis DC,Memphis,US,New York City,US,15,23.44,road,cases,749.37,0
+SO-00318,2026-06-14,C-WAR-006,Rotterdam DC,Rotterdam,NL,Warsaw,PL,12,28.3,road,audio,598.08,0
+SO-00401,2026-06-14,C-TOK-035,Shenzhen DC,Shenzhen,CN,Tokyo,JP,8,15.44,sea,wearables,897.07,0
+SO-00414,2026-06-14,C-TOK-011,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,22.18,sea,storage,843.68,0
+SO-00555,2026-06-14,C-BAN-038,Shenzhen DC,Shenzhen,CN,Bangkok,TH,3,10.66,sea,cables,624.87,0
+SO-00724,2026-06-14,C-NEW-039,Memphis DC,Memphis,US,New York City,US,5,11.53,road,wearables,710.07,0
+SO-00986,2026-06-14,C-MEX-014,Memphis DC,Memphis,US,Mexico City,MX,5,7.79,road,storage,852.15,0
+SO-00103,2026-06-15,C-BER-020,Rotterdam DC,Rotterdam,NL,Berlin,DE,15,27.97,road,cases,386.42,0
+SO-00319,2026-06-15,C-WAR-007,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,17.55,road,cases,1016.4,0
+SO-00386,2026-06-15,C-TOK-031,Shenzhen DC,Shenzhen,CN,Tokyo,JP,10,16.46,sea,storage,826.32,0
+SO-00527,2026-06-15,C-BAN-005,Shenzhen DC,Shenzhen,CN,Bangkok,TH,12,26.12,sea,audio,475.91,0
+SO-01155,2026-06-15,C-RIY-001,Dubai DC,Dubai,AE,Riyadh,SA,3,11.3,road,wearables,676.62,0
+SO-01210,2026-06-15,C-NAI-032,Dubai DC,Dubai,AE,Nairobi,KE,3,13.24,air,cables,531.2,0
+SO-01256,2026-06-15,C-JOH-026,Dubai DC,Dubai,AE,Johannesburg,ZA,11,31.53,sea,audio,431.39,0
+SO-00052,2026-06-17,C-LON-027,Rotterdam DC,Rotterdam,NL,London,GB,10,28.65,road,storage,911.92,0
+SO-00266,2026-06-17,C-MIL-012,Rotterdam DC,Rotterdam,NL,Milan,IT,5,15.13,road,wearables,622.17,0
+SO-00366,2026-06-17,C-DUB-038,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,11.22,air,wearables,514.02,0
+SO-00594,2026-06-17,C-MAN-025,Shenzhen DC,Shenzhen,CN,Manila,PH,3,12.16,sea,wearables,261.93,0
+SO-00891,2026-06-17,C-LOS-007,Memphis DC,Memphis,US,Los Angeles,US,8,20.21,road,storage,828.92,0
+SO-01186,2026-06-17,C-CAI-016,Dubai DC,Dubai,AE,Cairo,EG,14,21.84,sea,audio,606.02,0
+SO-00041,2026-06-18,C-LON-023,Rotterdam DC,Rotterdam,NL,London,GB,2,7.89,road,cases,603.21,0
+SO-00924,2026-06-18,C-LOS-029,Memphis DC,Memphis,US,Los Angeles,US,6,21.14,road,cases,739.6,0
+SO-00440,2026-06-19,C-SEO-012,Shenzhen DC,Shenzhen,CN,Seoul,KR,9,21.15,sea,audio,466.84,0
+SO-00842,2026-06-19,C-CHI-031,Memphis DC,Memphis,US,Chicago,US,8,16.18,road,storage,720.45,0
+SO-00164,2026-06-20,C-PAR-006,Rotterdam DC,Rotterdam,NL,Paris,FR,20,27.84,road,audio,537.12,0
+SO-00580,2026-06-20,C-JAK-010,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,21.48,sea,wearables,800.08,0
+SO-00920,2026-06-20,C-LOS-019,Memphis DC,Memphis,US,Los Angeles,US,12,32.38,road,wearables,582.1,0
+SO-01280,2026-06-20,C-KAR-006,Dubai DC,Dubai,AE,Karachi,PK,8,23.02,sea,audio,711.91,0
+SO-00453,2026-06-21,C-SEO-031,Shenzhen DC,Shenzhen,CN,Seoul,KR,3,10.42,sea,storage,455.18,0
+SO-00824,2026-06-21,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,4,10.35,road,cables,659.58,1
+SO-01197,2026-06-21,C-CAI-006,Dubai DC,Dubai,AE,Cairo,EG,3,9.63,sea,storage,643.28,0
+SO-01246,2026-06-21,C-LAG-010,Dubai DC,Dubai,AE,Lagos,NG,8,18.58,air,cables,452.97,0
+SO-00214,2026-06-22,C-MAD-030,Rotterdam DC,Rotterdam,NL,Madrid,ES,12,32.86,road,audio,475.65,0
+SO-00898,2026-06-22,C-LOS-038,Memphis DC,Memphis,US,Los Angeles,US,10,20.22,road,cables,852.23,0
+SO-01026,2026-06-22,C-SAO-022,Memphis DC,Memphis,US,Sao Paulo,BR,12,18.25,sea,chargers,547.34,0
+SO-00043,2026-06-23,C-LON-001,Rotterdam DC,Rotterdam,NL,London,GB,7,17.22,road,chargers,727.11,0
+SO-00199,2026-06-23,C-PAR-039,Rotterdam DC,Rotterdam,NL,Paris,FR,4,11.72,road,cases,606.66,0
+SO-00324,2026-06-23,C-STO-001,Rotterdam DC,Rotterdam,NL,Stockholm,SE,10,19.21,road,wearables,508.49,0
+SO-00423,2026-06-23,C-TOK-038,Shenzhen DC,Shenzhen,CN,Tokyo,JP,8,20.45,sea,wearables,939.22,0
+SO-00949,2026-06-23,C-TOR-026,Memphis DC,Memphis,US,Toronto,CA,15,24.5,road,audio,320.11,1
+SO-01057,2026-06-23,C-BOG-016,Memphis DC,Memphis,US,Bogota,CO,6,14.49,air,audio,512.33,0
+SO-00361,2026-06-24,C-DUB-028,Rotterdam DC,Rotterdam,NL,Dublin,IE,2,9.17,air,cables,228.15,0
+SO-01154,2026-06-24,C-RIY-026,Dubai DC,Dubai,AE,Riyadh,SA,8,20.99,road,wearables,812.13,0
+SO-00696,2026-06-25,C-SYD-023,Rotterdam DC,Rotterdam,NL,Sydney,AU,5,18.51,air,storage,842.62,0
+SO-00230,2026-06-26,C-MAD-020,Rotterdam DC,Rotterdam,NL,Madrid,ES,6,20.66,road,wearables,511.31,0
+SO-00444,2026-06-27,C-SEO-030,Shenzhen DC,Shenzhen,CN,Seoul,KR,3,11.84,sea,audio,918.57,1
+SO-01017,2026-06-27,C-MEX-011,Memphis DC,Memphis,US,Mexico City,MX,11,29.87,road,storage,559.92,0
+SO-00465,2026-06-28,C-SEO-015,Shenzhen DC,Shenzhen,CN,Seoul,KR,12,18.28,sea,chargers,556.8,0
+SO-00544,2026-06-28,C-BAN-011,Shenzhen DC,Shenzhen,CN,Bangkok,TH,5,11.42,sea,cables,698.62,0
+SO-01046,2026-06-28,C-SAO-021,Memphis DC,Memphis,US,Sao Paulo,BR,15,26.04,sea,audio,819.37,0
+SO-01158,2026-06-28,C-RIY-014,Dubai DC,Dubai,AE,Riyadh,SA,11,24.44,road,cables,887.4,0
+SO-00173,2026-06-29,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,9,24.51,road,storage,424.06,0
+SO-00263,2026-06-29,C-MIL-008,Rotterdam DC,Rotterdam,NL,Milan,IT,20,29.45,road,storage,829.57,0
+SO-00536,2026-06-29,C-BAN-024,Shenzhen DC,Shenzhen,CN,Bangkok,TH,8,27.95,sea,wearables,944.81,0
+SO-00732,2026-06-29,C-NEW-024,Memphis DC,Memphis,US,New York City,US,4,13.52,road,cables,712.72,0
+SO-00866,2026-06-29,C-CHI-005,Memphis DC,Memphis,US,Chicago,US,5,6.61,road,audio,998.38,0
+SO-01205,2026-06-29,C-NAI-011,Dubai DC,Dubai,AE,Nairobi,KE,3,9.94,air,cases,900.08,0
+SO-00685,2026-06-30,C-SYD-012,Rotterdam DC,Rotterdam,NL,Sydney,AU,7,21.73,air,cases,881.56,0
+SO-00769,2026-06-30,C-NEW-002,Memphis DC,Memphis,US,New York City,US,4,16.83,road,chargers,931.04,0
+SO-00854,2026-06-30,C-CHI-016,Memphis DC,Memphis,US,Chicago,US,11,26.89,road,audio,769.3,0
+SO-00466,2026-07-01,C-SEO-031,Shenzhen DC,Shenzhen,CN,Seoul,KR,9,18.02,sea,audio,834.98,0
+SO-01138,2026-07-01,C-RIY-007,Dubai DC,Dubai,AE,Riyadh,SA,11,29.93,road,storage,792.05,0
+SO-01149,2026-07-01,C-RIY-011,Dubai DC,Dubai,AE,Riyadh,SA,9,28.09,road,chargers,911.9,0
+SO-00473,2026-07-02,C-SIN-016,Shenzhen DC,Shenzhen,CN,Singapore,SG,2,4.81,sea,audio,875.66,1
+SO-00561,2026-07-02,C-JAK-022,Shenzhen DC,Shenzhen,CN,Jakarta,ID,16,26.38,sea,chargers,240.4,1
+SO-01142,2026-07-02,C-RIY-006,Dubai DC,Dubai,AE,Riyadh,SA,4,11.84,road,cases,862.98,0
+SO-00051,2026-07-03,C-LON-014,Rotterdam DC,Rotterdam,NL,London,GB,3,8.6,road,wearables,1179.84,0
+SO-00068,2026-07-03,C-LON-033,Rotterdam DC,Rotterdam,NL,London,GB,17,30.17,road,cases,659.01,0
+SO-00589,2026-07-03,C-JAK-038,Shenzhen DC,Shenzhen,CN,Jakarta,ID,14,23.76,sea,cables,1059.03,0
+SO-00781,2026-07-03,C-NEW-002,Memphis DC,Memphis,US,New York City,US,4,14.62,road,audio,930.59,0
+SO-00997,2026-07-03,C-MEX-030,Memphis DC,Memphis,US,Mexico City,MX,11,23.15,road,chargers,344.97,0
+SO-00192,2026-07-04,C-PAR-003,Rotterdam DC,Rotterdam,NL,Paris,FR,7,27.39,road,chargers,690.53,0
+SO-00283,2026-07-04,C-MIL-010,Rotterdam DC,Rotterdam,NL,Milan,IT,11,29.5,road,cables,656.51,0
+SO-00305,2026-07-04,C-WAR-001,Rotterdam DC,Rotterdam,NL,Warsaw,PL,12,38.45,road,chargers,1132.06,0
+SO-00560,2026-07-04,C-BAN-019,Shenzhen DC,Shenzhen,CN,Bangkok,TH,6,10.9,sea,chargers,767.48,0
+SO-00688,2026-07-04,C-SYD-018,Rotterdam DC,Rotterdam,NL,Sydney,AU,9,13.18,air,wearables,627.26,0
+SO-00166,2026-07-05,C-PAR-018,Rotterdam DC,Rotterdam,NL,Paris,FR,11,24.96,road,storage,803.93,0
+SO-00706,2026-07-05,C-AUC-011,Rotterdam DC,Rotterdam,NL,Auckland,NZ,4,9.24,air,audio,1015.8,0
+SO-00061,2026-07-06,C-LON-036,Rotterdam DC,Rotterdam,NL,London,GB,7,27.41,road,chargers,826.36,0
+SO-01034,2026-07-06,C-SAO-006,Memphis DC,Memphis,US,Sao Paulo,BR,6,20.79,sea,wearables,499.27,0
+SO-01295,2026-07-06,C-KAR-008,Dubai DC,Dubai,AE,Karachi,PK,1,2.35,sea,storage,359.28,0
+SO-00174,2026-07-07,C-PAR-017,Rotterdam DC,Rotterdam,NL,Paris,FR,8,23.71,road,storage,492.95,0
+SO-00468,2026-07-07,C-SEO-031,Shenzhen DC,Shenzhen,CN,Seoul,KR,3,10.06,sea,wearables,875.35,0
+SO-00836,2026-07-07,C-CHI-021,Memphis DC,Memphis,US,Chicago,US,7,22.35,road,cables,576.91,0
+SO-01182,2026-07-07,C-CAI-034,Dubai DC,Dubai,AE,Cairo,EG,7,18.67,sea,audio,928.82,0
+SO-00026,2026-07-08,C-LON-032,Rotterdam DC,Rotterdam,NL,London,GB,9,25.52,road,audio,948.21,0
+SO-00590,2026-07-09,C-JAK-018,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,24.94,sea,chargers,741.23,0
+SO-01022,2026-07-09,C-SAO-003,Memphis DC,Memphis,US,Sao Paulo,BR,15,23.26,sea,cables,499.94,0
+SO-00458,2026-07-10,C-SEO-032,Shenzhen DC,Shenzhen,CN,Seoul,KR,4,9.41,sea,chargers,743.73,0
+SO-00064,2026-07-11,C-LON-010,Rotterdam DC,Rotterdam,NL,London,GB,7,18.67,road,cases,622.19,0
+SO-00343,2026-07-11,C-STO-015,Rotterdam DC,Rotterdam,NL,Stockholm,SE,4,13.83,road,cases,865.03,0
+SO-00431,2026-07-11,C-SEO-014,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,23.8,sea,audio,1026.91,0
+SO-00745,2026-07-11,C-NEW-009,Memphis DC,Memphis,US,New York City,US,5,17.27,road,cases,693.75,0
+SO-00300,2026-07-12,C-WAR-017,Rotterdam DC,Rotterdam,NL,Warsaw,PL,7,27.1,road,cases,709.12,0
+SO-00562,2026-07-12,C-JAK-039,Shenzhen DC,Shenzhen,CN,Jakarta,ID,6,19.35,sea,cables,384.49,0
+SO-01299,2026-07-12,C-KAR-015,Dubai DC,Dubai,AE,Karachi,PK,6,24.99,sea,cables,705.23,1
+SO-00020,2026-07-13,C-LON-026,Rotterdam DC,Rotterdam,NL,London,GB,8,21.08,road,cases,679.32,0
+SO-00205,2026-07-13,C-MAD-037,Rotterdam DC,Rotterdam,NL,Madrid,ES,12,38.04,road,audio,176.36,0
+SO-00404,2026-07-13,C-TOK-002,Shenzhen DC,Shenzhen,CN,Tokyo,JP,15,21.11,sea,wearables,592.51,0
+SO-01003,2026-07-13,C-MEX-019,Memphis DC,Memphis,US,Mexico City,MX,7,19.99,road,audio,560.44,0
+SO-00572,2026-07-14,C-JAK-001,Shenzhen DC,Shenzhen,CN,Jakarta,ID,8,23.31,sea,audio,190.61,0
+SO-00630,2026-07-14,C-MUM-007,Shenzhen DC,Shenzhen,CN,Mumbai,IN,5,19.14,sea,cables,627.93,0
+SO-00122,2026-07-15,C-BER-026,Rotterdam DC,Rotterdam,NL,Berlin,DE,12,20.3,road,cases,792.11,0
+SO-00774,2026-07-15,C-NEW-015,Memphis DC,Memphis,US,New York City,US,1,2.65,road,storage,506.59,0
+SO-01098,2026-07-15,C-SAN-006,Memphis DC,Memphis,US,Santiago,CL,6,14.37,sea,chargers,615.95,0
+SO-01275,2026-07-15,C-JOH-038,Dubai DC,Dubai,AE,Johannesburg,ZA,6,19.56,sea,audio,1002.49,0
+SO-00086,2026-07-16,C-BER-013,Rotterdam DC,Rotterdam,NL,Berlin,DE,3,12.68,road,chargers,741.3,0
+SO-00186,2026-07-16,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,4,11.66,road,audio,941.08,0
+SO-00839,2026-07-16,C-CHI-009,Memphis DC,Memphis,US,Chicago,US,10,16.48,road,audio,933.27,0
+SO-01240,2026-07-16,C-LAG-002,Dubai DC,Dubai,AE,Lagos,NG,10,17.68,air,chargers,157.95,0
+SO-00066,2026-07-17,C-LON-014,Rotterdam DC,Rotterdam,NL,London,GB,11,30.26,road,cables,838.5,0
+SO-00137,2026-07-17,C-PAR-001,Rotterdam DC,Rotterdam,NL,Paris,FR,22,32.1,road,cables,873.45,0
+SO-00179,2026-07-17,C-PAR-012,Rotterdam DC,Rotterdam,NL,Paris,FR,6,12.13,road,cases,918.92,0
+SO-00515,2026-07-17,C-SIN-025,Shenzhen DC,Shenzhen,CN,Singapore,SG,8,11.97,sea,storage,277.7,0
+SO-01131,2026-07-17,C-RIY-031,Dubai DC,Dubai,AE,Riyadh,SA,7,13.85,road,wearables,617.59,0
+SO-01152,2026-07-17,C-RIY-024,Dubai DC,Dubai,AE,Riyadh,SA,10,31.83,road,audio,894.73,0
+SO-00080,2026-07-18,C-BER-028,Rotterdam DC,Rotterdam,NL,Berlin,DE,14,27.66,road,wearables,407.23,0
+SO-01260,2026-07-18,C-JOH-014,Dubai DC,Dubai,AE,Johannesburg,ZA,6,15.61,sea,audio,829.82,1
+SO-00493,2026-07-19,C-SIN-007,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,22.49,sea,audio,640.42,0
+SO-00670,2026-07-19,C-SYD-011,Rotterdam DC,Rotterdam,NL,Sydney,AU,4,15.81,air,cables,638.48,0
+SO-00852,2026-07-19,C-CHI-028,Memphis DC,Memphis,US,Chicago,US,4,11.22,road,chargers,738.81,0
+SO-01191,2026-07-19,C-CAI-018,Dubai DC,Dubai,AE,Cairo,EG,8,30.7,sea,cables,569.01,0
+SO-00434,2026-07-20,C-SEO-039,Shenzhen DC,Shenzhen,CN,Seoul,KR,10,17.86,sea,audio,776.51,0
+SO-00647,2026-07-20,C-MUM-007,Shenzhen DC,Shenzhen,CN,Mumbai,IN,11,38.89,sea,cases,342.7,0
+SO-00843,2026-07-20,C-CHI-034,Memphis DC,Memphis,US,Chicago,US,5,20.42,road,audio,677.12,0
+SO-00057,2026-07-21,C-LON-004,Rotterdam DC,Rotterdam,NL,London,GB,4,14.01,road,cases,500.54,0
+SO-00125,2026-07-21,C-BER-034,Rotterdam DC,Rotterdam,NL,Berlin,DE,13,18.9,road,storage,679.54,0
+SO-00455,2026-07-21,C-SEO-038,Shenzhen DC,Shenzhen,CN,Seoul,KR,9,18.34,sea,audio,493.67,0
+SO-00595,2026-07-21,C-MAN-026,Shenzhen DC,Shenzhen,CN,Manila,PH,9,14.56,sea,audio,609.61,0
+SO-00636,2026-07-21,C-MUM-010,Shenzhen DC,Shenzhen,CN,Mumbai,IN,10,27.68,sea,cables,523.61,0
+SO-01289,2026-07-21,C-KAR-028,Dubai DC,Dubai,AE,Karachi,PK,8,16.33,sea,chargers,411.99,0
+SO-00087,2026-07-22,C-BER-038,Rotterdam DC,Rotterdam,NL,Berlin,DE,7,12.07,road,audio,292.38,0
+SO-00785,2026-07-22,C-NEW-016,Memphis DC,Memphis,US,New York City,US,9,18.45,road,wearables,777.33,0
+SO-00095,2026-07-23,C-BER-036,Rotterdam DC,Rotterdam,NL,Berlin,DE,5,15.58,road,cables,904.32,0
+SO-00814,2026-07-23,C-CHI-032,Memphis DC,Memphis,US,Chicago,US,9,25.93,road,cases,832.26,0
+SO-01171,2026-07-23,C-CAI-010,Dubai DC,Dubai,AE,Cairo,EG,13,24.39,sea,cables,724.06,0
+SO-00279,2026-07-24,C-MIL-006,Rotterdam DC,Rotterdam,NL,Milan,IT,9,22.28,road,audio,1228.09,0
+SO-00496,2026-07-24,C-SIN-002,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,14.69,sea,cases,757.9,1
+SO-00605,2026-07-24,C-MAN-024,Shenzhen DC,Shenzhen,CN,Manila,PH,6,15.17,sea,audio,289.56,0
+SO-00748,2026-07-24,C-NEW-031,Memphis DC,Memphis,US,New York City,US,7,16.82,road,cables,793.68,0
+SO-00791,2026-07-24,C-NEW-016,Memphis DC,Memphis,US,New York City,US,6,17.46,road,storage,800.11,0
+SO-00867,2026-07-24,C-CHI-030,Memphis DC,Memphis,US,Chicago,US,5,17.92,road,wearables,964.12,0
+SO-01277,2026-07-24,C-JOH-015,Dubai DC,Dubai,AE,Johannesburg,ZA,7,27.82,sea,cables,507.3,0
+SO-01296,2026-07-24,C-KAR-030,Dubai DC,Dubai,AE,Karachi,PK,5,9.86,sea,cables,573.73,0
+SO-00126,2026-07-25,C-BER-015,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,22.41,road,audio,691.24,0
+SO-00153,2026-07-25,C-PAR-023,Rotterdam DC,Rotterdam,NL,Paris,FR,11,20.7,road,chargers,594.49,0
+SO-00323,2026-07-25,C-STO-008,Rotterdam DC,Rotterdam,NL,Stockholm,SE,14,28.74,road,chargers,340.1,0
+SO-01178,2026-07-25,C-CAI-032,Dubai DC,Dubai,AE,Cairo,EG,4,12.53,sea,storage,605.17,0
+SO-00673,2026-07-26,C-SYD-022,Rotterdam DC,Rotterdam,NL,Sydney,AU,11,16.0,air,wearables,915.99,0
+SO-00223,2026-07-27,C-MAD-002,Rotterdam DC,Rotterdam,NL,Madrid,ES,8,31.22,road,storage,590.91,0
+SO-00807,2026-07-27,C-CHI-012,Memphis DC,Memphis,US,Chicago,US,10,24.05,road,storage,870.92,0
+SO-00235,2026-07-28,C-MAD-034,Rotterdam DC,Rotterdam,NL,Madrid,ES,8,26.79,road,chargers,631.92,0
+SO-00260,2026-07-28,C-MIL-018,Rotterdam DC,Rotterdam,NL,Milan,IT,8,24.45,road,chargers,591.22,0
+SO-00450,2026-07-28,C-SEO-031,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,23.28,sea,cables,594.36,0
+SO-00627,2026-07-28,C-MUM-019,Shenzhen DC,Shenzhen,CN,Mumbai,IN,6,21.72,sea,audio,573.25,0
+SO-00477,2026-07-29,C-SIN-038,Shenzhen DC,Shenzhen,CN,Singapore,SG,9,17.73,sea,chargers,780.19,0
+SO-00508,2026-07-29,C-SIN-005,Shenzhen DC,Shenzhen,CN,Singapore,SG,7,14.97,sea,audio,1460.87,0
+SO-00783,2026-07-29,C-NEW-002,Memphis DC,Memphis,US,New York City,US,4,11.46,road,cases,727.36,0
+SO-00850,2026-07-29,C-CHI-003,Memphis DC,Memphis,US,Chicago,US,6,9.77,road,storage,908.23,0
+SO-00978,2026-07-29,C-TOR-035,Memphis DC,Memphis,US,Toronto,CA,6,12.55,road,audio,744.85,0
+SO-00996,2026-07-29,C-MEX-011,Memphis DC,Memphis,US,Mexico City,MX,2,6.74,road,wearables,516.5,0
+SO-01216,2026-07-29,C-NAI-039,Dubai DC,Dubai,AE,Nairobi,KE,13,21.73,air,cables,286.13,0
+SO-01285,2026-07-29,C-KAR-008,Dubai DC,Dubai,AE,Karachi,PK,8,28.18,sea,audio,167.22,1
+SO-00091,2026-07-30,C-BER-004,Rotterdam DC,Rotterdam,NL,Berlin,DE,6,24.36,road,chargers,362.28,0
+SO-00315,2026-07-30,C-WAR-036,Rotterdam DC,Rotterdam,NL,Warsaw,PL,8,19.06,road,cases,1011.57,0
+SO-00513,2026-07-30,C-SIN-005,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,10.05,sea,chargers,629.74,0
+SO-00880,2026-07-30,C-LOS-014,Memphis DC,Memphis,US,Los Angeles,US,8,20.1,road,audio,699.59,0
+SO-00135,2026-07-31,C-BER-021,Rotterdam DC,Rotterdam,NL,Berlin,DE,3,11.87,road,chargers,404.66,0
+SO-00341,2026-08-01,C-STO-012,Rotterdam DC,Rotterdam,NL,Stockholm,SE,7,14.1,road,wearables,881.25,0
+SO-00960,2026-08-01,C-TOR-019,Memphis DC,Memphis,US,Toronto,CA,3,10.08,road,cases,642.47,0
+SO-01168,2026-08-01,C-CAI-023,Dubai DC,Dubai,AE,Cairo,EG,12,17.49,sea,storage,572.89,0
+SO-00162,2026-08-02,C-PAR-011,Rotterdam DC,Rotterdam,NL,Paris,FR,11,17.45,road,cables,631.34,0
+SO-00608,2026-08-02,C-MAN-026,Shenzhen DC,Shenzhen,CN,Manila,PH,12,19.9,sea,audio,727.75,0
+SO-01088,2026-08-02,C-SAN-020,Memphis DC,Memphis,US,Santiago,CL,7,20.81,sea,cases,746.61,0
+SO-01200,2026-08-02,C-CAI-023,Dubai DC,Dubai,AE,Cairo,EG,8,24.96,sea,wearables,280.88,0
+SO-00134,2026-08-03,C-BER-026,Rotterdam DC,Rotterdam,NL,Berlin,DE,8,21.6,road,audio,303.64,0
+SO-00180,2026-08-03,C-PAR-030,Rotterdam DC,Rotterdam,NL,Paris,FR,8,15.0,road,chargers,416.76,0
+SO-00403,2026-08-03,C-TOK-035,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,17.0,sea,wearables,775.3,0
+SO-00240,2026-08-04,C-MAD-014,Rotterdam DC,Rotterdam,NL,Madrid,ES,4,10.19,road,cables,870.0,0
+SO-00367,2026-08-04,C-DUB-001,Rotterdam DC,Rotterdam,NL,Dublin,IE,7,13.63,air,cables,436.79,0
+SO-00922,2026-08-04,C-LOS-007,Memphis DC,Memphis,US,Los Angeles,US,2,8.06,road,chargers,779.64,0
+SO-01293,2026-08-04,C-KAR-012,Dubai DC,Dubai,AE,Karachi,PK,6,14.39,sea,storage,537.2,0
+SO-00004,2026-08-05,C-LON-038,Rotterdam DC,Rotterdam,NL,London,GB,8,19.08,road,audio,511.69,0
+SO-00362,2026-08-05,C-DUB-002,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,10.88,air,cases,283.4,0
+SO-00974,2026-08-05,C-TOR-012,Memphis DC,Memphis,US,Toronto,CA,3,8.22,road,cases,740.97,0
+SO-01031,2026-08-05,C-SAO-006,Memphis DC,Memphis,US,Sao Paulo,BR,6,22.98,sea,wearables,638.73,0
+SO-01099,2026-08-05,C-SAN-008,Memphis DC,Memphis,US,Santiago,CL,5,11.65,sea,cables,634.82,0
+SO-01281,2026-08-05,C-KAR-011,Dubai DC,Dubai,AE,Karachi,PK,5,15.43,sea,wearables,456.02,1
+SO-00208,2026-08-06,C-MAD-018,Rotterdam DC,Rotterdam,NL,Madrid,ES,9,20.18,road,wearables,259.91,0
+SO-00359,2026-08-06,C-DUB-004,Rotterdam DC,Rotterdam,NL,Dublin,IE,3,7.96,air,chargers,311.38,0
+SO-00389,2026-08-06,C-TOK-005,Shenzhen DC,Shenzhen,CN,Tokyo,JP,7,22.46,sea,wearables,1491.72,1
+SO-00741,2026-08-06,C-NEW-014,Memphis DC,Memphis,US,New York City,US,3,11.11,road,wearables,539.69,0
+SO-00747,2026-08-06,C-NEW-023,Memphis DC,Memphis,US,New York City,US,5,11.28,road,cables,447.88,0
+SO-00005,2026-08-07,C-LON-019,Rotterdam DC,Rotterdam,NL,London,GB,3,11.0,road,audio,803.7,0
+SO-01212,2026-08-07,C-NAI-024,Dubai DC,Dubai,AE,Nairobi,KE,13,18.96,air,wearables,783.66,0
+SO-01247,2026-08-07,C-LAG-026,Dubai DC,Dubai,AE,Lagos,NG,9,26.52,air,audio,527.6,0
+SO-00127,2026-08-08,C-BER-006,Rotterdam DC,Rotterdam,NL,Berlin,DE,12,30.02,road,wearables,581.8,0
+SO-00291,2026-08-08,C-WAR-003,Rotterdam DC,Rotterdam,NL,Warsaw,PL,7,28.48,road,wearables,907.82,0
+SO-00435,2026-08-08,C-SEO-021,Shenzhen DC,Shenzhen,CN,Seoul,KR,17,27.11,sea,cases,731.22,0
+SO-00501,2026-08-08,C-SIN-032,Shenzhen DC,Shenzhen,CN,Singapore,SG,5,10.04,sea,storage,730.03,0
+SO-01195,2026-08-08,C-CAI-027,Dubai DC,Dubai,AE,Cairo,EG,13,26.97,sea,chargers,701.45,0
+SO-01062,2026-08-09,C-BOG-021,Memphis DC,Memphis,US,Bogota,CO,12,30.0,air,storage,819.45,0
+SO-01164,2026-08-09,C-RIY-007,Dubai DC,Dubai,AE,Riyadh,SA,5,16.33,road,wearables,893.75,0
+SO-00893,2026-08-10,C-LOS-003,Memphis DC,Memphis,US,Los Angeles,US,5,18.6,road,wearables,495.55,0
+SO-01111,2026-08-10,C-BUE-013,Memphis DC,Memphis,US,Buenos Aires,AR,19,30.18,sea,chargers,443.52,0
+SO-00310,2026-08-11,C-WAR-036,Rotterdam DC,Rotterdam,NL,Warsaw,PL,10,28.41,road,cables,594.66,0
+SO-00660,2026-08-11,C-MUM-017,Shenzhen DC,Shenzhen,CN,Mumbai,IN,14,41.75,sea,wearables,609.81,0
+SO-01027,2026-08-12,C-SAO-018,Memphis DC,Memphis,US,Sao Paulo,BR,8,27.41,sea,cases,811.61,0
+SO-00059,2026-08-13,C-LON-036,Rotterdam DC,Rotterdam,NL,London,GB,12,20.74,road,wearables,757.36,1
+SO-00229,2026-08-13,C-MAD-008,Rotterdam DC,Rotterdam,NL,Madrid,ES,10,33.96,road,audio,632.37,0
+SO-00953,2026-08-13,C-TOR-030,Memphis DC,Memphis,US,Toronto,CA,4,15.07,road,chargers,429.59,0
+SO-00709,2026-08-14,C-AUC-039,Rotterdam DC,Rotterdam,NL,Auckland,NZ,2,7.06,air,cases,986.32,0
+SO-00356,2026-08-16,C-DUB-016,Rotterdam DC,Rotterdam,NL,Dublin,IE,2,7.75,air,cases,358.0,0
+SO-01286,2026-08-16,C-KAR-027,Dubai DC,Dubai,AE,Karachi,PK,12,35.91,sea,storage,451.61,0
+SO-00545,2026-08-17,C-BAN-007,Shenzhen DC,Shenzhen,CN,Bangkok,TH,9,15.28,sea,storage,1005.63,0
+SO-00588,2026-08-17,C-JAK-039,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,27.74,sea,wearables,654.86,0
+SO-00804,2026-08-17,C-CHI-030,Memphis DC,Memphis,US,Chicago,US,6,15.23,road,cables,502.85,0
+SO-01288,2026-08-17,C-KAR-038,Dubai DC,Dubai,AE,Karachi,PK,8,27.05,sea,cases,667.64,0
+SO-00489,2026-08-18,C-SIN-035,Shenzhen DC,Shenzhen,CN,Singapore,SG,12,25.87,sea,cases,650.38,0
+SO-00961,2026-08-18,C-TOR-026,Memphis DC,Memphis,US,Toronto,CA,4,14.79,road,cables,783.46,0
+SO-00446,2026-08-19,C-SEO-023,Shenzhen DC,Shenzhen,CN,Seoul,KR,6,19.23,sea,cables,730.38,0
+SO-00851,2026-08-19,C-CHI-012,Memphis DC,Memphis,US,Chicago,US,7,16.33,road,wearables,214.96,0
+SO-01271,2026-08-19,C-JOH-024,Dubai DC,Dubai,AE,Johannesburg,ZA,14,20.47,sea,cables,738.64,0
+SO-00906,2026-08-20,C-LOS-029,Memphis DC,Memphis,US,Los Angeles,US,12,20.92,road,storage,485.97,0
+SO-00089,2026-08-21,C-BER-001,Rotterdam DC,Rotterdam,NL,Berlin,DE,11,23.79,road,cables,867.83,0
+SO-00313,2026-08-21,C-WAR-015,Rotterdam DC,Rotterdam,NL,Warsaw,PL,6,11.66,road,chargers,676.78,0
+SO-00896,2026-08-21,C-LOS-030,Memphis DC,Memphis,US,Los Angeles,US,8,11.89,road,cables,775.7,0
+SO-01056,2026-08-21,C-BOG-009,Memphis DC,Memphis,US,Bogota,CO,7,25.82,air,cables,309.58,0
+SO-01144,2026-08-21,C-RIY-037,Dubai DC,Dubai,AE,Riyadh,SA,4,11.74,road,cases,1047.68,0
+SO-00251,2026-08-22,C-MIL-031,Rotterdam DC,Rotterdam,NL,Milan,IT,7,24.45,road,wearables,1040.61,0
+SO-00267,2026-08-22,C-MIL-038,Rotterdam DC,Rotterdam,NL,Milan,IT,18,30.34,road,chargers,559.27,0
+SO-00553,2026-08-22,C-BAN-028,Shenzhen DC,Shenzhen,CN,Bangkok,TH,7,21.49,sea,wearables,465.36,0
+SO-00559,2026-08-22,C-BAN-004,Shenzhen DC,Shenzhen,CN,Bangkok,TH,7,24.17,sea,chargers,569.65,0
+SO-00698,2026-08-22,C-AUC-039,Rotterdam DC,Rotterdam,NL,Auckland,NZ,3,10.87,air,storage,917.88,0
+SO-00084,2026-08-23,C-BER-023,Rotterdam DC,Rotterdam,NL,Berlin,DE,7,23.31,road,audio,1054.21,0
+SO-00120,2026-08-23,C-BER-035,Rotterdam DC,Rotterdam,NL,Berlin,DE,5,19.48,road,audio,839.85,0
+SO-00634,2026-08-23,C-MUM-015,Shenzhen DC,Shenzhen,CN,Mumbai,IN,7,15.77,sea,cases,605.14,1
+SO-00853,2026-08-23,C-CHI-035,Memphis DC,Memphis,US,Chicago,US,9,20.04,road,wearables,748.74,0
+SO-00947,2026-08-23,C-TOR-011,Memphis DC,Memphis,US,Toronto,CA,9,27.0,road,wearables,446.65,0
+SO-01075,2026-08-23,C-BOG-024,Memphis DC,Memphis,US,Bogota,CO,5,10.15,air,chargers,439.74,0
+SO-01259,2026-08-23,C-JOH-011,Dubai DC,Dubai,AE,Johannesburg,ZA,7,24.72,sea,chargers,709.49,1
+SO-00582,2026-08-24,C-JAK-002,Shenzhen DC,Shenzhen,CN,Jakarta,ID,11,17.68,sea,cables,730.31,0
+SO-00615,2026-08-24,C-MAN-018,Shenzhen DC,Shenzhen,CN,Manila,PH,7,22.25,sea,cases,652.38,0
+SO-00691,2026-08-24,C-SYD-023,Rotterdam DC,Rotterdam,NL,Sydney,AU,11,17.23,air,storage,576.22,0
+SO-00029,2026-08-25,C-LON-023,Rotterdam DC,Rotterdam,NL,London,GB,4,11.38,road,wearables,551.44,0
+SO-00169,2026-08-25,C-PAR-027,Rotterdam DC,Rotterdam,NL,Paris,FR,7,14.79,road,chargers,477.49,0
+SO-00311,2026-08-25,C-WAR-004,Rotterdam DC,Rotterdam,NL,Warsaw,PL,9,31.6,road,wearables,1132.16,0
+SO-00689,2026-08-25,C-SYD-029,Rotterdam DC,Rotterdam,NL,Sydney,AU,10,20.96,air,wearables,1013.83,0
+SO-00585,2026-08-26,C-JAK-030,Shenzhen DC,Shenzhen,CN,Jakarta,ID,7,21.96,sea,storage,421.55,0
+SO-00726,2026-08-26,C-NEW-016,Memphis DC,Memphis,US,New York City,US,8,12.1,road,audio,210.12,0
+SO-00114,2026-08-27,C-BER-003,Rotterdam DC,Rotterdam,NL,Berlin,DE,5,14.75,road,cases,581.98,0
+SO-00409,2026-08-27,C-TOK-007,Shenzhen DC,Shenzhen,CN,Tokyo,JP,6,22.78,sea,cases,974.58,0
+SO-00907,2026-08-27,C-LOS-036,Memphis DC,Memphis,US,Los Angeles,US,16,28.86,road,cases,810.19,0
+SO-00914,2026-08-27,C-LOS-031,Memphis DC,Memphis,US,Los Angeles,US,6,20.81,road,storage,793.87,0
+SO-00187,2026-08-29,C-PAR-019,Rotterdam DC,Rotterdam,NL,Paris,FR,4,13.03,road,storage,1036.78,0
+SO-00245,2026-08-29,C-MAD-013,Rotterdam DC,Rotterdam,NL,Madrid,ES,21,33.49,road,storage,449.45,0
+SO-00908,2026-08-29,C-LOS-017,Memphis DC,Memphis,US,Los Angeles,US,8,14.89,road,audio,991.26,0
+SO-01081,2026-08-29,C-SAN-011,Memphis DC,Memphis,US,Santiago,CL,10,24.43,sea,storage,774.33,0
+SO-00121,2026-08-30,C-BER-031,Rotterdam DC,Rotterdam,NL,Berlin,DE,14,37.74,road,storage,730.63,0
+SO-00338,2026-08-30,C-STO-027,Rotterdam DC,Rotterdam,NL,Stockholm,SE,7,28.08,road,wearables,590.0,1
+SO-00980,2026-08-30,C-TOR-023,Memphis DC,Memphis,US,Toronto,CA,9,24.46,road,cases,486.88,0
+SO-00034,2026-08-31,C-LON-003,Rotterdam DC,Rotterdam,NL,London,GB,9,19.85,road,chargers,695.9,0
+SO-00071,2026-08-31,C-LON-036,Rotterdam DC,Rotterdam,NL,London,GB,11,30.59,road,cases,315.79,0
+SO-00857,2026-08-31,C-CHI-020,Memphis DC,Memphis,US,Chicago,US,4,8.78,road,cases,610.13,0
