@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Your value chain{% endblock %}
+
+{% block content %}
+
+<section class="chain-head">
+  <h1>Your value chain</h1>
+  <p class="sub">
+    Every stage of how goods reach your customers, and what is going wrong in
+    each one. Pick a stage to see inside it.
+  </p>
+</section>
+
+<section class="chain-flow">
+  {% for stage in stages %}
+  <button class="stage{{ ' has-problems' if stage.problem_count }}"
+          data-stage="{{ stage.key }}"
+          data-stake="{{ stage.at_risk_cost + stage.at_risk_co2e }}"
+          type="button"
+          aria-expanded="false">
+    <span class="stage-name">{{ stage.name }}</span>
+    <span class="stage-count">
+      {{ "{:,}".format(stage.headline) }} <em>{{ stage.unit }}</em>
+    </span>
+    <span class="stage-figures">
+      {% if stage.cost %}<span class="cost-ink">${{ "{:,.0f}".format(stage.cost) }}</span>{% endif %}
+      {% if stage.co2e %}<span class="carbon-ink">{{ "{:,.0f}".format(stage.co2e / 1000) }} t</span>{% endif %}
+    </span>
+    {% if stage.problem_count %}
+    <span class="stage-flag">
+      {{ stage.problem_count }} problem{{ "s" if stage.problem_count != 1 }}
+    </span>
+    {% else %}
+    <span class="stage-ok">nothing flagged</span>
+    {% endif %}
+  </button>
+  {% if not loop.last %}<span class="stage-arrow" aria-hidden="true"></span>{% endif %}
+  {% endfor %}
+</section>
+
+{% for stage in stages %}
+<section class="stage-detail" id="detail-{{ stage.key }}" hidden>
+  <div class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>{{ stage.name }}</h2>
+        <p class="sub">{{ stage.blurb }}</p>
+      </div>
+      {% if stage.at_risk_cost or stage.at_risk_co2e %}
+      <div class="at-risk">
+        <span>Recoverable here</span>
+        <strong>
+          {% if stage.at_risk_cost %}<span class="cost-ink">${{ "{:,.0f}".format(stage.at_risk_cost) }}</span>{% endif %}
+          {% if stage.at_risk_co2e %}<span class="carbon-ink">{{ "{:,.1f}".format(stage.at_risk_co2e / 1000) }} t</span>{% endif %}
+        </strong>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if stage.problems %}
+    <ol class="problems">
+      {% for problem in stage.problems %}
+      <li>
+        <div class="problem-body">
+          <h3>{{ problem.title }}</h3>
+          <p class="problem-detail">{{ problem.detail }}</p>
+          <p class="problem-fix">{{ problem.fix }}</p>
+        </div>
+        <div class="problem-stake">
+          {% if problem.cost_at_stake %}
+          <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
+          {% endif %}
+          {% if problem.co2e_at_stake %}
+          <span class="carbon-ink">{{ "{:,.1f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          {% endif %}
+          {% if problem.edge_id %}
+          <a class="problem-link" href="{{ url_for('dashboard') }}?lane={{ problem.edge_id }}">
+            Open on the map
+          </a>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% else %}
+    <p class="empty">
+      Nothing here needs attention. Every part of this stage is already on the
+      best option available to it.
+    </p>
+    {% endif %}
+  </div>
+</section>
+{% endfor %}
+
+<section class="panel next-step">
+  <div>
+    <h2>Cost and carbon optimizer</h2>
+    <p class="sub">
+      Every route scored and ranked on a world map, with what-if changes you
+      can try before committing to any of them.
+    </p>
+  </div>
+  <a class="primary" href="{{ url_for('dashboard') }}">Open the optimizer</a>
+</section>
+
+<section class="panel next-step quiet">
+  <div>
+    <h2>Use your own data</h2>
+    <p class="sub">
+      {% if using_sample %}
+      This chain is the built-in sample company. Load a CSV export and it
+      rebuilds around your own suppliers, warehouses and customers.
+      {% else %}
+      Replace what is loaded with a different export, or add supplier and
+      warehouse files to fill out the chain.
+      {% endif %}
+    </p>
+  </div>
+  <a class="ghost-link" href="{{ url_for('upload_page') }}">Load a CSV</a>
+</section>
+
+<script src="{{ url_for('static', filename='chain.js') }}"></script>
+
+{% endblock %}

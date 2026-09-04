@@ -1034,3 +1034,377 @@ select:disabled {
     color: var(--ink-3);
     cursor: not-allowed;
 }
+
+
+/* Value chain */
+
+.chain-head {
+    padding: 10px 0 26px;
+}
+
+.chain-head h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    letter-spacing: -0.032em;
+    font-weight: 600;
+    line-height: 1.06;
+}
+
+.chain-flow {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 26px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.stage {
+    flex: 1 1 0;
+    min-width: 138px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    padding: 15px 15px 14px;
+    text-align: left;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink);
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease),
+        transform 0.15s var(--ease);
+}
+
+.stage:hover {
+    border-color: var(--ink-3);
+    transform: translateY(-1px);
+}
+
+.stage.on {
+    border-color: var(--carbon);
+    background: var(--carbon-soft);
+}
+
+.stage-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.stage-count {
+    font-size: 1.28rem;
+    font-weight: 500;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+}
+
+.stage-count em {
+    font-style: normal;
+    font-size: 11.5px;
+    font-weight: 400;
+    color: var(--ink-3);
+    letter-spacing: 0;
+}
+
+.stage-figures {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 4px;
+    min-height: 16px;
+}
+
+.stage-flag,
+.stage-ok {
+    margin-top: auto;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 3px;
+}
+
+.stage-flag {
+    background: var(--danger-soft);
+    color: var(--danger);
+}
+
+.stage-ok {
+    background: var(--line-soft);
+    color: var(--ink-3);
+}
+
+.stage-arrow {
+    flex: none;
+    align-self: center;
+    width: 22px;
+    height: 1px;
+    background: var(--line);
+    position: relative;
+}
+
+.stage-arrow::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: -3px;
+    border-left: 5px solid var(--line);
+    border-top: 3.5px solid transparent;
+    border-bottom: 3.5px solid transparent;
+}
+
+.at-risk {
+    text-align: right;
+}
+
+.at-risk span {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 3px;
+}
+
+.at-risk strong {
+    display: flex;
+    gap: 12px;
+    font-size: 1.05rem;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.problems {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line-soft);
+}
+
+.problems li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.problems li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.problem-body {
+    flex: 1 1 300px;
+}
+
+.problem-body h3 {
+    margin: 0 0 3px;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+.problem-detail {
+    margin: 0 0 5px;
+    font-size: 13px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+}
+
+.problem-fix {
+    margin: 0;
+    font-size: 13px;
+    color: var(--carbon);
+}
+
+.problem-stake {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.problem-link {
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--ink-3);
+    text-decoration: none;
+    border-bottom: 1px solid var(--line);
+}
+
+.problem-link:hover {
+    color: var(--ink);
+    border-color: var(--ink-3);
+}
+
+.next-step {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.next-step h2 {
+    margin-bottom: 4px;
+}
+
+.next-step .primary {
+    margin-top: 0;
+    flex: none;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.next-step.quiet {
+    background: transparent;
+    box-shadow: none;
+    border-style: dashed;
+}
+
+.ghost-link {
+    flex: none;
+    padding: 9px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink-2);
+    font-size: 14px;
+    text-decoration: none;
+    transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
+}
+
+.ghost-link:hover {
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+@media (max-width: 760px) {
+    .chain-flow {
+        flex-direction: column;
+    }
+
+    .stage-arrow {
+        width: 1px;
+        height: 16px;
+        margin-left: 22px;
+        align-self: flex-start;
+    }
+
+    .stage-arrow::after {
+        right: -3px;
+        top: auto;
+        bottom: 0;
+        border-left: 3.5px solid transparent;
+        border-right: 3.5px solid transparent;
+        border-top: 5px solid var(--line);
+        border-bottom: none;
+    }
+}
+
+
+.topnav {
+    display: flex;
+    gap: 20px;
+    font-size: 13.5px;
+}
+
+.topnav a {
+    color: var(--ink-3);
+    text-decoration: none;
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.topnav a:hover {
+    color: var(--ink);
+    border-color: var(--carbon);
+}
+
+.row-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.row-actions .primary {
+    margin-top: 0;
+    text-decoration: none;
+}
+
+.prose h2 {
+    font-size: 1.12rem;
+    margin-bottom: 12px;
+}
+
+.prose h3 {
+    font-size: 0.98rem;
+    font-weight: 500;
+    margin: 26px 0 8px;
+    letter-spacing: -0.012em;
+}
+
+.prose p,
+.prose li {
+    max-width: 68ch;
+    color: var(--ink-2);
+    font-size: 15px;
+    text-wrap: pretty;
+}
+
+.prose ul {
+    padding-left: 20px;
+}
+
+.prose li {
+    margin-bottom: 7px;
+}
+
+.prose .grid {
+    margin: 14px 0 6px;
+    max-width: 460px;
+}
+
+.prose .source {
+    font-size: 13.5px;
+    color: var(--ink-3);
+}
+
+.prose .caveat {
+    padding: 12px 16px;
+    background: var(--page);
+    border-left: 2px solid var(--cost);
+    border-radius: 0;
+    font-size: 14px;
+}
+
+.prose .caveat strong {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.foot a {
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+    text-decoration: none;
+}
+
+.foot a:hover {
+    color: var(--ink);
+}

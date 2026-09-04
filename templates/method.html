@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block title %}How the numbers are worked out{% endblock %}
+
+{% block content %}
+
+<section class="chain-head">
+  <h1>How the numbers are worked out</h1>
+  <p class="sub">
+    Every figure this tool shows, where it comes from, and what it does not
+    account for. Nothing here is a black box.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>The shape of the calculation</h2>
+  <p>
+    Your CSV becomes a graph. Suppliers, warehouses and customer cities are
+    points. Every shipping route between two points is a lane. Orders going
+    the same way by the same transport mode are grouped into one lane, so a
+    year of deliveries to London becomes a single lane carrying a year of
+    weight.
+  </p>
+  <p>
+    Everything after that is worked out per lane, then added up. Nothing is
+    estimated at the company level and divided down.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>Distance</h2>
+  <p>
+    City names are matched against a bundled GeoNames table of 34,135 cities
+    across 244 countries, which gives a latitude and longitude for each end of
+    the lane. Distance is the great-circle distance between those two points,
+    using the haversine formula on a 6,371 km earth radius.
+  </p>
+  <p class="caveat">
+    <strong>What this misses:</strong> real freight does not travel in
+    straight lines. Road distance typically runs 15 to 25 percent longer than
+    great-circle, and sea routes can be far longer where they route around
+    land masses or through canals. Absolute distances here run low. The
+    comparison between two options on the same lane is unaffected, because
+    both are measured the same way, and that comparison is what the ranking
+    rests on.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>Emissions</h2>
+  <p>
+    Freight emissions are measured in kg CO2e per tonne-kilometre, which is
+    the standard unit for the job: one tonne carried one kilometre. A lane's
+    transport emissions are its annual weight in tonnes, times distance in km,
+    times the factor for its mode.
+  </p>
+  <table class="grid">
+    <thead><tr><th>Mode</th><th>kg CO2e per tonne-km</th><th>Against sea</th></tr></thead>
+    <tbody>
+      {% for mode, value in emissions.items() %}
+      <tr>
+        <td>{{ mode }}</td>
+        <td class="num">{{ value }}</td>
+        <td class="num">{{ "{:.0f}x".format(value / emissions['sea']) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="source">
+    Source: the ranges published by the UK Department for Environment, Food
+    and Rural Affairs (DEFRA) in its greenhouse gas conversion factors, and
+    the Global Logistics Emissions Council (GLEC) framework, which is the
+    method most freight carbon reporting is built on.
+  </p>
+  <p>
+    Air is roughly 75 times sea per tonne-km. That single ratio is why air
+    freight dominates the results on any chain that uses it, and why moving a
+    lane off air is almost always the largest carbon win available.
+  </p>
+
+  <h3>The other two sources of emissions</h3>
+  <p>
+    <strong>Packaging</strong> is charged per order at
+    {{ packaging_co2e }} kg CO2e, because it scales with how many parcels go
+    out rather than how far they travel.
+  </p>
+  <p>
+    <strong>Warehouse energy</strong> is each site's annual kWh times its grid
+    carbon intensity, shared across that site's lanes by weight. If you do not
+    supply a grid intensity, {{ grid_default }} kg CO2e per kWh is assumed,
+    which is roughly the world average. Supplying real figures matters here:
+    the gap between a site on hydro power and one on a coal-heavy grid is
+    larger than most people expect.
+  </p>
+  <p>
+    <strong>Returns</strong> are charged as the outbound leg again at
+    {{ return_multiplier }} times, because reverse logistics is less
+    consolidated than the trip out.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>Cost to serve</h2>
+  <p>
+    Cost per lane is transport, plus that lane's share of the warehouse it
+    ships from, plus what its returns cost.
+  </p>
+  <table class="grid">
+    <thead><tr><th>Mode</th><th>USD per tonne-km</th></tr></thead>
+    <tbody>
+      {% for mode, value in costs.items() %}
+      <tr><td>{{ mode }}</td><td class="num">{{ value }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="source">
+    These are defaults, not published standards. Road and rail sit in the
+    normal range for contracted freight. Air is derived from general long haul
+    cargo at roughly 2 to 5 USD per kg, which is about 3,000 USD a tonne over
+    a 16,000 km route, or 0.19 per tonne-km.
+  </p>
+  <p class="caveat">
+    <strong>Treat these as a starting point.</strong> Real freight rates vary
+    enormously by contract, lane, volume and season, far more than emission
+    factors do. If you have your own rates, they belong in
+    <code>optimizer/factors.py</code> and the whole cost side of the tool gets
+    sharper for it. The carbon side does not depend on them at all.
+  </p>
+
+  <h3>How warehouse cost is shared out</h3>
+  <p>
+    A site's annual storage and handling cost is divided across its lanes by
+    weight. A lane carrying a fifth of what leaves a warehouse absorbs a fifth
+    of that warehouse's cost.
+  </p>
+  <p class="caveat">
+    <strong>Why weight and not orders or revenue:</strong> splitting by order
+    count under-charges heavy freight, which uses far more of a building than
+    a small parcel does. Splitting by revenue mixes up cost to serve with
+    margin, which are different questions. Weight is the closest honest proxy
+    for how much of a warehouse a lane actually consumes. It is still a proxy:
+    a pallet of something bulky and light occupies more space than its weight
+    suggests.
+  </p>
+
+  <h3>Returns</h3>
+  <p>
+    Each returned order is charged the outbound transport again at
+    {{ return_multiplier }} times, plus {{ return_handling }} USD of handling.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>What counts as a problem</h2>
+  <p>
+    A lane being expensive is a procurement question. A lane being dirty is a
+    reporting question. Neither is what this tool is for. It flags lanes where
+    changing the transport mode cuts <em>both</em> cost and carbon by at least
+    {{ "{:.0%}".format(flag_threshold) }} each.
+  </p>
+  <p>
+    Being large is not enough on its own. A lane already running the best mode
+    available to it has nothing to recover, so it never appears no matter how
+    big the number beside it is. The ranking runs on what a change would give
+    back, not on the size of the problem.
+  </p>
+
+  <h3>Which mode changes are offered</h3>
+  <p>
+    Without real routing data, the safe assumption is that a lane keeps
+    reaching its destination the way it already does.
+  </p>
+  <ul>
+    <li>
+      <strong>Air</strong> can drop to sea beyond
+      {{ "{:,}".format(sea_minimum) }} km, or to road and rail under
+      {{ "{:,}".format(surface_range) }} km
+    </li>
+    <li><strong>Road</strong> can move to rail at any distance, since it is already a land route</li>
+    <li><strong>Sea and rail</strong> are left alone. Nothing beats sea per tonne-km</li>
+  </ul>
+  <p class="caveat">
+    <strong>These gates are deliberately conservative.</strong> A suggestion
+    the tool misses is invisible. A suggestion that is obviously impossible,
+    like shipping freight overland between two inland cities by sea, makes
+    every other number on the page look unreliable. The tool would rather stay
+    quiet than be wrong out loud.
+  </p>
+  <p class="caveat">
+    <strong>It also does not know your business.</strong> Air freight is often
+    there for a reason: perishable goods, urgent replacements, contracts with
+    delivery windows sea cannot meet. That is exactly why the tool asks you to
+    tag how hard each change would be rather than assuming. Tagging something
+    hard weights it at {{ effort_weights['high'] }} and drops it down the
+    list; tagging it easy weights it at {{ effort_weights['low'] }} and lifts
+    it up.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>Problems found in each stage</h2>
+  <p>
+    The value chain view groups the same data by where in the business it
+    sits, and applies a check appropriate to that stage.
+  </p>
+  <ul>
+    <li><strong>Suppliers and freight:</strong> lanes flagged by the mode-switch test above</li>
+    <li><strong>Warehousing:</strong> sites emitting at least 40 percent more carbon per tonne handled than the median of your other sites, which usually means a dirty grid rather than a badly run building</li>
+    <li><strong>Customers:</strong> destinations costing at least 50 percent more per tonne to serve than the median destination</li>
+    <li><strong>Returns:</strong> lanes where more than 8 percent of orders come back</li>
+  </ul>
+  <p class="caveat">
+    Medians are used rather than averages throughout, so one extreme site or
+    destination cannot drag the comparison line with it.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>What this tool does not do</h2>
+  <ul>
+    <li>It does not model transit time, so a change that saves money and carbon may still be unacceptable on lead time</li>
+    <li>It does not model inventory. Slower shipping means more stock in transit and more working capital tied up, and that cost is not counted here</li>
+    <li>It does not model capacity. Moving volume to a different warehouse assumes that warehouse can take it</li>
+    <li>It covers freight, storage, packaging and returns. It is not a full product carbon footprint and says nothing about manufacturing, raw materials or end of life</li>
+    <li>Supplier terms beyond freight, meaning lead time, minimum order quantity and on-time rate, are not modelled yet</li>
+  </ul>
+  <p>
+    Everything above is arithmetic on figures you can check. There is no
+    model, no training data and no estimation you cannot reproduce by hand
+    from your own CSV and the factors on this page.
+  </p>
+</section>
+
+{% endblock %}

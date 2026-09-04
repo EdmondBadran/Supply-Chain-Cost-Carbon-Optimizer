@@ -2,9 +2,17 @@ import os
 import tempfile
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import (
+    Flask,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 
-from optimizer import analysis, db, ingest, scoring
+from optimizer import analysis, chain, db, factors, ingest, scoring
 
 ROOT = Path(__file__).resolve().parent
 SAMPLE_ORDERS = ROOT / "data" / "sample_orders.csv"
@@ -24,11 +32,49 @@ def get_conn():
 
 @app.route("/")
 def index():
+    """The value chain is the front door. Load the sample if nothing is here,
+    so the first thing anyone sees is a working chain rather than a form."""
+    conn = get_conn()
+    try:
+        if not db.summary(conn):
+            ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
+            analysis.run(conn)
+            session["using_sample"] = True
+        return render_template(
+            "chain.html",
+            summary=db.summary(conn),
+            stages=chain.build(conn),
+            using_sample=session.get("using_sample", False),
+        )
+    finally:
+        conn.close()
+
+
+@app.route("/data")
+def upload_page():
     conn = get_conn()
     try:
         return render_template("index.html", summary=db.summary(conn))
     finally:
         conn.close()
+
+
+@app.route("/method")
+def method():
+    return render_template(
+        "method.html",
+        emissions=factors.EMISSION_FACTORS,
+        costs=factors.COST_FACTORS,
+        packaging_co2e=factors.PACKAGING_KG_CO2E_PER_ORDER,
+        packaging_cost=factors.PACKAGING_COST_PER_ORDER,
+        return_multiplier=factors.RETURN_LEG_MULTIPLIER,
+        return_handling=factors.RETURN_HANDLING_COST,
+        grid_default=factors.DEFAULT_GRID_INTENSITY,
+        flag_threshold=scoring.FLAG_THRESHOLD,
+        effort_weights=scoring.EFFORT_WEIGHT,
+        sea_minimum=scoring.SEA_MINIMUM_KM,
+        surface_range=scoring.SURFACE_RANGE_KM,
+    )
 
 
 @app.route("/dashboard")
@@ -124,6 +170,7 @@ def upload():
             report = ingest.load(conn, orders_path, warehouses_path, suppliers_path)
             analysis.run(conn)
             summary = db.summary(conn)
+            session["using_sample"] = False
         except ingest.ValidationError as exc:
             return render_error(str(exc))
         except UnicodeDecodeError:
@@ -140,13 +187,12 @@ def upload():
 def sample():
     conn = get_conn()
     try:
-        report = ingest.load(
-            conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS
-        )
+        ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
         analysis.run(conn)
+        session["using_sample"] = True
     finally:
         conn.close()
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("index"))
 
 
 @app.post("/clear")
@@ -154,9 +200,10 @@ def clear():
     conn = get_conn()
     try:
         db.reset(conn)
+        session.pop("using_sample", None)
     finally:
         conn.close()
-    return redirect(url_for("index"))
+    return redirect(url_for("upload_page"))
 
 
 @app.errorhandler(404)

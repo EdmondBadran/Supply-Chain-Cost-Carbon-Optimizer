@@ -505,8 +505,14 @@ async function runSimulation(edgeId) {
     drawDetail();
 }
 
-// Open on the biggest win rather than an empty panel, so the page arrives
-// already showing something rather than asking to be explored first.
-const opener = flaggedLanes()[0];
+// Arriving from a problem in the value chain opens that exact lane. Otherwise
+// open on the biggest win, so the page arrives showing something rather than
+// asking to be explored first.
+const requested = Number(new URLSearchParams(location.search).get("lane"));
+const opener = (requested && laneById(requested)) || flaggedLanes()[0];
 if (opener) selectedId = opener.id;
 render();
+
+if (requested && laneById(requested)) {
+    document.querySelector(".map-panel").scrollIntoView({ behavior: "smooth" });
+}
