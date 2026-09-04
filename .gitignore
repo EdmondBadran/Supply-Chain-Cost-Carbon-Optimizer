@@ -1,0 +1,14 @@
+CLAUDE.md
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+instance/
+*.db
+*.sqlite3
+
+.env
+.DS_Store
