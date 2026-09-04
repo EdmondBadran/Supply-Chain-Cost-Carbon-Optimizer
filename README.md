@@ -6,8 +6,26 @@ routes doing the most financial damage are very often the same routes doing
 the most environmental damage, and nobody notices because the numbers live in
 different spreadsheets.
 
-This tool loads your order data, works out what every lane costs to serve and
+This tool loads your order data, works out what every route costs to serve and
 what it emits, and ranks the places where one change fixes both.
+
+## The three views
+
+**The value chain** is where it opens. Six stages, suppliers through to
+returns, each showing what it costs, what it emits, and what is wrong inside
+it. Warehousing gets checked for carbon per tonne handled, customers for cost
+per tonne to serve, returns for return rate, freight for whether a different
+transport mode would be better. Click a stage to see its problems, click a
+problem to land on that exact route on the map.
+
+**The optimizer** is the world map. Every route drawn and scored, the ones
+worth changing flagged, and a panel where you can try a different transport
+mode or a different warehouse and watch cost and carbon move before you commit
+to anything.
+
+**The method page** shows the working. Every formula, every factor with its
+source, every assumption, and a section on what the tool does not account for
+at all. You should not have to take any number here on faith.
 
 ## What it does
 
@@ -42,8 +60,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open http://localhost:5000. There is a sample dataset built in, so you
-can click straight through to the dashboard without finding a CSV first.
+Then open http://localhost:5000. The sample dataset loads itself, so you land
+on a working value chain rather than an upload form.
+
+    /           the value chain
+    /dashboard  the optimizer, map and what-if
+    /method     how every number is worked out
+    /data       load your own CSV
 
 ## Your own data
 
@@ -126,20 +149,28 @@ optimizer/
   ingest.py         CSV validation and loading
   analysis.py       cost to serve and emissions
   scoring.py        bottleneck ranking and what-if
+  chain.py          the value chain stages and their problem checks
 static/
   dashboard.js      the map, the ranking and the what-if panel
+  chain.js          the value chain stages
 data/               city reference table and the sample dataset
 tools/make_sample.py  regenerates the sample data
 ```
 
 ## Not done
 
-Supplier terms beyond freight. Lead time, minimum order quantity and on-time
-rate are all things that belong in a picture of a supply chain and none of
-them are modelled yet. Freight went first because it is the part where cost
-and carbon overlap, which is what this is for.
+**Supplier terms beyond freight.** Lead time, minimum order quantity and
+on-time rate all belong in a picture of a supply chain and none are modelled.
+Freight went first because it is the part where cost and carbon overlap.
 
-Adding and removing locations in the what-if. You can change how a route
+**Editing the chain.** The six stages are derived from your data and cannot be
+renamed, added to or removed.
+
+**Adding and removing locations in the what-if.** You can change how a route
 ships and which warehouse serves it, but you cannot delete a warehouse and
-watch the work redistribute. That needs reassignment and capacity logic
-rather than arithmetic.
+watch the work redistribute. That needs reassignment and capacity logic rather
+than arithmetic, and doing it half-right would be worse than not having it.
+
+**Transit time and inventory.** A change that saves money and carbon may still
+be unacceptable on lead time, and slower shipping ties up working capital.
+Neither is counted. The method page says so plainly rather than hiding it.
