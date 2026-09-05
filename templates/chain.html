@@ -4,40 +4,103 @@
 
 {% block content %}
 
-<section class="chain-head">
-  <h1>Your value chain</h1>
-  <p class="sub">
-    Every stage of how goods reach your customers, and what is going wrong in
-    each one. Pick a stage to see inside it.
-  </p>
+<section class="act-head">
+  <p class="eyebrow">Step one</p>
+  <h1>This is your value chain</h1>
+  {% if report %}
+  <p class="act-lede">{{ report.overview.truth }}</p>
+  {% endif %}
 </section>
 
-<section class="chain-flow">
-  {% for stage in stages %}
-  <button class="stage{{ ' has-problems' if stage.problem_count }}"
-          data-stage="{{ stage.key }}"
-          data-stake="{{ stage.at_risk_cost + stage.at_risk_co2e }}"
-          type="button"
-          aria-expanded="false">
-    <span class="stage-name">{{ stage.name }}</span>
-    <span class="stage-count">
-      {{ "{:,}".format(stage.headline) }} <em>{{ stage.unit }}</em>
-    </span>
-    <span class="stage-figures">
-      {% if stage.cost %}<span class="cost-ink">${{ "{:,.0f}".format(stage.cost) }}</span>{% endif %}
-      {% if stage.co2e %}<span class="carbon-ink">{{ "{:,.0f}".format(stage.co2e / 1000) }} t</span>{% endif %}
-    </span>
-    {% if stage.problem_count %}
-    <span class="stage-flag">
-      {{ stage.problem_count }} problem{{ "s" if stage.problem_count != 1 }}
-    </span>
-    {% else %}
-    <span class="stage-ok">nothing flagged</span>
-    {% endif %}
-  </button>
-  {% if not loop.last %}<span class="stage-arrow" aria-hidden="true"></span>{% endif %}
-  {% endfor %}
+{% if flow %}
+<section class="river-wrap">
+  <div class="river" style="--river-ratio: {{ "%.4f"|format(flow.height / flow.width) }};">
+    <svg class="river-art" viewBox="0 0 {{ flow.width }} {{ flow.height }}"
+         preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="riverfill" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="var(--carbon)" stop-opacity="0.16"/>
+          <stop offset="100%" stop-color="var(--cost)" stop-opacity="0.42"/>
+        </linearGradient>
+      </defs>
+      <path d="{{ flow.band }}" fill="url(#riverfill)"/>
+      {% if flow.loop %}
+      <path d="{{ flow.loop.path }}" fill="none" stroke="var(--danger)"
+            stroke-opacity="0.45" stroke-width="{{ "%.1f"|format(flow.loop.width) }}"
+            stroke-linecap="round"/>
+      <polygon points="{{ flow.loop.arrow }}" fill="var(--danger)" fill-opacity="0.55"/>
+      {% endif %}
+      {% for mark in flow.marks %}
+      <line x1="{{ "%.1f"|format(mark.x) }}" y1="{{ "%.1f"|format(flow.spine - mark.half - 16) }}"
+            x2="{{ "%.1f"|format(mark.x) }}" y2="{{ "%.1f"|format(flow.spine + mark.half + 16) }}"
+            stroke="var(--line)" stroke-width="1"/>
+      <circle cx="{{ "%.1f"|format(mark.x) }}" cy="{{ flow.spine }}" r="5"
+              fill="{{ 'var(--cost)' if mark.stage.problem_count else 'var(--panel)' }}"
+              stroke="{{ 'var(--cost)' if mark.stage.problem_count else 'var(--ink-3)' }}"
+              stroke-width="2"/>
+      {% endfor %}
+    </svg>
+
+    <div class="river-marks">
+      {% for mark in flow.marks %}
+      <button class="river-stage{{ ' has-problems' if mark.stage.problem_count }}"
+              type="button"
+              data-stage="{{ mark.key }}"
+              aria-expanded="false"
+              style="left: {{ "%.3f"|format(mark.x / flow.width * 100) }}%;">
+        <span class="river-name">{{ mark.stage.name }}</span>
+        <span class="river-count">
+          {{ "{:,}".format(mark.stage.headline) }} {{ mark.stage.unit }}
+        </span>
+        <span class="river-foot">
+        <span class="river-figures">
+          {% if mark.stage.cost %}
+          <span class="cost-ink">${{ "{:,.0f}".format(mark.stage.cost) }}</span>
+          {% endif %}
+          {% if mark.stage.co2e %}
+          <span class="carbon-ink">{{ "{:,.0f}".format(mark.stage.co2e / 1000) }} t</span>
+          {% endif %}
+          {% if not mark.stage.cost and not mark.stage.co2e %}
+          <span class="muted-ink">counted next door</span>
+          {% endif %}
+        </span>
+        {% if mark.stage.problem_count %}
+        <span class="river-flag">{{ mark.stage.problem_count }} problem{{ "s" if mark.stage.problem_count != 1 }}</span>
+        {% endif %}
+        </span>
+      </button>
+      {% endfor %}
+
+      {% if flow.loop %}
+      <button class="river-stage returns{{ ' has-problems' if flow.loop.stage.problem_count }}"
+              type="button"
+              data-stage="{{ flow.loop.stage.key }}"
+              aria-expanded="false"
+              style="left: {{ "%.3f"|format(flow.loop.label_x / flow.width * 100) }}%;
+                     top: {{ "%.3f"|format(flow.loop.label_y / flow.height * 100) }}%;">
+        <span class="river-name">{{ flow.loop.stage.name }}</span>
+        <span class="river-figures">
+          <span class="cost-ink">${{ "{:,.0f}".format(flow.loop.stage.cost) }}</span>
+          <span class="carbon-ink">{{ "{:,.0f}".format(flow.loop.stage.co2e / 1000) }} t</span>
+        </span>
+        {% if flow.loop.stage.problem_count %}
+        <span class="river-flag">{{ flow.loop.stage.problem_count }} problem{{ "s" if flow.loop.stage.problem_count != 1 }}</span>
+        {% endif %}
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  <p class="river-key">
+    The band thickens wherever cost is added, so you are looking at money
+    accumulating on your goods as they move. Suppliers and customers leave it
+    flat because their cost belongs to the leg either side of them, counted
+    once. The leg running backwards underneath is returns, going the wrong
+    way and paying for the trip a second time.
+    <span class="river-hint">Pick any stage to open it.</span>
+  </p>
 </section>
+{% endif %}
 
 {% for stage in stages %}
 <section class="stage-detail" id="detail-{{ stage.key }}" hidden>
@@ -93,15 +156,74 @@
 </section>
 {% endfor %}
 
+{% if report and report.top_three %}
+<section class="act-head second">
+  <p class="eyebrow">Step two</p>
+  <h2>This is what is wrong</h2>
+  <p class="act-lede">
+    {{ report.overview.concentration }}
+  </p>
+</section>
+
+<section class="worst">
+  {% for problem in report.top_three %}
+  <article class="worst-card">
+    <span class="worst-rank">{{ "%02d"|format(loop.index) }}</span>
+    <span class="finding-stage">{{ problem.stage }}</span>
+    <h3>{{ problem.title }}</h3>
+    <p class="worst-what">{{ problem.happening }}</p>
+    <div class="worst-stake">
+      {% if problem.cost_at_stake %}
+      <div>
+        <strong class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</strong>
+        <span>a year</span>
+      </div>
+      {% endif %}
+      {% if problem.co2e_at_stake %}
+      <div>
+        <strong class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t</strong>
+        <span>CO2e a year</span>
+      </div>
+      {% endif %}
+    </div>
+    <details class="worst-why">
+      <summary>Why this matters</summary>
+      <p>{{ problem.why }}</p>
+    </details>
+  </article>
+  {% endfor %}
+</section>
+
+<section class="act-head second">
+  <p class="eyebrow">Step three</p>
+  <h2>This is what to do about it</h2>
+  <p class="act-lede">
+    Every problem above becomes one change, with the money, the carbon, and
+    the operational catch attached to it.
+  </p>
+</section>
+
 <section class="panel next-step">
   <div>
-    <h2>Cost and carbon optimizer</h2>
+    <h2>Read the full diagnosis</h2>
     <p class="sub">
-      Every route scored and ranked on a world map, with what-if changes you
-      can try before committing to any of them.
+      The {{ report.problems|length }} biggest problems ranked, how every
+      figure was reached, and a numbered plan you can take into a meeting.
     </p>
   </div>
-  <a class="primary" href="{{ url_for('dashboard') }}">Open the optimizer</a>
+  <a class="primary" href="{{ url_for('diagnosis_page') }}">Open the report</a>
+</section>
+{% endif %}
+
+<section class="panel next-step quiet">
+  <div>
+    <h2>Try a change before committing to it</h2>
+    <p class="sub">
+      Every route on a world map, where you can switch its transport mode or
+      the warehouse serving it and watch cost and carbon move.
+    </p>
+  </div>
+  <a class="ghost-link" href="{{ url_for('dashboard') }}">Open the optimizer</a>
 </section>
 
 <section class="panel next-step quiet">

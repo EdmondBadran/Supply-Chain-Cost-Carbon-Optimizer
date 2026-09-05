@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Cost and carbon optimizer{% endblock %}
+
+{% block content %}
+
+<section class="lp-hero">
+  <p class="eyebrow">Supply chain diagnostics</p>
+  <h1>
+    Cost and carbon waste
+    <span class="lp-accent">the same routes.</span>
+    Nobody looks at both.
+  </h1>
+  <p class="lp-lede">
+    Freight cost is managed by one team, in dollars, every week. Freight
+    carbon is reported by another team, in tonnes, once a year. The routes
+    doing both kinds of damage sit in the gap between them, which is exactly
+    why they survive. This tool reads your order data and finds them.
+  </p>
+  <div class="lp-actions">
+    <a class="lp-primary" href="{{ url_for('chain_page') }}">
+      Open the live demo
+    </a>
+    <a class="lp-secondary" href="{{ url_for('upload_page') }}">
+      Use your own CSV
+    </a>
+  </div>
+  <p class="lp-note">
+    No sign up, no upload needed. The demo is loaded and running on a sample
+    company right now.
+  </p>
+</section>
+
+{% if report %}
+<section class="lp-proof">
+  <p class="lp-proof-label">Live output, sample company</p>
+  <p class="lp-proof-truth">{{ report.overview.truth }}</p>
+  <div class="lp-proof-figures">
+    <div>
+      <strong>${{ "{:,.0f}".format(report.overview.cost) }}</strong>
+      <span>a year to run the chain</span>
+    </div>
+    <div>
+      <strong>{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
+      <span>CO2e a year</span>
+    </div>
+    <div>
+      <strong class="cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</strong>
+      <span>recoverable a year</span>
+    </div>
+    <div>
+      <strong class="carbon-ink">{{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} t</strong>
+      <span>carbon recoverable</span>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<section class="lp-steps">
+  <h2>Three steps, in order</h2>
+  <ol>
+    <li>
+      <span class="lp-step-num">01</span>
+      <h3>See the chain</h3>
+      <p>
+        Every order collapses into routes, and the routes into six stages:
+        suppliers, inbound, warehousing, outbound, customers, returns. Most
+        companies have never seen all six on one page.
+      </p>
+    </li>
+    <li>
+      <span class="lp-step-num">02</span>
+      <h3>Find what is wrong</h3>
+      <p>
+        Each stage runs its own check. Freight on a mode that is beaten on
+        both cost and carbon. Warehouses on a dirty power grid. Destinations
+        that cost too much to reach. Routes where too much comes back.
+      </p>
+    </li>
+    <li>
+      <span class="lp-step-num">03</span>
+      <h3>Get the plan</h3>
+      <p>
+        A numbered list of changes. What to do, what it saves in money, what
+        it saves in carbon, and the operational catch that will decide whether
+        you can actually do it.
+      </p>
+    </li>
+  </ol>
+</section>
+
+<section class="lp-split">
+  <div>
+    <h2>What makes it different</h2>
+    <p>
+      A route being expensive is a procurement question. A route being dirty
+      is a reporting question. Neither is interesting alone, and both already
+      have an owner. This only surfaces routes where one change fixes both,
+      because those are the only ones where the business case writes itself.
+    </p>
+    <p>
+      That distinction is enforced in the maths, not in the marketing. A route
+      is flagged only when a change cuts at least 25 percent of its cost
+      <em>and</em> at least 25 percent of its carbon.
+    </p>
+  </div>
+  <div>
+    <h2>Why the numbers hold up</h2>
+    <p>
+      Emission factors come from the published DEFRA and GLEC ranges, the
+      method most freight carbon reporting is built on. Cost factors are
+      labelled as defaults rather than dressed up as standards. Every formula
+      is written out, along with what the tool does not account for.
+    </p>
+    <p>
+      There is no model and no training data. It is arithmetic on your own
+      figures, and you can reproduce any number on the page by hand.
+      <a href="{{ url_for('method') }}">The method page shows all of it</a>.
+    </p>
+  </div>
+</section>
+
+{% if summary %}
+<section class="lp-spec">
+  <h2>Under it</h2>
+  <dl>
+    <dt>Sample network</dt>
+    <dd>{{ "{:,}".format(summary.orders) }} orders, {{ summary.edges }} routes</dd>
+    <dt>Reach</dt>
+    <dd>{{ summary.customers }} cities, {{ summary.countries }} countries</dd>
+    <dt>Geocoding</dt>
+    <dd>34,135 cities, bundled offline</dd>
+    <dt>Stack</dt>
+    <dd>Python, Flask, SQLite, D3</dd>
+    <dt>Dependencies</dt>
+    <dd>Flask, and nothing else</dd>
+    <dt>Build step</dt>
+    <dd>None. Runs offline</dd>
+  </dl>
+</section>
+{% endif %}
+
+<section class="lp-close">
+  <h2>See it running</h2>
+  <p>
+    The demo is a sample company with a real problem in it: one route carrying
+    a fifth of the network's entire carbon footprint.
+  </p>
+  <a class="lp-primary" href="{{ url_for('chain_page') }}">Open the live demo</a>
+</section>
+
+{% endblock %}

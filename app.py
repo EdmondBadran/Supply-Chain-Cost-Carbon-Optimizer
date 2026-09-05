@@ -8,7 +8,6 @@ from flask import (
     redirect,
     render_template,
     request,
-    session,
     url_for,
 )
 
@@ -30,21 +29,47 @@ def get_conn():
     return conn
 
 
+def ensure_data(conn):
+    """Never let a page open empty. A cold start loads the sample, so the
+    first thing anyone sees is a working chain rather than a form."""
+    if not db.summary(conn):
+        ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
+        analysis.run(conn)
+        db.set_meta(conn, "source", "sample")
+
+
 @app.route("/")
 def index():
-    """The value chain is the front door. Load the sample if nothing is here,
-    so the first thing anyone sees is a working chain rather than a form."""
+    """The landing page, written for someone deciding whether this is worth
+    their time. It runs on real engine output rather than claims, so the
+    numbers on it are the same ones the tool would show a customer."""
     conn = get_conn()
     try:
-        if not db.summary(conn):
-            ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
-            analysis.run(conn)
-            session["using_sample"] = True
+        ensure_data(conn)
+        return render_template(
+            "landing.html",
+            summary=db.summary(conn),
+            report=diagnosis.build(conn),
+            stages=chain.build(conn),
+        )
+    finally:
+        conn.close()
+
+
+@app.route("/chain")
+def chain_page():
+    """The diagnostic itself, written for whoever runs the logistics."""
+    conn = get_conn()
+    try:
+        ensure_data(conn)
+        stages = chain.build(conn)
         return render_template(
             "chain.html",
             summary=db.summary(conn),
-            stages=chain.build(conn),
-            using_sample=session.get("using_sample", False),
+            stages=stages,
+            flow=chain.flow_layout(stages),
+            report=diagnosis.build(conn),
+            using_sample=db.get_meta(conn, "source") == "sample",
         )
     finally:
         conn.close()
@@ -85,7 +110,7 @@ def diagnosis_page():
     try:
         report = diagnosis.build(conn)
         if report is None:
-            return redirect(url_for("index"))
+            return redirect(url_for("chain_page"))
         return render_template(
             "diagnosis.html", report=report, summary=db.summary(conn)
         )
@@ -99,7 +124,7 @@ def dashboard():
     try:
         summary = db.summary(conn)
         if not summary:
-            return redirect(url_for("index"))
+            return redirect(url_for("chain_page"))
         return render_template(
             "dashboard.html",
             summary=summary,
@@ -186,7 +211,7 @@ def upload():
             report = ingest.load(conn, orders_path, warehouses_path, suppliers_path)
             analysis.run(conn)
             summary = db.summary(conn)
-            session["using_sample"] = False
+            db.set_meta(conn, "source", "upload")
         except ingest.ValidationError as exc:
             return render_error(str(exc))
         except UnicodeDecodeError:
@@ -205,10 +230,10 @@ def sample():
     try:
         ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
         analysis.run(conn)
-        session["using_sample"] = True
+        db.set_meta(conn, "source", "sample")
     finally:
         conn.close()
-    return redirect(url_for("index"))
+    return redirect(url_for("chain_page"))
 
 
 @app.post("/clear")
@@ -216,7 +241,6 @@ def clear():
     conn = get_conn()
     try:
         db.reset(conn)
-        session.pop("using_sample", None)
     finally:
         conn.close()
     return redirect(url_for("upload_page"))

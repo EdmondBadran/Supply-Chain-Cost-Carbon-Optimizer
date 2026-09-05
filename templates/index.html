@@ -72,7 +72,7 @@
   <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
   {% endif %}
   <div class="row-actions">
-    <a class="primary" href="{{ url_for('index') }}">See the value chain</a>
+    <a class="primary" href="{{ url_for('chain_page') }}">See the value chain</a>
     <form method="post" action="{{ url_for('clear') }}">
       <button class="ghost" type="submit">Clear this data</button>
     </form>

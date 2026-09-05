@@ -1821,3 +1821,621 @@ select:disabled {
         margin-left: 0 !important;
     }
 }
+
+
+/* ==== Landing page. Written for someone deciding whether to keep reading. ==== */
+.lp-hero {
+    padding: 56px 0 44px;
+    max-width: 62ch;
+}
+
+.lp-hero h1 {
+    margin: 0 0 22px;
+    font-size: clamp(2.2rem, 5.4vw, 3.5rem);
+    line-height: 1.02;
+    letter-spacing: -0.038em;
+    font-weight: 600;
+}
+
+.lp-accent {
+    display: block;
+    color: var(--cost);
+}
+
+.lp-lede {
+    margin: 0 0 30px;
+    font-size: clamp(1rem, 1.5vw, 1.16rem);
+    line-height: 1.6;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.lp-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.lp-primary,
+.lp-secondary {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 26px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+}
+
+.lp-primary {
+    background: var(--ink);
+    color: var(--page);
+}
+
+.lp-secondary {
+    border: 1px solid var(--line);
+    color: var(--ink-2);
+    background: var(--panel);
+}
+
+.lp-primary:hover,
+.lp-secondary:hover {
+    transform: translateY(-1px);
+}
+
+.lp-secondary:hover {
+    border-color: var(--ink-3);
+    color: var(--ink);
+}
+
+.lp-note {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--ink-3);
+}
+
+.lp-proof {
+    padding: 30px 32px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+    box-shadow: var(--shadow);
+    margin-bottom: 26px;
+}
+
+.lp-proof-label {
+    margin: 0 0 12px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.lp-proof-truth {
+    margin: 0 0 26px;
+    font-size: 16.5px;
+    line-height: 1.6;
+    color: var(--ink);
+    max-width: 74ch;
+    text-wrap: pretty;
+}
+
+.lp-proof-figures {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 22px;
+    padding-top: 22px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.lp-proof-figures strong {
+    display: block;
+    font-size: clamp(1.3rem, 2.3vw, 1.7rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+}
+
+.lp-proof-figures span {
+    font-size: 13px;
+    color: var(--ink-3);
+}
+
+.lp-steps {
+    margin-bottom: 26px;
+}
+
+.lp-steps h2,
+.lp-split h2,
+.lp-spec h2,
+.lp-close h2 {
+    font-size: 1.06rem;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin: 0 0 18px;
+}
+
+.lp-steps ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--line-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.lp-steps li {
+    background: var(--panel);
+    padding: 26px 24px 28px;
+}
+
+.lp-step-num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--cost);
+}
+
+.lp-steps h3 {
+    margin: 12px 0 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.014em;
+}
+
+.lp-steps p {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.lp-split {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+    margin-bottom: 26px;
+}
+
+.lp-split > div {
+    padding: 26px 28px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+}
+
+.lp-split p {
+    font-size: 14.5px;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.lp-split p:last-child {
+    margin-bottom: 0;
+}
+
+.lp-split a {
+    color: var(--carbon);
+}
+
+.lp-spec {
+    padding: 26px 28px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+    margin-bottom: 26px;
+}
+
+.lp-spec dl {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 18px 24px;
+    margin: 0;
+}
+
+.lp-spec dt {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 10px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+}
+
+.lp-spec dd {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--ink);
+}
+
+.lp-close {
+    padding: 40px 32px;
+    border-radius: var(--radius-lg);
+    background: var(--ink);
+    color: var(--page);
+    margin-bottom: 22px;
+}
+
+.lp-close h2 {
+    color: var(--page);
+    margin-bottom: 10px;
+}
+
+.lp-close p {
+    margin: 0 0 24px;
+    color: rgba(250, 248, 244, 0.74);
+    font-size: 15px;
+    max-width: 60ch;
+}
+
+.lp-close .lp-primary {
+    background: var(--page);
+    color: var(--ink);
+}
+
+/* ==== The chain as a river. Money accumulating as goods move. ==== */
+.act-head {
+    padding: 40px 0 26px;
+    max-width: 68ch;
+}
+
+.act-head.second {
+    padding: 46px 0 22px;
+}
+
+.act-head h1 {
+    margin: 0 0 16px;
+    font-size: clamp(1.9rem, 4.4vw, 2.7rem);
+    line-height: 1.05;
+    letter-spacing: -0.034em;
+    font-weight: 600;
+}
+
+.act-head h2 {
+    margin: 0 0 14px;
+    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.028em;
+    font-weight: 600;
+}
+
+.act-lede {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.river-wrap {
+    margin-bottom: 26px;
+}
+
+.river {
+    position: relative;
+    width: 100%;
+    padding-top: calc(var(--river-ratio, 0.33) * 100%);
+    min-height: 300px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.river-art,
+.river-marks {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.river-marks {
+    pointer-events: none;
+}
+
+.river-stage {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 15.5%;
+    transform: translateX(-50%);
+    /* A button centres its own content vertically whatever display says, so
+       the column has to be spelled out or the labels drift into the band. */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 3px;
+    padding: 14px 0 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: center;
+    cursor: pointer;
+    pointer-events: auto;
+    border-radius: var(--radius);
+    transition: background 0.18s var(--ease);
+}
+
+.river-stage:hover,
+.river-stage:focus-visible {
+    background: rgba(26, 107, 79, 0.05);
+}
+
+.river-stage.on {
+    background: var(--carbon-soft);
+}
+
+.river-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    letter-spacing: -0.012em;
+    line-height: 1.25;
+}
+
+.river-count {
+    font-size: 11.5px;
+    color: var(--ink-3);
+}
+
+/* Placed rather than flexed, so figures always clear the band below it. */
+.river-foot {
+    position: absolute;
+    top: 54%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.river-name,
+.river-count {
+    display: block;
+}
+
+.river-figures {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 12.5px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+}
+
+.river-flag {
+    margin-top: 5px;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: var(--cost-soft);
+    color: var(--cost);
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.river-stage.returns {
+    height: auto;
+    top: auto;
+    padding: 8px 10px;
+    width: 20%;
+    gap: 2px;
+}
+
+.river-stage.returns .river-figures {
+    flex-direction: row;
+    gap: 10px;
+}
+
+.river-stage.returns .river-flag {
+    margin-top: 0;
+}
+
+.river-key {
+    margin: 14px 2px 0;
+    font-size: 13.5px;
+    color: var(--ink-3);
+    max-width: 78ch;
+    text-wrap: pretty;
+}
+
+.river-hint {
+    color: var(--carbon);
+}
+
+/* The three worst things, stated plainly. */
+.worst {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.worst-card {
+    position: relative;
+    padding: 24px 24px 20px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+}
+
+.worst-rank {
+    position: absolute;
+    top: 20px;
+    right: 22px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--line);
+}
+
+.worst-card h3 {
+    margin: 6px 0 8px;
+    font-size: 1.02rem;
+    font-weight: 600;
+    letter-spacing: -0.016em;
+    padding-right: 28px;
+}
+
+.worst-what {
+    margin: 0 0 18px;
+    font-size: 14px;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+.worst-stake {
+    display: flex;
+    gap: 22px;
+    padding: 16px 0;
+    border-top: 1px solid var(--line-soft);
+    margin-top: auto;
+}
+
+.worst-stake strong {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: -0.028em;
+    font-variant-numeric: tabular-nums;
+}
+
+.worst-stake span {
+    font-size: 11.5px;
+    color: var(--ink-3);
+}
+
+.worst-why summary {
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--ink-3);
+    padding-top: 12px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.worst-why summary:hover {
+    color: var(--ink);
+}
+
+.worst-why p {
+    margin: 10px 0 0;
+    font-size: 13.5px;
+    color: var(--ink-2);
+    text-wrap: pretty;
+}
+
+@media (max-width: 820px) {
+    .river {
+        padding-top: 0;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+    }
+
+    .river-art {
+        display: none;
+    }
+
+    .river-marks {
+        position: static;
+        display: flex;
+        flex-direction: column;
+        height: auto;
+    }
+
+    .river-stage,
+    .river-stage.returns {
+        position: static;
+        transform: none;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        text-align: left;
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--line-soft);
+        border-radius: 0;
+    }
+
+    .river-foot {
+        position: static;
+        flex-direction: row;
+        align-items: baseline;
+        gap: 12px;
+    }
+
+
+    .river-figures {
+        flex-direction: row;
+        gap: 12px;
+    }
+}
+
+
+/* Small screens: five nav items will not sit on one line beside the brand,
+   and the stacked chain rows need two lines rather than one cramped one. */
+@media (max-width: 720px) {
+    .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 14px 20px;
+    }
+
+    .topnav {
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        font-size: 13px;
+    }
+
+    main {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .river-stage,
+    .river-stage.returns {
+        flex-wrap: wrap;
+        align-items: center;
+        row-gap: 6px;
+        padding: 14px 16px;
+    }
+
+    .river-name {
+        flex: 1 1 auto;
+    }
+
+    .river-flag {
+        order: 2;
+        margin-top: 0;
+    }
+
+    .river-count {
+        order: 3;
+        flex: 1 1 100%;
+        text-align: left;
+    }
+
+    .river-foot {
+        order: 4;
+        flex: 1 1 100%;
+        justify-content: flex-start;
+    }
+}

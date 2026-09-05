@@ -267,3 +267,104 @@ def _returns_stage(lanes):
         returns_co2e,
         problems[:6],
     )
+
+
+# The chain drawn as one river of money. Geometry lives here rather than in
+# the template because a bezier path is not something Jinja should be asked
+# to work out.
+FLOW_WIDTH = 1000
+FLOW_HEIGHT = 400
+FLOW_SPINE = 150
+FLOW_MAX_HALF = 54
+FLOW_MIN_HALF = 5
+
+
+def _curve(points):
+    """A path through points with flat tangents, so the river reads as flow."""
+    d = f"M {points[0][0]:.1f} {points[0][1]:.1f}"
+    for (x0, y0), (x1, y1) in zip(points, points[1:]):
+        grip = (x1 - x0) / 2
+        d += (
+            f" C {x0 + grip:.1f} {y0:.1f}, {x1 - grip:.1f} {y1:.1f}, "
+            f"{x1:.1f} {y1:.1f}"
+        )
+    return d
+
+
+def flow_layout(stages):
+    """Where each stage sits, and how thick the river is when it gets there.
+
+    The band widens at every stage that adds cost, because that is what a
+    supply chain does to a product: each leg makes it more expensive. Stages
+    that add no cost of their own, suppliers and customers, leave the band
+    flat, which answers the "why is this one blank" question in the picture
+    instead of in a footnote.
+    """
+    forward = [s for s in stages if s["key"] != "returns"]
+    returns = next((s for s in stages if s["key"] == "returns"), None)
+    if not forward:
+        return None
+
+    step = FLOW_WIDTH / (len(forward) + 1)
+    total = sum(s["cost"] for s in forward) or 1.0
+
+    running = 0.0
+    marks = []
+    for index, stage in enumerate(forward):
+        running += stage["cost"]
+        span = FLOW_MAX_HALF - FLOW_MIN_HALF
+        half = FLOW_MIN_HALF + span * (running / total)
+        marks.append(
+            {
+                "key": stage["key"],
+                "name": stage["name"],
+                "x": step * (index + 1),
+                "half": half,
+                "running": running,
+                "stage": stage,
+            }
+        )
+
+    top = [(m["x"], FLOW_SPINE - m["half"]) for m in marks]
+    bottom = [(m["x"], FLOW_SPINE + m["half"]) for m in marks]
+    band = _curve(top) + " L " + _curve(list(reversed(bottom)))[1:] + " Z"
+
+    loop = None
+    if returns and returns["cost"] > 0:
+        # The return leg runs flat underneath the whole chain rather than
+        # curving out of the band. It has to clear every stage label, and a
+        # line going right to left with an arrow on it reads as "backwards"
+        # more plainly than a graceful curve does.
+        start = marks[-1]["x"]
+        end = next(
+            (m["x"] for m in marks if m["key"] == "warehousing"), marks[0]["x"]
+        )
+        depth = FLOW_SPINE + FLOW_MAX_HALF + 110
+        lift = 22
+        corner = 34
+        thickness = max(6.0, FLOW_MAX_HALF * (returns["cost"] / total) * 2)
+        loop = {
+            "path": (
+                f"M {start:.1f} {depth - lift:.1f} "
+                f"Q {start:.1f} {depth:.1f}, {start - corner:.1f} {depth:.1f} "
+                f"L {end + corner:.1f} {depth:.1f} "
+                f"Q {end:.1f} {depth:.1f}, {end:.1f} {depth - lift:.1f}"
+            ),
+            "width": thickness,
+            "arrow": f"{end + corner + 16:.1f},{depth - 7:.1f} "
+                     f"{end + corner - 4:.1f},{depth:.1f} "
+                     f"{end + corner + 16:.1f},{depth + 7:.1f}",
+            "label_x": (start + end) / 2,
+            "label_y": depth + 24,
+            "stage": returns,
+        }
+
+    return {
+        "width": FLOW_WIDTH,
+        "height": FLOW_HEIGHT,
+        "spine": FLOW_SPINE,
+        "band": band,
+        "marks": marks,
+        "loop": loop,
+        "total": total,
+    }

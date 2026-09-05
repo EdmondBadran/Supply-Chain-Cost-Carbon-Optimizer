@@ -1,35 +1,38 @@
-const stages = document.querySelectorAll(".stage");
+const stages = document.querySelectorAll(".river-stage");
+const details = document.querySelectorAll(".stage-detail");
+
+function close() {
+    stages.forEach((button) => {
+        button.classList.remove("on");
+        button.setAttribute("aria-expanded", "false");
+    });
+    details.forEach((panel) => {
+        panel.hidden = true;
+    });
+}
 
 function open(key) {
+    close();
     stages.forEach((button) => {
-        const on = button.dataset.stage === key;
-        button.classList.toggle("on", on);
-        button.setAttribute("aria-expanded", String(on));
+        if (button.dataset.stage !== key) return;
+        button.classList.add("on");
+        button.setAttribute("aria-expanded", "true");
     });
-    document.querySelectorAll(".stage-detail").forEach((panel) => {
-        panel.hidden = panel.id !== "detail-" + key;
-    });
+    const panel = document.getElementById("detail-" + key);
+    if (!panel) return;
+    panel.hidden = false;
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 stages.forEach((button) => {
     button.addEventListener("click", () => {
-        const alreadyOpen = button.classList.contains("on");
-        if (alreadyOpen) {
-            button.classList.remove("on");
-            button.setAttribute("aria-expanded", "false");
-            document.getElementById("detail-" + button.dataset.stage).hidden = true;
+        if (button.classList.contains("on")) {
+            close();
             return;
         }
         open(button.dataset.stage);
     });
 });
 
-// Open the stage with the most at stake, so the page lands on the worst part
-// of the chain rather than on whatever happens to come first.
-const worst = [...stages]
-    .filter((b) => b.classList.contains("has-problems"))
-    .sort(
-        (a, b) =>
-            Number(b.dataset.stake || 0) - Number(a.dataset.stake || 0)
-    )[0];
-if (worst) open(worst.dataset.stage);
+// Nothing opens on load. The headline finding is already on the page, so the
+// per-stage detail is the part worth keeping out of the way until asked for.

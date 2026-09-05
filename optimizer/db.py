@@ -58,6 +58,11 @@ CREATE TABLE IF NOT EXISTS effort_tags (
     updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS meta (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_orders_origin ON orders(origin_id);
 CREATE INDEX IF NOT EXISTS idx_orders_dest ON orders(dest_id);
 CREATE INDEX IF NOT EXISTS idx_edges_origin ON edges(origin_id);
@@ -80,9 +85,25 @@ def init(conn):
 
 def reset(conn):
     """Drop loaded data but keep the schema, so a new upload starts clean."""
-    for table in ("effort_tags", "edges", "orders", "nodes"):
+    for table in ("meta", "effort_tags", "edges", "orders", "nodes"):
         conn.execute(f"DELETE FROM {table}")
     conn.commit()
+
+
+def set_meta(conn, key, value):
+    conn.execute(
+        """
+        INSERT INTO meta (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """,
+        (key, str(value)),
+    )
+    conn.commit()
+
+
+def get_meta(conn, key, default=None):
+    row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
+    return row["value"] if row else default
 
 
 def summary(conn):

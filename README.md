@@ -9,9 +9,17 @@ different spreadsheets.
 This tool loads your order data, works out what every route costs to serve and
 what it emits, and ranks the places where one change fixes both.
 
-## The four views
+## The five views
 
-**The value chain** is where it opens. Six stages, suppliers through to
+**The landing page** is where it opens, and it explains the problem before
+showing a single number. The demo is already loaded and one click away, so
+nothing is hidden behind a form.
+
+**The value chain** is the diagnostic itself, drawn as one river of money.
+The band thickens at every stage that adds cost, so you can see where the
+spend accumulates without reading a legend, and returns runs backwards
+underneath it. Three steps down the page: this is your chain, this is what is
+wrong, this is what to do. Six stages, suppliers through to
 returns, each showing what it costs, what it emits, and what is wrong inside
 it. Warehousing gets checked for carbon per tonne handled, customers for cost
 per tonne to serve, returns for return rate, freight for whether a different
@@ -70,7 +78,8 @@ python app.py
 Then open http://localhost:5000. The sample dataset loads itself, so you land
 on a working value chain rather than an upload form.
 
-    /           the value chain
+    /           the landing page
+    /chain      the value chain and the diagnosis
     /dashboard  the optimizer, map and what-if
     /diagnosis  the written report and the plan
     /method     how every number is worked out
