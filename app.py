@@ -254,4 +254,9 @@ def _cleanup(tmpdir):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    # The reloader runs a second process, which makes the server awkward to
+    # stop by port. Set FLASK_DEBUG=0 when starting it from something that
+    # needs to shut it down again cleanly.
+    debug = os.environ.get("FLASK_DEBUG", "1") != "0"
+    port = int(os.environ.get("PORT", "5000"))
+    app.run(debug=debug, port=port)
