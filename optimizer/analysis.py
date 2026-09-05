@@ -40,6 +40,15 @@ def lane_emissions(weight_kg, distance_km, mode, order_count, return_count):
     return {"transport": transport, "packaging": packaging, "returns": returns}
 
 
+def lane_transit_days(distance_km, mode):
+    """Rough door-to-door days for a lane, so a mode switch can be priced in
+    lead time as well as money and carbon."""
+    return (
+        distance_km / factors.transit_km_per_day(mode)
+        + factors.transit_fixed_days(mode)
+    )
+
+
 def run(conn):
     """Fill in cost and emission columns for every edge."""
     edges = conn.execute(

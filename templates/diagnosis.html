@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Supply chain diagnosis{% endblock %}
+
+{% block content %}
+
+{% set o = report.overview %}
+{% set m = report.method %}
+
+<section class="report-head">
+  <p class="eyebrow">Diagnosis</p>
+  <h1>The truth about your supply chain</h1>
+  <p class="truth">{{ o.truth }}</p>
+  {% if o.concentration %}
+  <p class="truth-note">{{ o.concentration }}</p>
+  {% endif %}
+</section>
+
+<section class="report-figures">
+  <div class="figure">
+    <span class="figure-label">Chain cost a year</span>
+    <strong class="figure-value">${{ "{:,.0f}".format(o.cost) }}</strong>
+    <span class="figure-foot">across {{ "{:,}".format(o.routes) }} routes</span>
+  </div>
+  <div class="figure">
+    <span class="figure-label">Chain carbon a year</span>
+    <strong class="figure-value">{{ "{:,.0f}".format(o.co2e / 1000) }} t</strong>
+    <span class="figure-foot">CO2e, all stages</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Money recoverable</span>
+    <strong class="figure-value cost-ink">${{ "{:,.0f}".format(o.recoverable_cost) }}</strong>
+    <span class="figure-foot">{{ "{:.0%}".format(o.cost_share) }} of what you spend</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Carbon recoverable</span>
+    <strong class="figure-value carbon-ink">{{ "{:,.0f}".format(o.recoverable_co2e / 1000) }} t</strong>
+    <span class="figure-foot">{{ "{:.0%}".format(o.co2e_share) }} of what you emit</span>
+  </div>
+</section>
+
+<section class="panel prose">
+  <h2>Your value chain, end to end</h2>
+  <p class="sub">{{ report.flow.note }}</p>
+
+  <ol class="flow">
+    {% for stage in report.flow.stages %}
+    <li class="flow-stage{{ ' flagged' if stage.problem_count }}">
+      <div class="flow-marker" aria-hidden="true">
+        <span class="flow-dot"></span>
+        {% if not loop.last %}<span class="flow-line"></span>{% endif %}
+      </div>
+      <div class="flow-body">
+        <h3>{{ stage.name }}</h3>
+        <p>{{ stage.what }}</p>
+        <p class="flow-found">{{ stage.found }}</p>
+      </div>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="panel prose">
+  <h2>What is going wrong</h2>
+  <p class="sub">
+    Ranked by how much of your whole chain each one gives back, so a dirty
+    warehouse can be weighed against an expensive route honestly.
+  </p>
+
+  <ol class="findings">
+    {% for problem in report.problems %}
+    <li class="finding">
+      <div class="finding-head">
+        <span class="finding-rank">{{ "%02d"|format(loop.index) }}</span>
+        <div>
+          <span class="finding-stage">{{ problem.stage }}</span>
+          <h3>{{ problem.title }}</h3>
+        </div>
+        <div class="finding-stake">
+          {% if problem.cost_at_stake %}
+          <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
+          {% endif %}
+          {% if problem.co2e_at_stake %}
+          <span class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          {% endif %}
+        </div>
+      </div>
+      <dl class="finding-body">
+        <dt>What is happening</dt>
+        <dd>{{ problem.happening }}</dd>
+        <dt>Why it matters</dt>
+        <dd>{{ problem.why }}</dd>
+      </dl>
+      {% if problem.edge_id %}
+      <a class="problem-link" href="{{ url_for('dashboard') }}?lane={{ problem.edge_id }}">
+        Open on the map
+      </a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="panel prose">
+  <h2>How these numbers were worked out</h2>
+  <p class="sub">
+    Nothing here is a model or an estimate you cannot reproduce. It is
+    arithmetic on your own figures and the factors below.
+  </p>
+
+  <h3>The four calculations</h3>
+  <dl class="formulas">
+    {% for name, words in m.formulas %}
+    <dt>{{ name }}</dt>
+    <dd>{{ words }}</dd>
+    {% endfor %}
+  </dl>
+
+  <h3>The factors</h3>
+  <table class="grid wide">
+    <thead>
+      <tr>
+        <th>Mode</th>
+        <th>Cost per tonne carried 1 km</th>
+        <th>Carbon per tonne carried 1 km</th>
+        <th>Rough speed</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mode in m.costs %}
+      <tr>
+        <td>{{ mode }}</td>
+        <td class="num">${{ m.costs[mode] }}</td>
+        <td class="num">{{ m.emissions[mode] }} kg</td>
+        <td class="num">{{ "{:,}".format(m.transit[mode]) }} km a day</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="source">
+    Air costs about {{ "{:,.0f}".format(m.air_cost_ratio) }} times what sea
+    costs per tonne carried, and emits about
+    {{ "{:,.0f}".format(m.air_co2e_ratio) }} times as much. That one gap is
+    where most of the findings above come from.
+  </p>
+
+  <h3>What we assumed</h3>
+  {% for title, words in m.assumptions %}
+  <p class="{{ 'caveat' if loop.index0 in [0, 2] else '' }}">
+    <strong>{{ title }}.</strong> {{ words }}
+  </p>
+  {% endfor %}
+
+  <h3>What this report does not cover</h3>
+  <ul>
+    {% for item in m.limits %}
+    <li>{{ item }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<section class="panel prose">
+  <h2>What to do, in order</h2>
+  <p class="sub">
+    Each one is a single change with the money, the carbon, and the catch
+    attached. Work down the list.
+  </p>
+
+  <ol class="plan">
+    {% for step in report.plan %}
+    <li class="plan-step">
+      <div class="plan-head">
+        <span class="plan-rank">{{ step.number }}</span>
+        <div>
+          <span class="finding-stage">{{ step.stage }}</span>
+          <h3>{{ step.title }}</h3>
+        </div>
+      </div>
+      <div class="plan-grid">
+        <div>
+          <span class="plan-label">Do this</span>
+          <p>{{ step.action }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Money</span>
+          <p>{{ step.cost_line }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Carbon</span>
+          <p>{{ step.co2e_line }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Before you commit</span>
+          <p>{{ step.note }}</p>
+        </div>
+      </div>
+      {% if step.alternatives %}
+      <p class="plan-alt">
+        <strong>If that is not possible:</strong>
+        {% for alt in step.alternatives %}{{ alt }} {% endfor %}
+      </p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+{% if report.top_three %}
+<section class="panel three">
+  <h2>If you do only three things</h2>
+  <ol>
+    {% for problem in report.top_three %}
+    <li>
+      <strong>{{ problem.title }}.</strong> {{ problem.action }}
+      <span class="three-stake">
+        {% if problem.cost_at_stake %}${{ "{:,.0f}".format(problem.cost_at_stake) }}{% endif %}
+        {% if problem.cost_at_stake and problem.co2e_at_stake %}and{% endif %}
+        {% if problem.co2e_at_stake %}{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e{% endif %}
+        a year.
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="closing">{{ report.closing }}</p>
+</section>
+{% endif %}
+
+<section class="panel next-step quiet">
+  <div>
+    <h2>Check any of this yourself</h2>
+    <p class="sub">
+      Every route above is on the map, where you can change its mode or its
+      warehouse and watch the numbers move before committing to anything.
+    </p>
+  </div>
+  <a class="ghost-link" href="{{ url_for('dashboard') }}">Open the optimizer</a>
+</section>
+
+{% endblock %}

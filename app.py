@@ -12,7 +12,7 @@ from flask import (
     url_for,
 )
 
-from optimizer import analysis, chain, db, factors, ingest, scoring
+from optimizer import analysis, chain, db, diagnosis, factors, ingest, scoring
 
 ROOT = Path(__file__).resolve().parent
 SAMPLE_ORDERS = ROOT / "data" / "sample_orders.csv"
@@ -75,6 +75,22 @@ def method():
         sea_minimum=scoring.SEA_MINIMUM_KM,
         surface_range=scoring.SURFACE_RANGE_KM,
     )
+
+
+@app.route("/diagnosis")
+def diagnosis_page():
+    """The whole chain read back as a report: the truth, what is wrong, how
+    every figure was reached, and the order to fix things in."""
+    conn = get_conn()
+    try:
+        report = diagnosis.build(conn)
+        if report is None:
+            return redirect(url_for("index"))
+        return render_template(
+            "diagnosis.html", report=report, summary=db.summary(conn)
+        )
+    finally:
+        conn.close()
 
 
 @app.route("/dashboard")

@@ -9,7 +9,7 @@ different spreadsheets.
 This tool loads your order data, works out what every route costs to serve and
 what it emits, and ranks the places where one change fixes both.
 
-## The three views
+## The four views
 
 **The value chain** is where it opens. Six stages, suppliers through to
 returns, each showing what it costs, what it emits, and what is wrong inside
@@ -22,6 +22,13 @@ problem to land on that exact route on the map.
 worth changing flagged, and a panel where you can try a different transport
 mode or a different warehouse and watch cost and carbon move before you commit
 to anything.
+
+**The report** writes the whole thing up the way a consultant would hand it
+over. The truth about your chain in one paragraph, every stage walked through
+in plain language, the problems ranked across stages, how each figure was
+reached, and a numbered plan with the money, the carbon and the operational
+catch on every step. It ends with the three things to do if you only do three.
+Every sentence is built from your own data.
 
 **The method page** shows the working. Every formula, every factor with its
 source, every assumption, and a section on what the tool does not account for
@@ -65,6 +72,7 @@ on a working value chain rather than an upload form.
 
     /           the value chain
     /dashboard  the optimizer, map and what-if
+    /diagnosis  the written report and the plan
     /method     how every number is worked out
     /data       load your own CSV
 
@@ -150,6 +158,7 @@ optimizer/
   analysis.py       cost to serve and emissions
   scoring.py        bottleneck ranking and what-if
   chain.py          the value chain stages and their problem checks
+  diagnosis.py      the written report: diagnosis, method and plan
 static/
   dashboard.js      the map, the ranking and the what-if panel
   chain.js          the value chain stages
@@ -171,6 +180,8 @@ ships and which warehouse serves it, but you cannot delete a warehouse and
 watch the work redistribute. That needs reassignment and capacity logic rather
 than arithmetic, and doing it half-right would be worse than not having it.
 
-**Transit time and inventory.** A change that saves money and carbon may still
-be unacceptable on lead time, and slower shipping ties up working capital.
-Neither is counted. The method page says so plainly rather than hiding it.
+**Inventory.** Slower shipping ties up more working capital in stock and that
+cost is not counted anywhere. Transit time itself is now estimated, from
+typical door-to-door speeds per mode, so the report can tell you a mode switch
+adds weeks rather than days. Those are planning figures, not carrier
+schedules, and the method page says so rather than hiding it.

@@ -68,3 +68,35 @@ def normalise_mode(mode):
     if key not in EMISSION_FACTORS:
         raise ValueError(f"unknown transport mode: {mode}")
     return key
+
+
+# Rough door-to-door speed by mode, in km per day. These turn a mode switch
+# into a lead time answer, which is the first question anyone asks about one.
+# They are planning figures, not schedules: road is capped by driver hours
+# rather than vehicle speed, rail loses hours to terminals and marshalling,
+# and a container ship cruising at about 20 knots still spends days in port at
+# each end. Right order of magnitude, nothing more.
+TRANSIT_KM_PER_DAY = {
+    "road": 700,
+    "rail": 450,
+    "sea": 550,
+    "air": 5000,
+}
+
+# Time spent at each end whatever the distance: collection, consolidation,
+# customs, terminal or port handling, and final delivery. Sea carries the most
+# because port dwell and container handling dominate short sea routes.
+TRANSIT_FIXED_DAYS = {
+    "road": 1.0,
+    "rail": 2.0,
+    "sea": 9.0,
+    "air": 2.0,
+}
+
+
+def transit_km_per_day(mode):
+    return TRANSIT_KM_PER_DAY[normalise_mode(mode)]
+
+
+def transit_fixed_days(mode):
+    return TRANSIT_FIXED_DAYS[normalise_mode(mode)]
