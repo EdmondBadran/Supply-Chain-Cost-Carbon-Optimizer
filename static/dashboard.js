@@ -1,9 +1,11 @@
 const MODE_COLOR = {
-    road: "#8a8578",
-    rail: "#6b5bc4",
-    sea: "#2d7fb8",
-    air: "#c2703a",
+    road: "#9c968a",
+    rail: "#9184e8",
+    sea: "#4fa8e0",
+    air: "#f2913d",
 };
+
+const REDUCED_MOTION = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const WORLD_TOPOLOGY =
     "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -112,6 +114,10 @@ function rescale() {
         return this.dataset.width / k;
     });
     laneLayer.selectAll("path.lane-hit").attr("stroke-width", 14 / k);
+    laneLayer.selectAll("path.lane-trace").attr("stroke-width", function () {
+        return this.dataset.width / k;
+    });
+    laneLayer.selectAll("circle.lane-pulse").attr("r", 4 / k);
     nodeLayer.selectAll("circle").attr("r", function () {
         return this.dataset.r / k;
     });
@@ -149,8 +155,8 @@ function drawLand(world) {
         .data(countries.features)
         .join("path")
         .attr("d", path)
-        .attr("fill", "#ded7c9")
-        .attr("stroke", "#f4f1ea")
+        .attr("fill", "#1e1d1b")
+        .attr("stroke", "#2f2d2a")
         .attr("stroke-width", 0.6);
 }
 
@@ -242,6 +248,8 @@ function drawNetwork() {
         const w = laneWidth(lane) * (lane.id === selectedId ? 2 : 1);
         line.node().dataset.width = w;
         line.attr("stroke-width", w / zoomScale);
+
+        if (lane.id === selectedId) travel(group, d, lane);
     });
 
     nodeLayer.selectAll("*").remove();
@@ -312,6 +320,64 @@ const NODE_LABEL = {
     warehouse: "Warehouse",
     customer: "Customer city",
 };
+
+function travel(group, d, lane) {
+    if (REDUCED_MOTION) return;
+
+    const color = MODE_COLOR[lane.mode];
+    const width = laneWidth(lane) * 2.6;
+    const trace = group
+        .append("path")
+        .attr("class", "lane-trace")
+        .attr("d", d)
+        .attr("stroke", color)
+        .style("color", color)
+        .attr("stroke-width", width / zoomScale);
+    trace.node().dataset.width = width;
+
+    const shape = trace.node();
+    const length = shape.getTotalLength();
+    const pulse = group
+        .append("circle")
+        .attr("class", "lane-pulse")
+        .attr("r", 4 / zoomScale)
+        .attr("stroke", color)
+        .style("color", color);
+
+    function run() {
+        // A redraw wipes the layer, and the transition would otherwise keep
+        // running against a node that is no longer on the page.
+        if (!shape.isConnected) return;
+
+        trace
+            .attr("stroke-dasharray", length + " " + length)
+            .attr("stroke-dashoffset", length)
+            .attr("opacity", 1)
+            .transition()
+            .duration(2000)
+            .ease(d3.easeCubicInOut)
+            .attr("stroke-dashoffset", 0)
+            .transition()
+            .duration(700)
+            .attr("opacity", 0);
+
+        pulse
+            .attr("opacity", 1)
+            .transition()
+            .duration(2000)
+            .ease(d3.easeCubicInOut)
+            .attrTween("transform", () => (t) => {
+                const point = shape.getPointAtLength(t * length);
+                return "translate(" + point.x + "," + point.y + ")";
+            })
+            .transition()
+            .duration(700)
+            .attr("opacity", 0)
+            .on("end", run);
+    }
+
+    run();
+}
 
 function arc(a, b) {
     // A slight curve keeps overlapping lanes readable instead of stacking
@@ -384,14 +450,27 @@ function drawWins() {
 }
 
 async function saveEffort(edgeId, effort) {
-    const response = await fetch("/api/effort", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ edge_id: edgeId, effort: effort }),
-    });
-    if (!response.ok) return;
-    network = (await response.json()).network;
+    try {
+        const response = await fetch("/api/effort", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ edge_id: edgeId, effort: effort }),
+        });
+        if (!response.ok) throw new Error(response.status);
+        network = (await response.json()).network;
+        trouble(null);
+    } catch {
+        trouble("That rating was not saved. The server did not answer.");
+    }
+    // Either way the list is redrawn from what the server actually holds, so
+    // a dropdown never sits showing a value that did not stick.
     render();
+}
+
+function trouble(message) {
+    const line = document.getElementById("wins-trouble");
+    line.textContent = message || "";
+    line.hidden = !message;
 }
 
 /* Detail panel and what-if */
@@ -470,6 +549,14 @@ function drawDetail() {
 }
 
 function resultBlock(result) {
+    if (result.failed) {
+        return `
+    <div class="sim bad">
+      <p class="sim-line">That change could not be worked out.</p>
+      <p class="sim-sub">The server did not answer. Pick an option again to retry.</p>
+    </div>`;
+    }
+
     const cost = result.saved.cost;
     const co2e = result.saved.co2e;
     const good = cost > 0 && co2e > 0;
@@ -491,17 +578,22 @@ function resultBlock(result) {
 }
 
 async function runSimulation(edgeId) {
-    const response = await fetch("/api/simulate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            edge_id: edgeId,
-            mode: document.getElementById("sim-mode").value,
-            origin_id: document.getElementById("sim-origin").value,
-        }),
-    });
-    if (!response.ok) return;
-    pending = await response.json();
+    const mode = document.getElementById("sim-mode").value;
+    try {
+        const response = await fetch("/api/simulate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                edge_id: edgeId,
+                mode: mode,
+                origin_id: document.getElementById("sim-origin").value,
+            }),
+        });
+        if (!response.ok) throw new Error(response.status);
+        pending = await response.json();
+    } catch {
+        pending = { edge_id: edgeId, mode: mode, failed: true };
+    }
     drawDetail();
 }
 

@@ -1,22 +1,35 @@
+/* Dark instrument palette. The ground is warm near-black so the two
+   semantic accents, green for carbon and orange for cost, are the only
+   real light on the page and read as live readings rather than decoration. */
 :root {
-    --ink: #191714;
-    --ink-2: #4a453d;
-    --ink-3: #837c70;
-    --line: #e6e1d8;
-    --line-soft: #f0ece4;
-    --page: #faf8f4;
-    --panel: #ffffff;
-    --carbon: #1a6b4f;
-    --carbon-soft: #e9f2ee;
-    --cost: #c2703a;
-    --cost-soft: #f9efe7;
-    --danger: #9d3427;
-    --danger-soft: #f9ebe8;
+    color-scheme: dark;
+
+    --ink: #f3f0ea;
+    --ink-2: #a9a398;
+    --ink-3: #948d80;
+    --line: #2c2a26;
+    --line-soft: #201e1b;
+    --page: #121110;
+    --panel: #1a1917;
+    --panel-2: #221f1c;
+
+    --carbon: #3fcf8e;
+    --carbon-soft: rgba(63, 207, 142, 0.1);
+    --carbon-line: rgba(63, 207, 142, 0.28);
+    --cost: #f2913d;
+    --cost-soft: rgba(242, 145, 61, 0.1);
+    --cost-line: rgba(242, 145, 61, 0.28);
+    --danger: #f2685a;
+    --danger-soft: rgba(242, 104, 90, 0.1);
+
     --radius-lg: 16px;
     --radius: 10px;
     --radius-sm: 6px;
-    --shadow: 0 1px 2px rgba(38, 30, 18, 0.04), 0 8px 24px -12px rgba(38, 30, 18, 0.14);
+    /* On a dark ground a drop shadow does nothing. Depth comes from a lit top
+       edge instead, the way a physical panel catches light. */
+    --shadow: inset 0 1px 0 rgba(255, 255, 255, 0.045), 0 16px 40px -20px rgba(0, 0, 0, 0.9);
     --ease: cubic-bezier(0.32, 0.72, 0.3, 1);
+    --enter: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *,
@@ -46,8 +59,9 @@ body::before {
     inset: 0;
     z-index: -2;
     background:
-        radial-gradient(60rem 40rem at 12% -8%, #eef4f0 0%, transparent 60%),
-        radial-gradient(48rem 34rem at 96% 4%, #faf1e8 0%, transparent 58%);
+        radial-gradient(64rem 42rem at 10% -10%, rgba(63, 207, 142, 0.08) 0%, transparent 62%),
+        radial-gradient(52rem 36rem at 98% 2%, rgba(242, 145, 61, 0.07) 0%, transparent 60%),
+        var(--page);
 }
 
 body::after {
@@ -56,7 +70,8 @@ body::after {
     inset: 0;
     z-index: -1;
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.35;
+    mix-blend-mode: screen;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
 }
 
@@ -64,8 +79,8 @@ body::after {
     position: absolute;
     left: -9999px;
     top: 0;
-    background: var(--ink);
-    color: #fff;
+    background: var(--carbon);
+    color: var(--page);
     padding: 10px 16px;
     border-radius: 0 0 var(--radius-sm) 0;
     z-index: 10;
@@ -82,7 +97,7 @@ body::after {
     gap: 16px;
     padding: 18px 32px;
     border-bottom: 1px solid var(--line);
-    background: rgba(250, 248, 244, 0.82);
+    background: rgba(18, 17, 16, 0.72);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
@@ -200,10 +215,11 @@ main {
     color: var(--ink-3);
 }
 
-/* Stats: one lead figure, the rest supporting. Not six equal boxes. */
+/* Stats: one lead figure, the rest supporting. The column count has to
+   divide the six cells exactly or the grid shows its gap colour as a slab. */
 .stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 1px;
     background: var(--line-soft);
     border: 1px solid var(--line-soft);
@@ -234,12 +250,8 @@ main {
     line-height: 1.1;
 }
 
-.stat.lead {
-    grid-column: span 2;
-}
-
 .stat.lead strong {
-    font-size: 2.3rem;
+    font-size: 2rem;
     color: var(--carbon);
 }
 
@@ -306,18 +318,18 @@ button {
     margin-top: 22px;
     padding: 11px 22px;
     background: var(--carbon);
-    color: #fff;
+    color: var(--page);
     border: 1px solid transparent;
     border-radius: var(--radius);
     font-size: 15px;
     font-weight: 500;
     letter-spacing: -0.005em;
-    box-shadow: 0 1px 2px rgba(26, 107, 79, 0.24), 0 10px 20px -12px rgba(26, 107, 79, 0.5);
+    box-shadow: 0 1px 2px rgba(63, 207, 142, 0.24), 0 10px 20px -12px rgba(63, 207, 142, 0.5);
 }
 
 .primary:hover {
-    background: #17795a;
-    box-shadow: 0 2px 4px rgba(26, 107, 79, 0.26), 0 14px 26px -14px rgba(26, 107, 79, 0.6);
+    background: var(--carbon);
+    box-shadow: 0 2px 4px rgba(63, 207, 142, 0.26), 0 14px 26px -14px rgba(63, 207, 142, 0.6);
 }
 
 .primary:active {
@@ -370,8 +382,8 @@ button {
 
 .notice.ok {
     background: var(--carbon-soft);
-    border-color: #cfe4da;
-    color: #10513b;
+    border-color: rgba(63, 207, 142, 0.4);
+    color: var(--carbon);
 }
 
 .notice.ok::before {
@@ -381,7 +393,7 @@ button {
 
 .notice.error {
     background: var(--danger-soft);
-    border-color: #efd2cc;
+    border-color: rgba(242, 104, 90, 0.4);
     color: var(--danger);
 }
 
@@ -459,6 +471,12 @@ code {
     color: var(--ink-3);
 }
 
+@media (max-width: 1000px) {
+    .stats {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 760px) {
     .topbar,
     main,
@@ -480,8 +498,8 @@ code {
         padding-top: 22px;
     }
 
-    .stat.lead {
-        grid-column: span 2;
+    .stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 
@@ -569,10 +587,10 @@ code {
     display: inline-block;
 }
 
-.swatch.road { background: #8a8578; }
-.swatch.rail { background: #6b5bc4; }
-.swatch.sea { background: #2d7fb8; }
-.swatch.air { background: #c2703a; }
+.swatch.road { background: #9c968a; }
+.swatch.rail { background: #9184e8; }
+.swatch.sea { background: #4fa8e0; }
+.swatch.air { background: var(--cost); }
 .swatch.flag {
     background: none;
     border-top: 3px dashed var(--danger);
@@ -589,7 +607,9 @@ code {
 }
 
 #map {
-    background: #eef3f5;
+    /* Ocean sits a shade under the page so the continents read as the raised
+       surface and the routes are the only lit thing on it. */
+    background: #0c0d0f;
     border-radius: var(--radius);
     overflow: hidden;
 }
@@ -598,7 +618,7 @@ code {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 8.5px;
     letter-spacing: 0.04em;
-    fill: #4a453d;
+    fill: var(--ink-2);
 }
 
 .map-fallback {
@@ -714,9 +734,9 @@ select:hover { border-color: var(--ink-3); }
     border: 1px solid transparent;
 }
 
-.sim.good { background: var(--carbon-soft); border-color: #cfe4da; }
-.sim.bad { background: var(--danger-soft); border-color: #efd2cc; }
-.sim.mixed { background: var(--cost-soft); border-color: #ecd8c6; }
+.sim.good { background: var(--carbon-soft); border-color: rgba(63, 207, 142, 0.4); }
+.sim.bad { background: var(--danger-soft); border-color: rgba(242, 104, 90, 0.4); }
+.sim.mixed { background: var(--cost-soft); border-color: rgba(242, 145, 61, 0.4); }
 
 .sim-line {
     margin: 0 0 4px;
@@ -731,6 +751,16 @@ select:hover { border-color: var(--ink-3); }
 }
 
 /* Quick wins */
+
+.trouble {
+    margin: 0 0 14px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    border: 1px solid rgba(242, 104, 90, 0.4);
+    color: var(--danger);
+    font-size: 13px;
+}
 
 .wins {
     display: flex;
@@ -753,8 +783,11 @@ select:hover { border-color: var(--ink-3); }
     transition: background 0.18s var(--ease);
 }
 
-.win:hover { background: #fdfcfa; }
-.win.on { background: var(--carbon-soft); }
+.win:hover { background: var(--panel-2); }
+.win.on {
+    background: rgba(63, 207, 142, 0.05);
+    box-shadow: inset 3px 0 0 var(--carbon);
+}
 
 .win-rank {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
@@ -807,6 +840,7 @@ select:hover { border-color: var(--ink-3); }
 .split-2 {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    align-items: start;
     gap: 22px;
 }
 
@@ -908,8 +942,8 @@ select:hover { border-color: var(--ink-3); }
 .node.supplier {
     width: 9px;
     height: 9px;
-    background: #faf8f4;
-    border: 1.6px solid #6b5bc4;
+    background: var(--page);
+    border: 1.6px solid #9184e8;
 }
 
 .node.warehouse {
@@ -923,7 +957,7 @@ select:hover { border-color: var(--ink-3); }
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #fff;
+    background: var(--page);
     border: 1.6px solid var(--carbon);
 }
 
@@ -946,12 +980,14 @@ select:hover { border-color: var(--ink-3); }
     min-width: 150px;
     max-width: 210px;
     padding: 9px 11px;
-    background: var(--ink);
-    color: #f6f4ef;
+    background: rgba(34, 31, 28, 0.96);
+    border: 1px solid var(--line);
+    backdrop-filter: blur(6px);
+    color: var(--ink);
     border-radius: var(--radius-sm);
     font-size: 12px;
     line-height: 1.5;
-    box-shadow: 0 6px 18px -6px rgba(25, 23, 20, 0.5);
+    box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
 }
 
 .tip strong {
@@ -965,14 +1001,14 @@ select:hover { border-color: var(--ink-3); }
     font-variant-numeric: tabular-nums;
 }
 
-.tip .cost-ink { color: #eda06b; }
-.tip .carbon-ink { color: #74c4a3; }
+.tip .cost-ink { color: var(--cost); }
+.tip .carbon-ink { color: var(--carbon); }
 
 .tip-flag {
     margin-top: 5px;
     padding-top: 5px;
-    border-top: 1px solid rgba(246, 244, 239, 0.22);
-    color: #e8a79c;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    color: var(--danger);
 }
 
 .zoom-controls {
@@ -988,7 +1024,7 @@ select:hover { border-color: var(--ink-3); }
     min-width: 30px;
     height: 30px;
     padding: 0 9px;
-    background: rgba(255, 255, 255, 0.94);
+    background: rgba(26, 25, 23, 0.94);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     color: var(--ink-2);
@@ -997,7 +1033,7 @@ select:hover { border-color: var(--ink-3); }
 }
 
 .zoom-controls button:hover {
-    background: #fff;
+    background: var(--page);
     border-color: var(--ink-3);
     color: var(--ink);
 }
@@ -1020,13 +1056,13 @@ select:hover { border-color: var(--ink-3); }
 }
 
 .leg-tag.inbound {
-    background: #efedfa;
-    color: #4a3d9e;
+    background: rgba(145, 132, 232, 0.16);
+    color: #b3a9f2;
 }
 
 .leg-tag.outbound {
     background: var(--carbon-soft);
-    color: #10513b;
+    color: var(--carbon);
 }
 
 select:disabled {
@@ -1245,6 +1281,7 @@ select:disabled {
     color: var(--ink-3);
     text-decoration: none;
     border-bottom: 1px solid var(--line);
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
 }
 
 .problem-link:hover {
@@ -1293,6 +1330,10 @@ select:disabled {
     color: var(--ink);
 }
 
+.ghost-link:active {
+    transform: translateY(1px);
+}
+
 @media (max-width: 760px) {
     .chain-flow {
         flex-direction: column;
@@ -1332,6 +1373,11 @@ select:disabled {
 }
 
 .topnav a:hover {
+    color: var(--ink);
+    border-color: var(--carbon);
+}
+
+.topnav a[aria-current="page"] {
     color: var(--ink);
     border-color: var(--carbon);
 }
@@ -1403,10 +1449,12 @@ select:disabled {
     color: var(--ink-3);
     border-bottom: 1px solid var(--line);
     text-decoration: none;
+    transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
 }
 
 .foot a:hover {
     color: var(--ink);
+    border-color: var(--ink-3);
 }
 
 
@@ -1755,7 +1803,10 @@ select:disabled {
 
 /* The close: three things, stated flatly. */
 .three {
-    background: var(--ink);
+    background:
+        radial-gradient(34rem 20rem at 92% 6%, rgba(242, 145, 61, 0.2), transparent 62%),
+        radial-gradient(30rem 18rem at 2% 98%, rgba(63, 207, 142, 0.22), transparent 60%),
+        var(--ink);
     border-color: var(--ink);
     color: var(--page);
 }
@@ -1774,7 +1825,7 @@ select:disabled {
     margin-bottom: 14px;
     font-size: 15px;
     line-height: 1.5;
-    color: rgba(250, 248, 244, 0.82);
+    color: rgba(18, 17, 16, 0.72);
     max-width: 68ch;
     text-wrap: pretty;
 }
@@ -1789,14 +1840,14 @@ select:disabled {
     margin-top: 3px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     font-size: 12px;
-    color: rgba(250, 248, 244, 0.55);
+    color: rgba(18, 17, 16, 0.5);
     font-variant-numeric: tabular-nums;
 }
 
 .closing {
     margin: 22px 0 0;
     padding-top: 18px;
-    border-top: 1px solid rgba(250, 248, 244, 0.16);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 15px;
     color: var(--page);
     max-width: 68ch;
@@ -1827,6 +1878,18 @@ select:disabled {
 .lp-hero {
     padding: 56px 0 44px;
     max-width: 62ch;
+}
+
+/* On a phone the headline was running to four lines and pushing the buttons
+   off the first screen. */
+@media (max-width: 560px) {
+    .lp-hero {
+        padding: 24px 0 32px;
+    }
+
+    .lp-hero h1 {
+        font-size: 1.95rem;
+    }
 }
 
 .lp-hero h1 {
@@ -1866,12 +1929,18 @@ select:disabled {
     font-size: 15px;
     font-weight: 500;
     text-decoration: none;
-    transition: transform 0.18s var(--ease), background 0.18s var(--ease);
+    transition: transform 0.18s var(--ease), background 0.18s var(--ease),
+        border-color 0.18s var(--ease), color 0.18s var(--ease);
 }
 
 .lp-primary {
-    background: var(--ink);
-    color: var(--page);
+    background: var(--carbon);
+    color: #08130d;
+    font-weight: 600;
+}
+
+.lp-primary:hover {
+    background: #55dc9d;
 }
 
 .lp-secondary {
@@ -1888,6 +1957,11 @@ select:disabled {
 .lp-secondary:hover {
     border-color: var(--ink-3);
     color: var(--ink);
+}
+
+.lp-primary:active,
+.lp-secondary:active {
+    transform: translateY(0) scale(0.985);
 }
 
 .lp-note {
@@ -1944,8 +2018,15 @@ select:disabled {
     color: var(--ink-3);
 }
 
+/* Three steps read as a sequence, so they run down the page joined by a
+   rule rather than sitting side by side as three interchangeable cards. The
+   heading holds its own column to keep the block off-centre. */
 .lp-steps {
-    margin-bottom: 26px;
+    display: grid;
+    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
+    gap: 20px 56px;
+    align-items: start;
+    margin-bottom: 40px;
 }
 
 .lp-steps h2,
@@ -1958,33 +2039,46 @@ select:disabled {
     margin: 0 0 18px;
 }
 
+.lp-steps-intro h2 {
+    margin-bottom: 10px;
+}
+
+.lp-steps-intro p {
+    max-width: 32ch;
+    color: var(--ink-3);
+    font-size: 14px;
+}
+
 .lp-steps ol {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1px;
-    background: var(--line-soft);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
 }
 
 .lp-steps li {
-    background: var(--panel);
-    padding: 26px 24px 28px;
+    position: relative;
+    padding: 0 0 22px 22px;
+    border-left: 1px solid var(--line);
 }
 
-.lp-step-num {
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--cost);
+.lp-steps li:last-child {
+    padding-bottom: 0;
+}
+
+/* A lit node on the rail marks each step without numbering it. */
+.lp-steps li::before {
+    content: "";
+    position: absolute;
+    left: -3.5px;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--cost);
 }
 
 .lp-steps h3 {
-    margin: 12px 0 8px;
+    margin: 0 0 6px;
     font-size: 1rem;
     font-weight: 600;
     letter-spacing: -0.014em;
@@ -1994,7 +2088,15 @@ select:disabled {
     margin: 0;
     font-size: 14.5px;
     color: var(--ink-2);
+    max-width: 56ch;
     text-wrap: pretty;
+}
+
+@media (max-width: 760px) {
+    .lp-steps {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
 }
 
 .lp-split {
@@ -2034,44 +2136,72 @@ select:disabled {
     margin-bottom: 26px;
 }
 
-.lp-spec dl {
+.lp-spec-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 18px 24px;
-    margin: 0;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
 }
 
-.lp-spec dt {
+.lp-spec-grid article {
+    padding: 16px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lp-spec-wide {
+    grid-column: 1 / -1;
+    background: linear-gradient(120deg, var(--carbon-soft), transparent 58%), var(--panel-2) !important;
+}
+
+.lp-spec-grid strong {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--ink-3);
-    margin-bottom: 4px;
+    font-size: 1.24rem;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
 }
 
-.lp-spec dd {
-    margin: 0;
-    font-size: 14.5px;
-    color: var(--ink);
+.lp-spec-wide strong {
+    color: var(--carbon);
+}
+
+.lp-spec-grid span {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-3);
+}
+
+@media (max-width: 760px) {
+    .lp-spec-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .lp-close {
     padding: 40px 32px;
     border-radius: var(--radius-lg);
-    background: var(--ink);
-    color: var(--page);
+    background:
+        radial-gradient(34rem 20rem at 88% 8%, rgba(242, 145, 61, 0.22), transparent 62%),
+        radial-gradient(30rem 18rem at 4% 96%, rgba(63, 207, 142, 0.24), transparent 60%),
+        var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
     margin-bottom: 22px;
 }
 
 .lp-close h2 {
-    color: var(--page);
+    color: var(--ink);
     margin-bottom: 10px;
 }
 
 .lp-close p {
     margin: 0 0 24px;
-    color: rgba(250, 248, 244, 0.74);
+    color: var(--ink-2);
     font-size: 15px;
     max-width: 60ch;
 }
@@ -2128,7 +2258,6 @@ select:disabled {
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
-    overflow: hidden;
 }
 
 .river-art,
@@ -2137,6 +2266,11 @@ select:disabled {
     inset: 0;
     width: 100%;
     height: 100%;
+}
+
+.river-art {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
 }
 
 .river-marks {
@@ -2170,7 +2304,7 @@ select:disabled {
 
 .river-stage:hover,
 .river-stage:focus-visible {
-    background: rgba(26, 107, 79, 0.05);
+    background: rgba(63, 207, 142, 0.05);
 }
 
 .river-stage.on {
@@ -2274,13 +2408,11 @@ select:disabled {
     flex-direction: column;
 }
 
-.worst-rank {
-    position: absolute;
-    top: 20px;
-    right: 22px;
-    font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 12px;
-    color: var(--line);
+/* The list is ranked, so the first one carries the weight the copy gives it
+   rather than sitting in three interchangeable cards. */
+.worst-card:first-child {
+    background: linear-gradient(140deg, var(--cost-soft), transparent 58%), var(--panel);
+    border-color: var(--cost-line);
 }
 
 .worst-card h3 {
@@ -2288,7 +2420,6 @@ select:disabled {
     font-size: 1.02rem;
     font-weight: 600;
     letter-spacing: -0.016em;
-    padding-right: 28px;
 }
 
 .worst-what {
@@ -2438,4 +2569,105 @@ select:disabled {
         flex: 1 1 100%;
         justify-content: flex-start;
     }
+}
+
+
+/* ==== Motion ====
+   Scroll choreography is native CSS scroll-driven animation, so there is no
+   animation library and no scroll listener. Everything sits inside both a
+   support query and a reduced-motion query, which means a browser without
+   view timelines and a reader who has asked for less motion both get the
+   finished page with no hidden content. */
+
+@media (prefers-reduced-motion: no-preference) {
+
+    /* Hero enters in reading order on load. */
+    .lp-hero > * {
+        animation: rise 0.7s var(--enter) backwards;
+    }
+
+    .lp-hero h1 { animation-delay: 0.04s; }
+    .lp-hero .lp-lede { animation-delay: 0.16s; }
+    .lp-hero .lp-actions { animation-delay: 0.26s; }
+    .lp-hero .lp-note { animation-delay: 0.34s; }
+
+    @supports (animation-timeline: view()) {
+
+        /* Sections arrive as they are scrolled to, which paces the argument
+           instead of dropping all of it on screen at once. */
+        [data-reveal] {
+            animation: rise linear both;
+            animation-timeline: view();
+            animation-range: entry 8% cover 26%;
+        }
+
+        /* Inside the proof block the four figures stagger, so the recoverable
+           pair lands last and reads as the conclusion. */
+        .lp-proof-figures > * {
+            animation: rise linear both;
+            animation-timeline: view();
+        }
+
+        .lp-proof-figures > :nth-child(1) { animation-range: entry 10% cover 24%; }
+        .lp-proof-figures > :nth-child(2) { animation-range: entry 14% cover 28%; }
+        .lp-proof-figures > :nth-child(3) { animation-range: entry 18% cover 32%; }
+        .lp-proof-figures > :nth-child(4) { animation-range: entry 22% cover 36%; }
+
+    }
+
+    /* The six chain stages are overlaid on one diagram, so they all sit at the
+       same scroll position. They light up left to right on load instead, in
+       the order goods actually move through the chain. */
+    .river-stage {
+        animation: stage-in 0.6s var(--enter) backwards;
+    }
+
+    .river-stage:nth-child(1) { animation-delay: 0.10s; }
+    .river-stage:nth-child(2) { animation-delay: 0.22s; }
+    .river-stage:nth-child(3) { animation-delay: 0.34s; }
+    .river-stage:nth-child(4) { animation-delay: 0.46s; }
+    .river-stage:nth-child(5) { animation-delay: 0.58s; }
+    .river-stage:nth-child(6) { animation-delay: 0.70s; }
+
+    .river-stage.returns {
+        animation-delay: 0.82s;
+    }
+}
+
+@keyframes rise {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes stage-in {
+    from {
+        opacity: 0.25;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* The travelling pulse that shows a route being walked from origin to
+   destination on the map. */
+.lane-pulse {
+    fill: var(--page);
+    stroke-width: 2;
+    filter: drop-shadow(0 0 6px currentColor);
+    pointer-events: none;
+}
+
+.lane-trace {
+    fill: none;
+    stroke-linecap: round;
+    pointer-events: none;
+    filter: drop-shadow(0 0 5px currentColor);
 }

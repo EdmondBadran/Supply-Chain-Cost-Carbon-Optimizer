@@ -1,0 +1,6 @@
+name,city,country,supplies,mode,annual_weight_kg,shipments_per_year,annual_cost
+Sidama Union,Addis Ababa,ET,Bristol Roastery,sea,7200,4,39600
+Huila Growers Co-op,Bogota,CO,Bristol Roastery,sea,6000,4,37200
+Cerrado Estates,Sao Paulo,BR,Bristol Roastery,sea,5400,3,24300
+Antigua Microlots,Guatemala City,GT,Bristol Roastery,air,900,8,12600
+Douro Packaging,Porto,PT,Bristol Roastery,road,2300,12,9800

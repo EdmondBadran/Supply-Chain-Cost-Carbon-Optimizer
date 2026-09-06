@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta name="theme-color" content="#121110">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -24,11 +25,16 @@
     <span>Cost <em>and</em> carbon optimizer</span>
   </a>
   <nav class="topnav">
-    <a href="{{ url_for('chain_page') }}">Value chain</a>
-    <a href="{{ url_for('dashboard') }}">Optimizer</a>
-    <a href="{{ url_for('diagnosis_page') }}">Report</a>
-    <a href="{{ url_for('method') }}">How it works</a>
-    <a href="{{ url_for('upload_page') }}">Data</a>
+    {% set here = request.endpoint %}
+    {% for endpoint, label in [
+      ('chain_page', 'Value chain'),
+      ('dashboard', 'Optimizer'),
+      ('diagnosis_page', 'Report'),
+      ('method', 'How it works'),
+      ('upload_page', 'Data'),
+    ] %}
+    <a href="{{ url_for(endpoint) }}"{% if endpoint == here %} aria-current="page"{% endif %}>{{ label }}</a>
+    {% endfor %}
   </nav>
 </header>
 
@@ -42,5 +48,6 @@
     <a href="{{ url_for('method') }}">Every calculation is written up here</a>.
   </span>
 </footer>
+<script src="{{ url_for('static', filename='motion.js') }}" defer></script>
 </body>
 </html>

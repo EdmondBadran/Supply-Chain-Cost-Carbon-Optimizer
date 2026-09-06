@@ -1,0 +1,183 @@
+order_ref,order_date,customer_id,origin_name,origin_city,origin_country,dest_city,dest_country,units,weight_kg,mode,product_category,order_value,returned
+WS-0163,2025-09-01,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,57,52.46,road,espresso blend,708.08,0
+WS-0093,2025-09-02,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,90,82.35,road,equipment,1759.85,0
+WS-0096,2025-09-02,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,78,62.07,road,espresso blend,796.33,0
+WS-0095,2025-09-03,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,105,92.24,road,filter,1210.2,0
+WS-0010,2025-09-05,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,106,81.93,road,espresso blend,975.79,0
+WS-0025,2025-09-07,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,140,136.84,road,equipment,3143.91,0
+WS-0151,2025-09-09,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,103,75.15,road,decaf,998.76,0
+WS-0068,2025-09-10,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,80,79.21,road,retail bags,1332.71,0
+WS-0140,2025-09-10,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,45,30.14,air,espresso blend,347.87,0
+WS-0128,2025-09-14,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,82,72.23,road,espresso blend,888.44,0
+WS-0049,2025-09-16,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,68,65.69,road,retail bags,1052.27,0
+WS-0104,2025-09-21,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,165,117.06,road,decaf,1632.94,0
+WS-0139,2025-09-22,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,46,33.76,air,espresso blend,443.23,0
+WS-0083,2025-09-23,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,141,115.75,road,espresso blend,1469.17,0
+WS-0137,2025-09-25,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,67,60.67,air,espresso blend,796.48,0
+WS-0071,2025-09-27,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,59,55.46,road,espresso blend,653.08,0
+WS-0053,2025-09-28,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,151,123.72,road,decaf,1694.68,0
+WS-0062,2025-09-30,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,73,54.74,road,retail bags,873.94,0
+WS-0109,2025-10-01,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,105,85.3,road,equipment,1763.95,0
+WS-0114,2025-10-07,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,77,54.09,road,decaf,685.21,0
+WS-0011,2025-10-08,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,188,131.76,road,equipment,3123.54,0
+WS-0153,2025-10-15,C-BRI-01,Bristol Roastery,Bristol,GB,Brighton,GB,51,32.56,road,retail bags,530.0,0
+WS-0054,2025-10-21,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,157,128.63,road,retail bags,2242.08,0
+WS-0078,2025-10-21,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,105,104.72,road,filter,1481.38,0
+WS-0077,2025-10-22,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,78,74.15,road,filter,977.71,0
+WS-0058,2025-10-23,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,113,71.4,road,equipment,1612.08,0
+WS-0156,2025-10-23,C-BRI-02,Bristol Roastery,Bristol,GB,Brighton,GB,40,38.18,road,espresso blend,492.46,0
+WS-0130,2025-10-24,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,93,63.65,road,equipment,1467.04,0
+WS-0180,2025-10-26,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,87,53.63,road,espresso blend,626.76,0
+WS-0129,2025-10-28,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,111,68.36,road,decaf,940.01,0
+WS-0172,2025-10-28,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,50,43.88,road,espresso blend,525.95,0
+WS-0031,2025-10-29,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,176,115.05,road,decaf,1415.86,0
+WS-0075,2025-10-29,C-CAR-01,Bristol Roastery,Bristol,GB,Cardiff,GB,100,66.79,road,filter,922.13,1
+WS-0165,2025-10-29,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,62,42.53,road,equipment,968.08,0
+WS-0152,2025-11-02,C-LEE-02,Bristol Roastery,Bristol,GB,Leeds,GB,77,58.17,road,decaf,725.56,0
+WS-0050,2025-11-03,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,155,109.95,road,equipment,2490.68,0
+WS-0118,2025-11-05,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,79,60.73,road,retail bags,1034.59,0
+WS-0131,2025-11-06,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,53,46.38,air,equipment,1030.16,0
+WS-0045,2025-11-13,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,123,122.05,road,decaf,1637.37,0
+WS-0074,2025-11-13,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,125,80.08,road,retail bags,1235.04,0
+WS-0019,2025-11-14,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,171,161.54,road,decaf,2161.67,0
+WS-0176,2025-11-20,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,77,62.98,road,decaf,763.45,0
+WS-0059,2025-11-21,C-BAT-03,Bristol Roastery,Bristol,GB,Bath,GB,67,62.94,road,filter,817.14,0
+WS-0039,2025-11-22,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,72,49.85,road,espresso blend,671.95,0
+WS-0159,2025-11-22,C-BRI-01,Bristol Roastery,Bristol,GB,Brighton,GB,26,25.02,road,retail bags,431.38,0
+WS-0132,2025-11-24,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,27,25.56,air,espresso blend,343.13,0
+WS-0150,2025-11-25,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,41,40.32,road,equipment,863.24,0
+WS-0160,2025-11-26,C-BRI-01,Bristol Roastery,Bristol,GB,Brighton,GB,88,66.22,road,espresso blend,866.03,0
+WS-0107,2025-11-30,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,37,35.61,road,filter,517.67,0
+WS-0116,2025-12-01,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,104,80.8,road,decaf,1096.24,0
+WS-0002,2025-12-11,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,103,87.44,road,espresso blend,1124.16,0
+WS-0005,2025-12-13,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,128,96.67,road,espresso blend,1269.21,0
+WS-0080,2025-12-20,C-CAR-01,Bristol Roastery,Bristol,GB,Cardiff,GB,118,95.52,road,equipment,2262.54,0
+WS-0113,2025-12-21,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,59,56.68,road,decaf,757.57,0
+WS-0125,2025-12-23,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,89,71.15,road,espresso blend,887.31,0
+WS-0171,2025-12-24,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,65,49.28,road,espresso blend,596.1,0
+WS-0143,2025-12-25,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,79,64.95,road,retail bags,1061.93,0
+WS-0148,2026-01-01,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,115,96.12,road,decaf,1276.92,0
+WS-0003,2026-01-03,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,132,117.58,road,decaf,1642.81,0
+WS-0020,2026-01-05,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,160,118.31,road,equipment,2790.65,1
+WS-0056,2026-01-05,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,95,92.46,road,retail bags,1516.34,0
+WS-0064,2026-01-07,C-CAR-01,Bristol Roastery,Bristol,GB,Cardiff,GB,162,103.26,road,decaf,1364.62,0
+WS-0086,2026-01-08,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,57,54.05,road,retail bags,952.89,0
+WS-0027,2026-01-09,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,127,117.64,road,filter,1700.13,0
+WS-0142,2026-01-10,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,26,19.9,air,filter,285.43,0
+WS-0042,2026-01-15,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,166,126.16,road,equipment,2722.22,0
+WS-0073,2026-01-15,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,78,72.22,road,equipment,1528.71,0
+WS-0115,2026-01-17,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,144,107.32,road,espresso blend,1298.15,0
+WS-0038,2026-01-21,C-BAT-03,Bristol Roastery,Bristol,GB,Bath,GB,132,115.69,road,filter,1629.24,0
+WS-0120,2026-01-22,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,145,90.63,road,retail bags,1424.59,0
+WS-0158,2026-01-22,C-BRI-02,Bristol Roastery,Bristol,GB,Brighton,GB,100,73.93,road,filter,1084.76,0
+WS-0022,2026-01-23,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,83,78.83,road,equipment,1649.37,0
+WS-0105,2026-01-23,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,77,72.07,road,decaf,948.47,0
+WS-0051,2026-01-26,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,141,118.32,road,espresso blend,1481.34,0
+WS-0164,2026-01-28,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,98,66.68,road,retail bags,1085.41,0
+WS-0179,2026-01-29,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,44,35.42,road,filter,498.57,1
+WS-0034,2026-01-30,C-LON-02,Bristol Roastery,Bristol,GB,London,GB,128,127.92,road,equipment,2881.37,0
+WS-0149,2026-02-03,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,86,60.21,road,filter,866.74,0
+WS-0127,2026-02-04,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,120,79.87,road,equipment,1748.12,0
+WS-0057,2026-02-08,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,182,113.24,road,equipment,2612.97,0
+WS-0018,2026-02-10,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,171,112.75,road,equipment,2599.71,0
+WS-0162,2026-02-10,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,77,58.52,road,filter,817.06,0
+WS-0014,2026-02-11,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,98,91.76,road,filter,1283.36,0
+WS-0112,2026-02-11,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,108,65.84,road,espresso blend,784.93,0
+WS-0037,2026-02-12,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,164,109.11,road,equipment,2327.58,0
+WS-0175,2026-02-12,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,52,37.51,road,retail bags,587.12,0
+WS-0033,2026-02-15,C-LON-02,Bristol Roastery,Bristol,GB,London,GB,144,93.96,road,espresso blend,1228.7,0
+WS-0157,2026-02-16,C-BRI-02,Bristol Roastery,Bristol,GB,Brighton,GB,101,89.96,road,equipment,1886.98,0
+WS-0082,2026-02-19,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,120,110.25,road,retail bags,1872.0,0
+WS-0009,2026-02-20,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,77,65.31,road,espresso blend,769.14,0
+WS-0065,2026-02-21,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,101,96.05,road,espresso blend,1142.79,0
+WS-0029,2026-02-26,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,88,80.52,road,decaf,976.6,0
+WS-0098,2026-02-27,C-EXE-01,Bristol Roastery,Bristol,GB,Exeter,GB,39,26.31,road,retail bags,437.29,0
+WS-0081,2026-03-02,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,139,102.39,road,decaf,1434.0,0
+WS-0177,2026-03-02,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,55,47.23,road,equipment,1039.43,0
+WS-0035,2026-03-03,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,99,74.24,road,filter,1084.89,0
+WS-0126,2026-03-04,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,88,54.75,road,filter,737.64,0
+WS-0135,2026-03-04,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,55,43.79,air,espresso blend,543.53,0
+WS-0169,2026-03-05,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,103,62.66,road,decaf,860.33,0
+WS-0084,2026-03-06,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,53,52.94,road,retail bags,896.23,0
+WS-0103,2026-03-09,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,35,26.13,road,filter,355.17,0
+WS-0099,2026-03-16,C-EXE-01,Bristol Roastery,Bristol,GB,Exeter,GB,95,77.79,road,retail bags,1229.07,0
+WS-0134,2026-03-25,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,90,59.01,air,retail bags,977.82,0
+WS-0138,2026-03-28,C-DUB-02,Bristol Roastery,Bristol,GB,Dublin,IE,61,47.68,air,retail bags,814.49,0
+WS-0036,2026-04-01,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,121,94.64,road,filter,1285.91,0
+WS-0167,2026-04-07,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,109,72.1,road,filter,957.25,0
+WS-0181,2026-04-09,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,48,34.25,road,retail bags,556.71,0
+WS-0021,2026-04-10,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,44,42.2,road,espresso blend,503.39,0
+WS-0166,2026-04-13,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,149,94.35,road,filter,1231.54,0
+WS-0102,2026-04-14,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,53,46.16,road,espresso blend,616.27,0
+WS-0012,2026-04-16,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,186,135.32,road,equipment,2890.76,0
+WS-0007,2026-04-18,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,43,39.93,road,retail bags,666.67,0
+WS-0101,2026-04-24,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,82,63.16,road,filter,953.54,0
+WS-0174,2026-04-30,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,99,70.22,road,filter,989.46,0
+WS-0004,2026-05-05,C-LON-03,Bristol Roastery,Bristol,GB,London,GB,188,127.4,road,retail bags,2002.13,0
+WS-0091,2026-05-05,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,107,95.57,road,filter,1376.82,1
+WS-0013,2026-05-09,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,212,140.37,road,decaf,1786.23,0
+WS-0052,2026-05-16,C-BAT-03,Bristol Roastery,Bristol,GB,Bath,GB,75,60.15,road,equipment,1298.71,0
+WS-0041,2026-05-17,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,85,81.26,road,retail bags,1395.25,0
+WS-0170,2026-05-17,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,72,63.6,road,decaf,884.11,0
+WS-0089,2026-05-18,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,114,89.98,road,retail bags,1410.93,0
+WS-0017,2026-05-20,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,160,96.62,road,espresso blend,1267.59,0
+WS-0008,2026-05-21,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,115,92.16,road,retail bags,1504.75,0
+WS-0117,2026-05-22,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,109,90.39,road,decaf,1193.24,0
+WS-0119,2026-05-22,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,26,19.52,road,decaf,241.12,0
+WS-0145,2026-05-22,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,92,83.8,road,decaf,1103.18,0
+WS-0055,2026-05-26,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,97,66.84,road,filter,974.07,0
+WS-0085,2026-05-28,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,67,65.01,road,equipment,1333.92,0
+WS-0044,2026-05-31,C-BAT-04,Bristol Roastery,Bristol,GB,Bath,GB,87,79.71,road,decaf,1027.75,0
+WS-0060,2026-05-31,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,96,71.49,road,equipment,1526.38,0
+WS-0108,2026-05-31,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,167,127.06,road,decaf,1657.27,0
+WS-0161,2026-06-01,C-BRI-02,Bristol Roastery,Bristol,GB,Brighton,GB,46,38.33,road,retail bags,590.96,0
+WS-0147,2026-06-02,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,104,63.14,road,espresso blend,729.69,0
+WS-0079,2026-06-05,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,95,57.65,road,retail bags,963.88,0
+WS-0146,2026-06-05,C-LEE-02,Bristol Roastery,Bristol,GB,Leeds,GB,95,60.34,road,equipment,1407.72,0
+WS-0088,2026-06-07,C-EXE-01,Bristol Roastery,Bristol,GB,Exeter,GB,49,44.45,road,decaf,595.58,0
+WS-0141,2026-06-07,C-DUB-01,Bristol Roastery,Bristol,GB,Dublin,IE,33,21.17,air,espresso blend,277.44,1
+WS-0040,2026-06-19,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,112,98.42,road,espresso blend,1293.12,0
+WS-0090,2026-06-20,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,77,60.52,road,equipment,1261.2,0
+WS-0048,2026-06-23,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,190,123.54,road,retail bags,2068.82,0
+WS-0028,2026-06-24,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,97,95.56,road,espresso blend,1100.1,0
+WS-0178,2026-06-24,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,64,48.37,road,equipment,1072.38,0
+WS-0144,2026-06-25,C-LEE-01,Bristol Roastery,Bristol,GB,Leeds,GB,82,81.8,road,espresso blend,956.13,0
+WS-0030,2026-07-05,C-LON-02,Bristol Roastery,Bristol,GB,London,GB,169,115.54,road,filter,1733.43,0
+WS-0063,2026-07-05,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,164,103.75,road,espresso blend,1208.24,0
+WS-0070,2026-07-06,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,65,58.78,road,espresso blend,714.64,0
+WS-0001,2026-07-15,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,225,148.73,road,espresso blend,1896.79,0
+WS-0066,2026-07-15,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,99,93.23,road,espresso blend,1192.67,0
+WS-0087,2026-07-18,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,105,70.95,road,equipment,1677.57,0
+WS-0122,2026-07-21,C-MAN-01,Bristol Roastery,Bristol,GB,Manchester,GB,94,58.27,road,decaf,730.44,0
+WS-0032,2026-07-25,C-LON-05,Bristol Roastery,Bristol,GB,London,GB,149,135.87,road,espresso blend,1607.78,0
+WS-0136,2026-07-25,C-DUB-01,Bristol Roastery,Bristol,GB,Dublin,IE,80,74.44,air,decaf,1032.08,0
+WS-0023,2026-07-26,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,104,98.21,road,retail bags,1541.58,0
+WS-0092,2026-07-26,C-EXE-03,Bristol Roastery,Bristol,GB,Exeter,GB,92,85.77,road,decaf,1114.7,0
+WS-0182,2026-07-26,C-PAR-01,Bristol Roastery,Bristol,GB,Paris,FR,84,51.17,road,filter,743.56,0
+WS-0173,2026-07-27,C-AMS-01,Bristol Roastery,Bristol,GB,Amsterdam,NL,59,48.79,road,espresso blend,592.02,0
+WS-0106,2026-07-29,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,97,59.42,road,decaf,732.27,0
+WS-0111,2026-07-29,C-BIR-01,Bristol Roastery,Bristol,GB,Birmingham,GB,82,74.9,road,decaf,1023.68,0
+WS-0123,2026-07-30,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,77,65.18,road,decaf,836.79,0
+WS-0155,2026-07-31,C-BRI-01,Bristol Roastery,Bristol,GB,Brighton,GB,78,68.78,road,decaf,929.97,0
+WS-0067,2026-08-02,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,91,88.29,road,equipment,1854.67,0
+WS-0133,2026-08-03,C-DUB-01,Bristol Roastery,Bristol,GB,Dublin,IE,78,68.99,air,decaf,928.36,0
+WS-0047,2026-08-07,C-BAT-01,Bristol Roastery,Bristol,GB,Bath,GB,210,137.64,road,retail bags,2143.26,0
+WS-0061,2026-08-07,C-CAR-01,Bristol Roastery,Bristol,GB,Cardiff,GB,87,75.94,road,decaf,1015.41,0
+WS-0094,2026-08-10,C-EXE-01,Bristol Roastery,Bristol,GB,Exeter,GB,116,77.64,road,filter,1164.57,0
+WS-0110,2026-08-14,C-BIR-02,Bristol Roastery,Bristol,GB,Birmingham,GB,57,56.73,road,filter,843.52,0
+WS-0016,2026-08-16,C-LON-04,Bristol Roastery,Bristol,GB,London,GB,172,118.18,road,decaf,1566.87,0
+WS-0069,2026-08-16,C-CAR-03,Bristol Roastery,Bristol,GB,Cardiff,GB,119,73.75,road,filter,1101.62,0
+WS-0100,2026-08-16,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,75,74.46,road,espresso blend,900.65,0
+WS-0043,2026-08-17,C-BAT-03,Bristol Roastery,Bristol,GB,Bath,GB,98,65.11,road,decaf,803.04,0
+WS-0121,2026-08-18,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,112,84.43,road,espresso blend,1053.82,0
+WS-0072,2026-08-20,C-CAR-02,Bristol Roastery,Bristol,GB,Cardiff,GB,124,80.01,road,filter,1109.51,0
+WS-0015,2026-08-21,C-LON-02,Bristol Roastery,Bristol,GB,London,GB,121,100.54,road,decaf,1343.55,0
+WS-0024,2026-08-22,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,105,89.7,road,equipment,2006.57,0
+WS-0046,2026-08-22,C-BAT-02,Bristol Roastery,Bristol,GB,Bath,GB,176,134.42,road,filter,1974.45,0
+WS-0154,2026-08-22,C-BRI-01,Bristol Roastery,Bristol,GB,Brighton,GB,63,43.58,road,equipment,886.39,0
+WS-0168,2026-08-22,C-EDI-01,Bristol Roastery,Bristol,GB,Edinburgh,GB,132,82.95,road,filter,1088.05,0
+WS-0026,2026-08-25,C-LON-03,Bristol Roastery,Bristol,GB,London,GB,104,102.28,road,decaf,1339.12,0
+WS-0006,2026-08-26,C-LON-01,Bristol Roastery,Bristol,GB,London,GB,224,145.73,road,retail bags,2476.81,0
+WS-0124,2026-08-28,C-MAN-02,Bristol Roastery,Bristol,GB,Manchester,GB,49,35.86,road,decaf,467.41,0
+WS-0097,2026-08-29,C-EXE-02,Bristol Roastery,Bristol,GB,Exeter,GB,84,67.69,road,espresso blend,860.07,0
+WS-0076,2026-08-30,C-CAR-01,Bristol Roastery,Bristol,GB,Cardiff,GB,65,59.84,road,filter,819.75,0

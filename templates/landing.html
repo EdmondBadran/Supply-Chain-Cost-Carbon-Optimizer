@@ -5,7 +5,6 @@
 {% block content %}
 
 <section class="lp-hero">
-  <p class="eyebrow">Supply chain diagnostics</p>
   <h1>
     Cost and carbon waste
     <span class="lp-accent">the same routes.</span>
@@ -26,41 +25,46 @@
     </a>
   </div>
   <p class="lp-note">
-    No sign up, no upload needed. The demo is loaded and running on a sample
-    company right now.
+    Nothing to sign up for and nothing to upload. The demo is already loaded
+    and running on a sample company.
   </p>
 </section>
 
 {% if report %}
-<section class="lp-proof">
-  <p class="lp-proof-label">Live output, sample company</p>
+<section class="lp-proof" data-reveal>
+  <p class="eyebrow">Live output, sample company</p>
   <p class="lp-proof-truth">{{ report.overview.truth }}</p>
   <div class="lp-proof-figures">
     <div>
-      <strong>${{ "{:,.0f}".format(report.overview.cost) }}</strong>
+      <strong data-count="{{ report.overview.cost | round | int }}" data-prefix="$">${{ "{:,.0f}".format(report.overview.cost) }}</strong>
       <span>a year to run the chain</span>
     </div>
     <div>
-      <strong>{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
+      <strong data-count="{{ (report.overview.co2e / 1000) | round | int }}" data-suffix=" t">{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
       <span>CO2e a year</span>
     </div>
     <div>
-      <strong class="cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</strong>
+      <strong class="cost-ink" data-count="{{ report.overview.recoverable_cost | round | int }}" data-prefix="$">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</strong>
       <span>recoverable a year</span>
     </div>
     <div>
-      <strong class="carbon-ink">{{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} t</strong>
+      <strong class="carbon-ink" data-count="{{ (report.overview.recoverable_co2e / 1000) | round | int }}" data-suffix=" t">{{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} t</strong>
       <span>carbon recoverable</span>
     </div>
   </div>
 </section>
 {% endif %}
 
-<section class="lp-steps">
-  <h2>Three steps, in order</h2>
+<section class="lp-steps" data-reveal>
+  <div class="lp-steps-intro">
+    <h2>Three steps, in order</h2>
+    <p>
+      You do not need to know what you are looking for before you start. Each
+      step hands you the question for the next one.
+    </p>
+  </div>
   <ol>
     <li>
-      <span class="lp-step-num">01</span>
       <h3>See the chain</h3>
       <p>
         Every order collapses into routes, and the routes into six stages:
@@ -69,7 +73,6 @@
       </p>
     </li>
     <li>
-      <span class="lp-step-num">02</span>
       <h3>Find what is wrong</h3>
       <p>
         Each stage runs its own check. Freight on a mode that is beaten on
@@ -78,7 +81,6 @@
       </p>
     </li>
     <li>
-      <span class="lp-step-num">03</span>
       <h3>Get the plan</h3>
       <p>
         A numbered list of changes. What to do, what it saves in money, what
@@ -89,7 +91,7 @@
   </ol>
 </section>
 
-<section class="lp-split">
+<section class="lp-split" data-reveal>
   <div>
     <h2>What makes it different</h2>
     <p>
@@ -121,26 +123,38 @@
 </section>
 
 {% if summary %}
-<section class="lp-spec">
-  <h2>Under it</h2>
-  <dl>
-    <dt>Sample network</dt>
-    <dd>{{ "{:,}".format(summary.orders) }} orders, {{ summary.edges }} routes</dd>
-    <dt>Reach</dt>
-    <dd>{{ summary.customers }} cities, {{ summary.countries }} countries</dd>
-    <dt>Geocoding</dt>
-    <dd>34,135 cities, bundled offline</dd>
-    <dt>Stack</dt>
-    <dd>Python, Flask, SQLite, D3</dd>
-    <dt>Dependencies</dt>
-    <dd>Flask, and nothing else</dd>
-    <dt>Build step</dt>
-    <dd>None. Runs offline</dd>
-  </dl>
+<section class="lp-spec" data-reveal>
+  <h2>How it is built</h2>
+  <div class="lp-spec-grid">
+    <article>
+      <strong>{{ "{:,}".format(summary.orders) }}</strong>
+      <span>orders in the sample, collapsed into {{ summary.edges }} routes</span>
+    </article>
+    <article>
+      <strong>{{ summary.countries }}</strong>
+      <span>countries reached, across {{ summary.customers }} customer cities</span>
+    </article>
+    <article>
+      <strong>34,135</strong>
+      <span>cities in the bundled geocoding table, so it works offline</span>
+    </article>
+    <article>
+      <strong>1</strong>
+      <span>runtime dependency. Flask, and nothing else</span>
+    </article>
+    <article class="lp-spec-wide">
+      <strong>No build step</strong>
+      <span>
+        Python, SQLite and server rendered templates, with D3 for the map.
+        Distances are computed in the same SQL statement that rolls up the
+        orders, by registering haversine as a SQLite function.
+      </span>
+    </article>
+  </div>
 </section>
 {% endif %}
 
-<section class="lp-close">
+<section class="lp-close" data-reveal>
   <h2>See it running</h2>
   <p>
     The demo is a sample company with a real problem in it: one route carrying

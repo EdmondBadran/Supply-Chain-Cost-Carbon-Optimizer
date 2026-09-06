@@ -14,9 +14,10 @@ from flask import (
 from optimizer import analysis, chain, db, diagnosis, factors, ingest, scoring
 
 ROOT = Path(__file__).resolve().parent
-SAMPLE_ORDERS = ROOT / "data" / "sample_orders.csv"
-SAMPLE_WAREHOUSES = ROOT / "data" / "sample_warehouses.csv"
-SAMPLE_SUPPLIERS = ROOT / "data" / "sample_suppliers.csv"
+SAMPLE = ROOT / "data" / "Sample B Small BB"
+SAMPLE_ORDERS = SAMPLE / "orders.csv"
+SAMPLE_WAREHOUSES = SAMPLE / "warehouses.csv"
+SAMPLE_SUPPLIERS = SAMPLE / "suppliers.csv"
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
