@@ -70,8 +70,8 @@ body {
        the extra point to read at the same size. Antialiasing is deliberately
        left off: it thins light-on-dark serif strokes, and Times has hairlines
        to spare already. */
-    font-size: 17px;
-    line-height: 1.62;
+    font-size: 18px;
+    line-height: 1.6;
 }
 
 /* Ambient wash behind the page, plus a grain layer so flat areas are not sterile. */
@@ -138,7 +138,7 @@ body::after {
 
 .brand span {
     color: var(--ink);
-    font-size: 15px;
+    font-size: 16.5px;
 }
 
 .brand em {
@@ -198,7 +198,7 @@ main {
 
 .hero-aside dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -233,7 +233,7 @@ main {
 
 .panel > .sub {
     margin: 0 0 22px;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-3);
 }
 
@@ -257,7 +257,7 @@ main {
 .stat span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -279,7 +279,7 @@ main {
 
 .meta {
     margin: 16px 0 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
@@ -287,7 +287,7 @@ main {
 form label {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -302,7 +302,7 @@ input[type="file"] {
     border: 1px dashed var(--line);
     border-radius: var(--radius);
     font-family: inherit;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-2);
     transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
 }
@@ -314,7 +314,7 @@ input[type="file"]:hover {
 
 input[type="file"]::file-selector-button {
     font: inherit;
-    font-size: 14px;
+    font-size: 16px;
     margin-right: 12px;
     padding: 6px 12px;
     border: 1px solid var(--line);
@@ -343,7 +343,7 @@ button {
     color: var(--page);
     border: 1px solid transparent;
     border-radius: var(--radius);
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 500;
     letter-spacing: -0.005em;
     box-shadow: 0 1px 2px rgba(63, 207, 142, 0.24), 0 10px 20px -12px rgba(63, 207, 142, 0.5);
@@ -364,7 +364,7 @@ button {
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     color: var(--ink-2);
-    font-size: 14.5px;
+    font-size: 16px;
 }
 
 .ghost:hover {
@@ -390,13 +390,13 @@ button {
     padding: 13px 18px;
     border-radius: var(--radius);
     margin-bottom: 20px;
-    font-size: 14.5px;
+    font-size: 16px;
     border: 1px solid transparent;
 }
 
 .notice::before {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     flex: none;
@@ -425,13 +425,13 @@ button {
 
 details {
     margin-top: 18px;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 details summary {
     cursor: pointer;
     color: var(--ink-3);
-    font-size: 14.5px;
+    font-size: 16px;
     padding: 4px 0;
     transition: color 0.2s var(--ease);
 }
@@ -444,7 +444,7 @@ details table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 12px;
-    font-size: 14.5px;
+    font-size: 16px;
 }
 
 details th,
@@ -456,7 +456,7 @@ details td {
 
 details th {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -480,7 +480,7 @@ code {
     border: 1px solid var(--line-soft);
     padding: 1px 5px;
     border-radius: var(--radius-sm);
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--ink);
 }
 
@@ -489,7 +489,7 @@ code {
     margin: 0 auto;
     padding: 22px 32px 40px;
     border-top: 1px solid var(--line);
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
@@ -546,7 +546,7 @@ code {
 
 .sub {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-3);
     max-width: 56ch;
 }
@@ -559,7 +559,7 @@ code {
 .figure span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -592,7 +592,7 @@ code {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
@@ -646,7 +646,7 @@ code {
 .map-fallback {
     padding: 16px;
     margin: 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
 }
 
@@ -661,21 +661,21 @@ code {
 .detail .empty,
 .wins .empty {
     margin: 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
     line-height: 1.65;
 }
 
 .detail-head h3 {
     margin: 0 0 4px;
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 600;
     letter-spacing: -0.015em;
 }
 
 .detail-head p {
     margin: 0 0 16px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
@@ -691,7 +691,7 @@ code {
 
 .detail-figures dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -708,7 +708,7 @@ code {
 .whatif-title,
 .win-effort span {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -718,7 +718,7 @@ code {
 
 .whatif label {
     display: block;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-2);
     margin-bottom: 10px;
     text-transform: none;
@@ -732,7 +732,7 @@ select {
     margin-top: 4px;
     padding: 7px 9px;
     font: inherit;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink);
     background: var(--panel);
     border: 1px solid var(--line);
@@ -745,7 +745,7 @@ select:hover { border-color: var(--ink-3); }
 
 .whatif-hint {
     margin: 12px 0 0;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
@@ -762,13 +762,13 @@ select:hover { border-color: var(--ink-3); }
 
 .sim-line {
     margin: 0 0 4px;
-    font-size: 14.5px;
+    font-size: 16px;
     font-variant-numeric: tabular-nums;
 }
 
 .sim-sub {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-2);
 }
 
@@ -781,7 +781,7 @@ select:hover { border-color: var(--ink-3); }
     background: var(--danger-soft);
     border: 1px solid rgba(242, 104, 90, 0.4);
     color: var(--danger);
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .wins {
@@ -820,14 +820,14 @@ select:hover { border-color: var(--ink-3); }
 
 .win-body h3 {
     margin: 0 0 2px;
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
 .win-move {
     margin: 0 0 6px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
@@ -840,7 +840,7 @@ select:hover { border-color: var(--ink-3); }
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
@@ -869,13 +869,13 @@ select:hover { border-color: var(--ink-3); }
 .grid {
     width: 100%;
     border-collapse: collapse;
-    font-size: 14.5px;
+    font-size: 16px;
 }
 
 .grid th {
     text-align: left;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -929,7 +929,7 @@ select:hover { border-color: var(--ink-3); }
 
 .finding-sub {
     margin: 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
     text-wrap: pretty;
 }
@@ -941,7 +941,7 @@ select:hover { border-color: var(--ink-3); }
     margin-bottom: 14px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--line-soft);
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
@@ -1007,7 +1007,7 @@ select:hover { border-color: var(--ink-3); }
     backdrop-filter: blur(6px);
     color: var(--ink);
     border-radius: var(--radius-sm);
-    font-size: 13.5px;
+    font-size: 15.5px;
     line-height: 1.5;
     box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
 }
@@ -1050,7 +1050,7 @@ select:hover { border-color: var(--ink-3); }
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     color: var(--ink-2);
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1;
 }
 
@@ -1070,7 +1070,7 @@ select:hover { border-color: var(--ink-3); }
     padding: 1px 7px;
     border-radius: 3px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     vertical-align: 1px;
@@ -1145,7 +1145,7 @@ select:disabled {
 }
 
 .stage-name {
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 500;
     letter-spacing: -0.01em;
 }
@@ -1160,7 +1160,7 @@ select:disabled {
 
 .stage-count em {
     font-style: normal;
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 400;
     color: var(--ink-3);
     letter-spacing: 0;
@@ -1170,7 +1170,7 @@ select:disabled {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-variant-numeric: tabular-nums;
     margin-bottom: 4px;
     min-height: 16px;
@@ -1180,7 +1180,7 @@ select:disabled {
 .stage-ok {
     margin-top: auto;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     padding: 3px 7px;
@@ -1223,7 +1223,7 @@ select:disabled {
 .at-risk span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1267,21 +1267,21 @@ select:disabled {
 
 .problem-body h3 {
     margin: 0 0 3px;
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
 .problem-detail {
     margin: 0 0 5px;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
 
 .problem-fix {
     margin: 0;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--carbon);
 }
 
@@ -1290,7 +1290,7 @@ select:disabled {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -1298,7 +1298,7 @@ select:disabled {
 
 .problem-link {
     margin-top: 4px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 400;
     color: var(--ink-3);
     text-decoration: none;
@@ -1342,7 +1342,7 @@ select:disabled {
     border: 1px solid var(--line);
     border-radius: var(--radius);
     color: var(--ink-2);
-    font-size: 14px;
+    font-size: 16px;
     text-decoration: none;
     transition: border-color 0.2s var(--ease), color 0.2s var(--ease);
 }
@@ -1383,7 +1383,7 @@ select:disabled {
 .topnav {
     display: flex;
     gap: 20px;
-    font-size: 14.5px;
+    font-size: 16px;
 }
 
 .topnav a {
@@ -1432,7 +1432,7 @@ select:disabled {
 .prose li {
     max-width: 68ch;
     color: var(--ink-2);
-    font-size: 15px;
+    font-size: 16.5px;
     text-wrap: pretty;
 }
 
@@ -1450,7 +1450,7 @@ select:disabled {
 }
 
 .prose .source {
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
 }
 
@@ -1459,7 +1459,7 @@ select:disabled {
     background: var(--page);
     border-left: 2px solid var(--cost);
     border-radius: 0;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .prose .caveat strong {
@@ -1490,7 +1490,7 @@ select:disabled {
 .eyebrow {
     margin: 0 0 10px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11.5px;
+    font-size: 13px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1516,7 +1516,7 @@ select:disabled {
     margin: 14px 0 0;
     padding-left: 14px;
     border-left: 2px solid var(--cost);
-    font-size: 15px;
+    font-size: 16.5px;
     color: var(--ink-2);
     text-wrap: pretty;
 }
@@ -1546,7 +1546,7 @@ select:disabled {
 
 .figure-label {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1561,7 +1561,7 @@ select:disabled {
 }
 
 .figure-foot {
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-2);
 }
 
@@ -1658,7 +1658,7 @@ select:disabled {
 
 .finding-rank {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--ink-3);
     padding-top: 3px;
 }
@@ -1666,7 +1666,7 @@ select:disabled {
 .finding-stage {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-2);
@@ -1685,7 +1685,7 @@ select:disabled {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -1697,7 +1697,7 @@ select:disabled {
 
 .finding-body dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1708,7 +1708,7 @@ select:disabled {
     margin: 0 0 12px;
     max-width: 68ch;
     color: var(--ink-2);
-    font-size: 14.5px;
+    font-size: 16px;
     text-wrap: pretty;
 }
 
@@ -1728,7 +1728,7 @@ select:disabled {
 
 .formulas dt {
     font-weight: 600;
-    font-size: 14.5px;
+    font-size: 16px;
     margin-bottom: 3px;
 }
 
@@ -1736,7 +1736,7 @@ select:disabled {
     margin: 0 0 14px;
     max-width: 68ch;
     color: var(--ink-2);
-    font-size: 14.5px;
+    font-size: 16px;
     text-wrap: pretty;
 }
 
@@ -1773,7 +1773,7 @@ select:disabled {
     border-radius: 50%;
     background: var(--ink);
     color: var(--page);
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
@@ -1802,7 +1802,7 @@ select:disabled {
 .plan-label {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1845,7 +1845,7 @@ select:disabled {
 
 .three li {
     margin-bottom: 14px;
-    font-size: 15px;
+    font-size: 16.5px;
     line-height: 1.5;
     color: var(--ink-2);
     max-width: 68ch;
@@ -1861,7 +1861,7 @@ select:disabled {
     display: block;
     margin-top: 3px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13.5px;
+    font-size: 14px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
@@ -1870,7 +1870,7 @@ select:disabled {
     margin: 22px 0 0;
     padding-top: 18px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 15px;
+    font-size: 16.5px;
     color: var(--ink-2);
     max-width: 68ch;
 }
@@ -1948,7 +1948,7 @@ select:disabled {
     align-items: center;
     padding: 13px 26px;
     border-radius: 999px;
-    font-size: 15px;
+    font-size: 16.5px;
     font-weight: 500;
     text-decoration: none;
     transition: transform 0.18s var(--ease), background 0.18s var(--ease),
@@ -1988,7 +1988,7 @@ select:disabled {
 
 .lp-note {
     margin: 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
 }
 
@@ -2004,7 +2004,7 @@ select:disabled {
 .lp-proof-label {
     margin: 0 0 12px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 13px;
+    font-size: 14px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -2036,7 +2036,7 @@ select:disabled {
 }
 
 .lp-proof-figures span {
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-2);
 }
 
@@ -2068,7 +2068,7 @@ select:disabled {
 .lp-steps-intro p {
     max-width: 32ch;
     color: var(--ink-3);
-    font-size: 14px;
+    font-size: 16px;
 }
 
 .lp-steps ol {
@@ -2108,7 +2108,7 @@ select:disabled {
 
 .lp-steps p {
     margin: 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-2);
     max-width: 56ch;
     text-wrap: pretty;
@@ -2137,7 +2137,7 @@ select:disabled {
 }
 
 .lp-split p {
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-2);
     text-wrap: pretty;
 }
@@ -2193,7 +2193,7 @@ select:disabled {
 }
 
 .lp-spec-grid span {
-    font-size: 14.5px;
+    font-size: 16px;
     line-height: 1.5;
     color: var(--ink-2);
 }
@@ -2224,7 +2224,7 @@ select:disabled {
 .lp-close p {
     margin: 0 0 24px;
     color: var(--ink-2);
-    font-size: 15px;
+    font-size: 16.5px;
     max-width: 60ch;
 }
 
@@ -2334,14 +2334,14 @@ select:disabled {
 }
 
 .river-name {
-    font-size: 14.5px;
+    font-size: 16px;
     font-weight: 600;
     letter-spacing: -0.012em;
     line-height: 1.25;
 }
 
 .river-count {
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-2);
 }
 
@@ -2366,7 +2366,7 @@ select:disabled {
     display: flex;
     flex-direction: column;
     gap: 1px;
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
@@ -2377,7 +2377,7 @@ select:disabled {
     border-radius: 999px;
     background: var(--cost-soft);
     color: var(--cost);
-    font-size: 13.5px;
+    font-size: 15.5px;
     font-weight: 600;
     white-space: nowrap;
 }
@@ -2401,7 +2401,7 @@ select:disabled {
 
 .river-key {
     margin: 14px 2px 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-3);
     max-width: 78ch;
     text-wrap: pretty;
@@ -2446,7 +2446,7 @@ select:disabled {
 
 .worst-what {
     margin: 0 0 18px;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-2);
     text-wrap: pretty;
 }
@@ -2468,13 +2468,13 @@ select:disabled {
 }
 
 .worst-stake span {
-    font-size: 13.5px;
+    font-size: 15.5px;
     color: var(--ink-3);
 }
 
 .worst-why summary {
     cursor: pointer;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--ink-3);
     padding-top: 12px;
     border-top: 1px solid var(--line-soft);
@@ -2486,7 +2486,7 @@ select:disabled {
 
 .worst-why p {
     margin: 10px 0 0;
-    font-size: 14.5px;
+    font-size: 16px;
     color: var(--ink-2);
     text-wrap: pretty;
 }
@@ -2555,7 +2555,7 @@ select:disabled {
     .topnav {
         flex-wrap: wrap;
         gap: 8px 16px;
-        font-size: 14px;
+        font-size: 16px;
     }
 
     main {
@@ -2768,7 +2768,7 @@ select:disabled {
     border-radius: var(--radius);
     color: var(--ink-2);
     font: inherit;
-    font-size: 14px;
+    font-size: 16px;
     cursor: pointer;
     transition: border-color 0.18s var(--ease), color 0.18s var(--ease);
 }
