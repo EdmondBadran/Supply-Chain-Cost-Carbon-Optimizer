@@ -359,9 +359,14 @@ def flow_layout(stages):
             "stage": returns,
         }
 
+    # The returns label and its figures hang below the loop, so the canvas
+    # grows to hold them. A fixed height clipped the problem pill off the
+    # bottom edge of the box.
+    height = FLOW_HEIGHT if loop is None else loop["label_y"] + 96
+
     return {
         "width": FLOW_WIDTH,
-        "height": FLOW_HEIGHT,
+        "height": height,
         "spine": FLOW_SPINE,
         "band": band,
         "marks": marks,

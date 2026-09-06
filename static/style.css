@@ -32,6 +32,25 @@
     --enter: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Prose is set in Times, but the standalone readouts stay on the mono face.
+   A figure that is being read as a measurement wants to line up in a column
+   and look like an instrument; a figure sitting inside a sentence does not,
+   and those are deliberately left in the body font. */
+.hero-aside dd,
+.stat strong,
+.figure strong,
+.figure-value,
+.detail-figures dd,
+.stage-count,
+.at-risk strong,
+.worst-stake strong,
+.lp-proof-figures strong,
+.grid .num {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+}
+
 *,
 *::before,
 *::after {
@@ -46,10 +65,13 @@ body {
     margin: 0;
     background: var(--page);
     color: var(--ink);
-    font-family: "Space Grotesk", "Segoe UI", system-ui, sans-serif;
-    font-size: 16px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    font-family: "Times New Roman", Times, serif;
+    /* Times has a smaller x-height than the grotesk this replaced, so it needs
+       the extra point to read at the same size. Antialiasing is deliberately
+       left off: it thins light-on-dark serif strokes, and Times has hairlines
+       to spare already. */
+    font-size: 17px;
+    line-height: 1.62;
 }
 
 /* Ambient wash behind the page, plus a grain layer so flat areas are not sterile. */
@@ -176,7 +198,7 @@ main {
 
 .hero-aside dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11px;
+    font-size: 13.5px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -235,7 +257,7 @@ main {
 .stat span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10.5px;
+    font-size: 13.5px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -257,7 +279,7 @@ main {
 
 .meta {
     margin: 16px 0 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
@@ -265,7 +287,7 @@ main {
 form label {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11px;
+    font-size: 13.5px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -280,7 +302,7 @@ input[type="file"] {
     border: 1px dashed var(--line);
     border-radius: var(--radius);
     font-family: inherit;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-2);
     transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
 }
@@ -292,7 +314,7 @@ input[type="file"]:hover {
 
 input[type="file"]::file-selector-button {
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     margin-right: 12px;
     padding: 6px 12px;
     border: 1px solid var(--line);
@@ -342,7 +364,7 @@ button {
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     color: var(--ink-2);
-    font-size: 13.5px;
+    font-size: 14.5px;
 }
 
 .ghost:hover {
@@ -374,7 +396,7 @@ button {
 
 .notice::before {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11px;
+    font-size: 13.5px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     flex: none;
@@ -409,7 +431,7 @@ details {
 details summary {
     cursor: pointer;
     color: var(--ink-3);
-    font-size: 13.5px;
+    font-size: 14.5px;
     padding: 4px 0;
     transition: color 0.2s var(--ease);
 }
@@ -422,7 +444,7 @@ details table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 12px;
-    font-size: 13.5px;
+    font-size: 14.5px;
 }
 
 details th,
@@ -434,7 +456,7 @@ details td {
 
 details th {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10.5px;
+    font-size: 13.5px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -458,7 +480,7 @@ code {
     border: 1px solid var(--line-soft);
     padding: 1px 5px;
     border-radius: var(--radius-sm);
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink);
 }
 
@@ -467,7 +489,7 @@ code {
     margin: 0 auto;
     padding: 22px 32px 40px;
     border-top: 1px solid var(--line);
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
@@ -537,7 +559,7 @@ code {
 .figure span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10.5px;
+    font-size: 13.5px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -570,7 +592,7 @@ code {
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
-    font-size: 12px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
@@ -616,7 +638,7 @@ code {
 
 .map-label {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 8.5px;
+    font-size: 9.5px;
     letter-spacing: 0.04em;
     fill: var(--ink-2);
 }
@@ -624,7 +646,7 @@ code {
 .map-fallback {
     padding: 16px;
     margin: 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
 }
 
@@ -639,7 +661,7 @@ code {
 .detail .empty,
 .wins .empty {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
     line-height: 1.65;
 }
@@ -653,7 +675,7 @@ code {
 
 .detail-head p {
     margin: 0 0 16px;
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
@@ -669,7 +691,7 @@ code {
 
 .detail-figures dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 13px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -686,7 +708,7 @@ code {
 .whatif-title,
 .win-effort span {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 13px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -696,7 +718,7 @@ code {
 
 .whatif label {
     display: block;
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink-2);
     margin-bottom: 10px;
     text-transform: none;
@@ -710,7 +732,7 @@ select {
     margin-top: 4px;
     padding: 7px 9px;
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink);
     background: var(--panel);
     border: 1px solid var(--line);
@@ -723,7 +745,7 @@ select:hover { border-color: var(--ink-3); }
 
 .whatif-hint {
     margin: 12px 0 0;
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
@@ -740,13 +762,13 @@ select:hover { border-color: var(--ink-3); }
 
 .sim-line {
     margin: 0 0 4px;
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-variant-numeric: tabular-nums;
 }
 
 .sim-sub {
     margin: 0;
-    font-size: 12px;
+    font-size: 13.5px;
     color: var(--ink-2);
 }
 
@@ -759,7 +781,7 @@ select:hover { border-color: var(--ink-3); }
     background: var(--danger-soft);
     border: 1px solid rgba(242, 104, 90, 0.4);
     color: var(--danger);
-    font-size: 13px;
+    font-size: 14px;
 }
 
 .wins {
@@ -805,7 +827,7 @@ select:hover { border-color: var(--ink-3); }
 
 .win-move {
     margin: 0 0 6px;
-    font-size: 12.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
@@ -818,7 +840,7 @@ select:hover { border-color: var(--ink-3); }
     display: flex;
     flex-wrap: wrap;
     gap: 14px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
@@ -847,13 +869,13 @@ select:hover { border-color: var(--ink-3); }
 .grid {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13.5px;
+    font-size: 14.5px;
 }
 
 .grid th {
     text-align: left;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -907,7 +929,7 @@ select:hover { border-color: var(--ink-3); }
 
 .finding-sub {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
     text-wrap: pretty;
 }
@@ -919,7 +941,7 @@ select:hover { border-color: var(--ink-3); }
     margin-bottom: 14px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--line-soft);
-    font-size: 12px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
@@ -985,7 +1007,7 @@ select:hover { border-color: var(--ink-3); }
     backdrop-filter: blur(6px);
     color: var(--ink);
     border-radius: var(--radius-sm);
-    font-size: 12px;
+    font-size: 13.5px;
     line-height: 1.5;
     box-shadow: 0 6px 18px -6px rgba(0, 0, 0, 0.6);
 }
@@ -1048,7 +1070,7 @@ select:hover { border-color: var(--ink-3); }
     padding: 1px 7px;
     border-radius: 3px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 13px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     vertical-align: 1px;
@@ -1123,7 +1145,7 @@ select:disabled {
 }
 
 .stage-name {
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 500;
     letter-spacing: -0.01em;
 }
@@ -1138,7 +1160,7 @@ select:disabled {
 
 .stage-count em {
     font-style: normal;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-weight: 400;
     color: var(--ink-3);
     letter-spacing: 0;
@@ -1148,7 +1170,7 @@ select:disabled {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    font-size: 11.5px;
+    font-size: 13.5px;
     font-variant-numeric: tabular-nums;
     margin-bottom: 4px;
     min-height: 16px;
@@ -1158,7 +1180,7 @@ select:disabled {
 .stage-ok {
     margin-top: auto;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 13px;
     letter-spacing: 0.07em;
     text-transform: uppercase;
     padding: 3px 7px;
@@ -1201,7 +1223,7 @@ select:disabled {
 .at-risk span {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 9.5px;
+    font-size: 13px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1252,14 +1274,14 @@ select:disabled {
 
 .problem-detail {
     margin: 0 0 5px;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
 
 .problem-fix {
     margin: 0;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--carbon);
 }
 
@@ -1268,7 +1290,7 @@ select:disabled {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     text-align: right;
@@ -1276,7 +1298,7 @@ select:disabled {
 
 .problem-link {
     margin-top: 4px;
-    font-size: 12px;
+    font-size: 13.5px;
     font-weight: 400;
     color: var(--ink-3);
     text-decoration: none;
@@ -1361,7 +1383,7 @@ select:disabled {
 .topnav {
     display: flex;
     gap: 20px;
-    font-size: 13.5px;
+    font-size: 14.5px;
 }
 
 .topnav a {
@@ -1428,7 +1450,7 @@ select:disabled {
 }
 
 .prose .source {
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
 }
 
@@ -1468,7 +1490,7 @@ select:disabled {
 .eyebrow {
     margin: 0 0 10px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 11.5px;
     letter-spacing: 0.16em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1524,7 +1546,7 @@ select:disabled {
 
 .figure-label {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1539,8 +1561,8 @@ select:disabled {
 }
 
 .figure-foot {
-    font-size: 12.5px;
-    color: var(--ink-3);
+    font-size: 13.5px;
+    color: var(--ink-2);
 }
 
 /* The chain as a walk down the page, not six boxes across it. */
@@ -1636,7 +1658,7 @@ select:disabled {
 
 .finding-rank {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 12px;
+    font-size: 13.5px;
     color: var(--ink-3);
     padding-top: 3px;
 }
@@ -1644,10 +1666,10 @@ select:disabled {
 .finding-stage {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: var(--ink-3);
+    color: var(--ink-2);
     margin-bottom: 3px;
 }
 
@@ -1663,7 +1685,7 @@ select:disabled {
     flex-direction: column;
     align-items: flex-end;
     gap: 2px;
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
@@ -1675,7 +1697,7 @@ select:disabled {
 
 .finding-body dt {
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1751,7 +1773,7 @@ select:disabled {
     border-radius: 50%;
     background: var(--ink);
     color: var(--page);
-    font-size: 12px;
+    font-size: 13.5px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
 }
@@ -1780,7 +1802,7 @@ select:disabled {
 .plan-label {
     display: block;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -1806,13 +1828,13 @@ select:disabled {
     background:
         radial-gradient(34rem 20rem at 92% 6%, rgba(242, 145, 61, 0.2), transparent 62%),
         radial-gradient(30rem 18rem at 2% 98%, rgba(63, 207, 142, 0.22), transparent 60%),
-        var(--ink);
-    border-color: var(--ink);
-    color: var(--page);
+        var(--panel-2);
+    border-color: var(--line);
+    color: var(--ink);
 }
 
 .three h2 {
-    color: var(--page);
+    color: var(--ink);
     margin-bottom: 18px;
 }
 
@@ -1825,13 +1847,13 @@ select:disabled {
     margin-bottom: 14px;
     font-size: 15px;
     line-height: 1.5;
-    color: rgba(18, 17, 16, 0.72);
+    color: var(--ink-2);
     max-width: 68ch;
     text-wrap: pretty;
 }
 
 .three li strong {
-    color: var(--page);
+    color: var(--ink);
     font-weight: 600;
 }
 
@@ -1839,8 +1861,8 @@ select:disabled {
     display: block;
     margin-top: 3px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 12px;
-    color: rgba(18, 17, 16, 0.5);
+    font-size: 13.5px;
+    color: var(--ink-3);
     font-variant-numeric: tabular-nums;
 }
 
@@ -1849,7 +1871,7 @@ select:disabled {
     padding-top: 18px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
     font-size: 15px;
-    color: var(--page);
+    color: var(--ink-2);
     max-width: 68ch;
 }
 
@@ -1966,7 +1988,7 @@ select:disabled {
 
 .lp-note {
     margin: 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
 }
 
@@ -1982,7 +2004,7 @@ select:disabled {
 .lp-proof-label {
     margin: 0 0 12px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 10px;
+    font-size: 13px;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-3);
@@ -2014,8 +2036,8 @@ select:disabled {
 }
 
 .lp-proof-figures span {
-    font-size: 13px;
-    color: var(--ink-3);
+    font-size: 14px;
+    color: var(--ink-2);
 }
 
 /* Three steps read as a sequence, so they run down the page joined by a
@@ -2171,9 +2193,9 @@ select:disabled {
 }
 
 .lp-spec-grid span {
-    font-size: 13.5px;
+    font-size: 14.5px;
     line-height: 1.5;
-    color: var(--ink-3);
+    color: var(--ink-2);
 }
 
 @media (max-width: 760px) {
@@ -2253,7 +2275,7 @@ select:disabled {
     position: relative;
     width: 100%;
     padding-top: calc(var(--river-ratio, 0.33) * 100%);
-    min-height: 300px;
+    min-height: 380px;
     background: var(--panel);
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
@@ -2312,15 +2334,15 @@ select:disabled {
 }
 
 .river-name {
-    font-size: 13.5px;
+    font-size: 14.5px;
     font-weight: 600;
     letter-spacing: -0.012em;
     line-height: 1.25;
 }
 
 .river-count {
-    font-size: 11.5px;
-    color: var(--ink-3);
+    font-size: 13.5px;
+    color: var(--ink-2);
 }
 
 /* Placed rather than flexed, so figures always clear the band below it. */
@@ -2344,7 +2366,7 @@ select:disabled {
     display: flex;
     flex-direction: column;
     gap: 1px;
-    font-size: 12.5px;
+    font-size: 13.5px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
 }
@@ -2355,7 +2377,7 @@ select:disabled {
     border-radius: 999px;
     background: var(--cost-soft);
     color: var(--cost);
-    font-size: 10.5px;
+    font-size: 13.5px;
     font-weight: 600;
     white-space: nowrap;
 }
@@ -2379,7 +2401,7 @@ select:disabled {
 
 .river-key {
     margin: 14px 2px 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-3);
     max-width: 78ch;
     text-wrap: pretty;
@@ -2446,13 +2468,13 @@ select:disabled {
 }
 
 .worst-stake span {
-    font-size: 11.5px;
+    font-size: 13.5px;
     color: var(--ink-3);
 }
 
 .worst-why summary {
     cursor: pointer;
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-3);
     padding-top: 12px;
     border-top: 1px solid var(--line-soft);
@@ -2464,7 +2486,7 @@ select:disabled {
 
 .worst-why p {
     margin: 10px 0 0;
-    font-size: 13.5px;
+    font-size: 14.5px;
     color: var(--ink-2);
     text-wrap: pretty;
 }
@@ -2533,7 +2555,7 @@ select:disabled {
     .topnav {
         flex-wrap: wrap;
         gap: 8px 16px;
-        font-size: 13px;
+        font-size: 14px;
     }
 
     main {
@@ -2670,4 +2692,92 @@ select:disabled {
     stroke-linecap: round;
     pointer-events: none;
     filter: drop-shadow(0 0 5px currentColor);
+}
+
+
+/* ==== Print ====
+   Saving the report is the browser's own print to PDF, so there is no
+   exporter and no new dependency. The page is drawn for a screen, so print
+   swaps the tokens back to ink on paper rather than restyling every rule. */
+@media print {
+    :root {
+        color-scheme: light;
+        --ink: #16150f;
+        --ink-2: #3d3a33;
+        --ink-3: #5e594f;
+        --line: #c9c4ba;
+        --line-soft: #e4e0d8;
+        --page: #ffffff;
+        --panel: #ffffff;
+        --panel-2: #ffffff;
+        --carbon: #0f6b47;
+        --carbon-soft: #edf5f1;
+        --cost: #9c5518;
+        --cost-soft: #f7efe7;
+        --danger: #8f2f23;
+        --danger-soft: #f8ebe9;
+        --shadow: none;
+    }
+
+    /* The ambient wash and the grain are screen decoration and cost toner. */
+    body::before,
+    body::after {
+        display: none;
+    }
+
+    .topbar,
+    .foot,
+    .skip,
+    .report-save {
+        display: none;
+    }
+
+    main {
+        max-width: none;
+        padding: 0;
+    }
+
+    /* A finding split across two sheets is unreadable, so each block stays
+       whole. */
+    section,
+    .figure,
+    .problem,
+    .plan-step,
+    .worst-card {
+        break-inside: avoid;
+    }
+
+    a {
+        text-decoration: underline;
+    }
+
+    /* A bare "the method page" in print points nowhere, so the address is
+       printed after it. */
+    main a[href^="/"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.85em;
+        color: var(--ink-3);
+    }
+}
+
+.report-save {
+    margin-top: 18px;
+    padding: 9px 18px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    transition: border-color 0.18s var(--ease), color 0.18s var(--ease);
+}
+
+.report-save:hover {
+    border-color: var(--carbon);
+    color: var(--carbon);
+}
+
+.report-save:active {
+    transform: scale(0.985);
 }

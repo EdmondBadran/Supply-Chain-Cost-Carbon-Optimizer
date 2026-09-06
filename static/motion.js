@@ -37,3 +37,10 @@ if (!REDUCED) {
         .querySelectorAll("[data-count]")
         .forEach((el) => arriving.observe(el));
 }
+
+
+// Saving the report hands off to the browser's own print dialogue, which is
+// where "save as PDF" already lives on every platform.
+document
+    .querySelectorAll("[data-print]")
+    .forEach((button) => button.addEventListener("click", () => window.print()));
