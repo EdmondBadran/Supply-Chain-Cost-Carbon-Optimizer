@@ -36,6 +36,18 @@ def _number(value, default=None, field="value"):
         raise ValidationError(f"{field} is not a number: {text}") from None
 
 
+def _rate(value, field):
+    """A rate written either as 0.92 or as 92, both of which people use."""
+    number = _number(value, None, field=field)
+    if number is None:
+        return None
+    if number > 1.0:
+        number = number / 100.0
+    if not 0.0 <= number <= 1.0:
+        raise ValidationError(f"{field} must be between 0 and 100 percent")
+    return number
+
+
 def _resolve_point(city, country, lat, lon):
     lat_text, lon_text = _clean(lat), _clean(lon)
     if lat_text and lon_text:
@@ -214,6 +226,13 @@ def _apply_suppliers(nodes, supplier_rows, errors):
                 "country": country or None,
                 "lat": point[0],
                 "lon": point[1],
+                "lead_time_days": _number(
+                    row.get("lead_time_days"), None, field="lead_time_days"
+                ),
+                "min_order_qty": _number(
+                    row.get("min_order_qty"), None, field="min_order_qty"
+                ),
+                "on_time_rate": _rate(row.get("on_time_rate"), "on_time_rate"),
             }
             inbound.append(
                 {
@@ -302,8 +321,9 @@ def _write_nodes(conn, nodes):
             """
             INSERT INTO nodes
                 (name, node_type, city, country, lat, lon,
-                 storage_cost_annual, energy_kwh_annual, grid_intensity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 storage_cost_annual, energy_kwh_annual, grid_intensity,
+                 lead_time_days, min_order_qty, on_time_rate)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 name,
@@ -315,6 +335,9 @@ def _write_nodes(conn, nodes):
                 node.get("storage_cost_annual", 0.0),
                 node.get("energy_kwh_annual", 0.0),
                 node.get("grid_intensity"),
+                node.get("lead_time_days"),
+                node.get("min_order_qty"),
+                node.get("on_time_rate"),
             ),
         )
         ids[name] = cursor.lastrowid

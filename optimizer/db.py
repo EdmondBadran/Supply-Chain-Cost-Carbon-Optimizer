@@ -14,7 +14,10 @@ CREATE TABLE IF NOT EXISTS nodes (
     lon REAL NOT NULL,
     storage_cost_annual REAL DEFAULT 0,
     energy_kwh_annual REAL DEFAULT 0,
-    grid_intensity REAL
+    grid_intensity REAL,
+    lead_time_days REAL,
+    min_order_qty REAL,
+    on_time_rate REAL
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -63,6 +66,15 @@ CREATE TABLE IF NOT EXISTS meta (
     value TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS stages (
+    key TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    blurb TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    hidden INTEGER NOT NULL DEFAULT 0,
+    builtin INTEGER NOT NULL DEFAULT 1
+);
+
 CREATE INDEX IF NOT EXISTS idx_orders_origin ON orders(origin_id);
 CREATE INDEX IF NOT EXISTS idx_orders_dest ON orders(dest_id);
 CREATE INDEX IF NOT EXISTS idx_edges_origin ON edges(origin_id);
@@ -78,13 +90,32 @@ def connect(path=DEFAULT_DB):
     return conn
 
 
+# Columns added to nodes after the first version of the schema shipped.
+# CREATE TABLE IF NOT EXISTS will not add them to a database that already
+# exists, so they are applied by hand.
+ADDED_NODE_COLUMNS = {
+    "lead_time_days": "REAL",
+    "min_order_qty": "REAL",
+    "on_time_rate": "REAL",
+}
+
+
 def init(conn):
     conn.executescript(SCHEMA)
+    have = {row["name"] for row in conn.execute("PRAGMA table_info(nodes)")}
+    for column, kind in ADDED_NODE_COLUMNS.items():
+        if column not in have:
+            conn.execute(f"ALTER TABLE nodes ADD COLUMN {column} {kind}")
     conn.commit()
 
 
 def reset(conn):
-    """Drop loaded data but keep the schema, so a new upload starts clean."""
+    """Drop loaded data but keep the schema, so a new upload starts clean.
+
+    Stages are deliberately left alone. How someone has named and arranged
+    their chain is their model of their own business, not a property of the
+    file they happened to upload last.
+    """
     for table in ("meta", "effort_tags", "edges", "orders", "nodes"):
         conn.execute(f"DELETE FROM {table}")
     conn.commit()

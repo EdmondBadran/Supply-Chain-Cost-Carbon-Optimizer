@@ -114,6 +114,15 @@ get less useful. And suppliers, with `name`, `city`, `country`, `supplies`
 and `annual_cost`, which is what turns the outbound network into a full
 chain.
 
+The supplier file takes three more optional columns: `lead_time_days`,
+`min_order_qty` and `on_time_rate`, written either as 0.92 or as 92. These are
+commercial terms rather than freight, and only the on-time rate carries money.
+A supplier that misses its date gets expedited, expediting means air, and that
+is the point where a service problem quietly becomes a carbon one. Lead time
+and minimum order are flagged without a figure attached, because what they
+cost depends on your demand and your cost of capital, neither of which is in
+an orders file.
+
 Anything the loader cannot read gets reported by line number and the rest of
 the file still loads. One bad row does not cost you the import.
 
@@ -171,23 +180,61 @@ optimizer/
 static/
   dashboard.js      the map, the ranking and the what-if panel
   chain.js          the value chain stages
-data/               city reference table and the sample dataset
+data/               city reference table and the sample datasets
+tests/              tests around the hand-tuned scoring thresholds
 tools/make_sample.py  regenerates the sample data
 ```
 
+## Reshaping the network
+
+The map's what-if panel goes past changing one route. Close a warehouse and
+its work moves to whichever remaining site is nearest and has room, heaviest
+routes first, while the building stops costing you rent and electricity. Name
+a city and it opens a hypothetical site there, priced at the median cost and
+energy per tonne of the sites you already run, because nothing in your data
+describes a building that does not exist yet.
+
+Only routes actually affected move. A route whose warehouse is still open and
+still the nearest stays exactly where it is, so changing nothing saves exactly
+nothing. That sounds obvious and is the whole reason the rest of the answer
+can be trusted: a panel that quietly re-plans the entire network on every run
+credits unrelated savings to whatever you just clicked.
+
+Capacity is one headroom figure, half as much again as a site handles today.
+Past that the overflow goes to the next nearest, and if nothing has room the
+answer says the shape is over capacity rather than pretending a warehouse is
+infinitely elastic.
+
+## Editing the chain
+
+The six stages are what the tool can measure, not a claim about how your
+business is arranged. Rename any of them to what you actually call it, move
+them, hide one that does not apply, or add a step of your own. A stage you add
+carries no figures and runs no checks, and says so, because inventing a number
+to fill the space would be worse than the gap. Hiding a stage only takes it
+out of the picture, and the figures behind it are still in the totals.
+
+How you arrange the chain survives a new upload. It describes your business,
+not the file you happened to load last.
+
+## Tests
+
+```
+python -m unittest discover tests
+```
+
+The scoring thresholds decide which routes get flagged and in what order, and
+they were tuned by hand. The risk was never that they are wrong, it is that
+someone changes one and nothing complains until the output looks strange weeks
+later. The tests pin the behaviour the thresholds exist to produce rather than
+the numbers themselves, so moving one on purpose stays easy and moving one by
+accident is loud.
+
 ## Not done
 
-**Supplier terms beyond freight.** Lead time, minimum order quantity and
-on-time rate all belong in a picture of a supply chain and none are modelled.
-Freight went first because it is the part where cost and carbon overlap.
-
-**Editing the chain.** The six stages are derived from your data and cannot be
-renamed, added to or removed.
-
-**Adding and removing locations in the what-if.** You can change how a route
-ships and which warehouse serves it, but you cannot delete a warehouse and
-watch the work redistribute. That needs reassignment and capacity logic rather
-than arithmetic, and doing it half-right would be worse than not having it.
+**Uploads are shared.** There is one SQLite file for the whole site, so if this
+were hosted, one visitor's upload would replace another's. Fine on your own
+machine, not fine anywhere else, and it is the next thing to fix.
 
 **Inventory.** Slower shipping ties up more working capital in stock and that
 cost is not counted anywhere. Transit time itself is now estimated, from

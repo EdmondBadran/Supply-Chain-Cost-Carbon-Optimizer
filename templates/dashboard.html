@@ -72,6 +72,52 @@
   <div class="wins" id="wins"></div>
 </section>
 
+<section class="panel network-panel">
+  <div class="panel-head">
+    <div>
+      <h2>What if the network were shaped differently</h2>
+      <p class="sub">
+        Close a site and its work moves to whichever remaining site is nearest
+        and has room, and the building stops costing you. Open one and the
+        routes closer to it move across. Every route is reassigned and repriced,
+        not estimated.
+      </p>
+    </div>
+  </div>
+
+  <div class="network-controls">
+    <ul class="site-toggles" id="site-toggles">
+      {% for warehouse in network.warehouses %}
+      <li>
+        <label>
+          <input type="checkbox" data-site="{{ warehouse.id }}" checked>
+          <span>{{ warehouse.name }}</span>
+        </label>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <div class="site-add">
+      <label for="new-site">Try a new site at</label>
+      <input type="text" id="new-site" placeholder="City, for example Lyon"
+             autocomplete="off" maxlength="60">
+      <input type="text" id="new-site-country" placeholder="Country code"
+             autocomplete="off" maxlength="2">
+      <button type="button" id="run-network">Work it out</button>
+    </div>
+  </div>
+
+  <div id="network-result" class="network-result"></div>
+
+  <p class="meta">
+    A site is assumed to absorb up to half as much again as it handles today.
+    Past that the overflow goes to the next nearest one, and the answer says
+    so. A new site is priced at what your own sites cost and burn per tonne,
+    on an average grid, because nothing in your data describes a building that
+    does not exist yet.
+  </p>
+</section>
+
 <div class="split-2">
   <section class="panel">
     <h2>Cost by destination</h2>

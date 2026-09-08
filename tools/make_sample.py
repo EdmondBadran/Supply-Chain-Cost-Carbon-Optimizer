@@ -95,16 +95,20 @@ LANES = [
 # Inbound: where the goods come from before they reach a warehouse. Two of
 # these are deliberately on air freight, which is where the hidden carbon in
 # most real chains turns out to be sitting.
+# Lead time, minimum order and on-time rate are commercial terms rather than
+# freight. They are set so the far eastern sea lanes carry the long lead times
+# and the softer on-time rates, which is what puts the expedite risk on the
+# suppliers where flying the recovery actually hurts.
 SUPPLIERS = [
-    ("Pearl River Components", "Dongguan", "CN", "Shenzhen DC", "road", 1_180_000, 240, 3_900_000),
-    ("Haiphong Assembly", "Haiphong", "VN", "Shenzhen DC", "sea", 640_000, 48, 2_100_000),
-    ("Penang Circuits", "George Town", "MY", "Shenzhen DC", "sea", 410_000, 36, 1_640_000),
-    ("Shenzhen Cell Works", "Shenzhen", "CN", "Rotterdam DC", "sea", 890_000, 52, 3_200_000),
-    ("Taipei Precision", "Taipei", "TW", "Rotterdam DC", "air", 210_000, 96, 2_450_000),
-    ("Guadalajara Modules", "Guadalajara", "MX", "Memphis DC", "road", 520_000, 120, 1_780_000),
-    ("Suzhou Optics", "Suzhou", "CN", "Memphis DC", "sea", 730_000, 44, 2_600_000),
-    ("Chennai Polymers", "Chennai", "IN", "Dubai DC", "sea", 380_000, 30, 1_120_000),
-    ("Istanbul Fabrication", "Istanbul", "TR", "Dubai DC", "air", 165_000, 72, 1_380_000),
+    ("Pearl River Components", "Dongguan", "CN", "Shenzhen DC", "road", 1_180_000, 240, 3_900_000, 21, 40_000, 0.97),
+    ("Haiphong Assembly", "Haiphong", "VN", "Shenzhen DC", "sea", 640_000, 48, 2_100_000, 38, 90_000, 0.91),
+    ("Penang Circuits", "George Town", "MY", "Shenzhen DC", "sea", 410_000, 36, 1_640_000, 44, 60_000, 0.95),
+    ("Shenzhen Cell Works", "Shenzhen", "CN", "Rotterdam DC", "sea", 890_000, 52, 3_200_000, 62, 100_000, 0.93),
+    ("Taipei Precision", "Taipei", "TW", "Rotterdam DC", "air", 210_000, 96, 2_450_000, 12, 8_000, 0.94),
+    ("Guadalajara Modules", "Guadalajara", "MX", "Memphis DC", "road", 520_000, 120, 1_780_000, 18, 30_000, 0.96),
+    ("Suzhou Optics", "Suzhou", "CN", "Memphis DC", "sea", 730_000, 44, 2_600_000, 55, 220_000, 0.97),
+    ("Chennai Polymers", "Chennai", "IN", "Dubai DC", "sea", 380_000, 30, 1_120_000, 48, 40_000, 0.96),
+    ("Istanbul Fabrication", "Istanbul", "TR", "Dubai DC", "air", 165_000, 72, 1_380_000, 16, 6_000, 0.90),
 ]
 
 CATEGORIES = [
@@ -220,6 +224,9 @@ def main():
                 "annual_weight_kg",
                 "shipments_per_year",
                 "annual_cost",
+                "lead_time_days",
+                "min_order_qty",
+                "on_time_rate",
             ]
         )
         writer.writerows(SUPPLIERS)

@@ -8,11 +8,24 @@ the chain the cost and carbon land rather than by geography.
 
 from statistics import median
 
-from . import scoring
+from . import analysis, factors, scoring
 
 # A warehouse burning this much more carbon per tonne than the median is
 # usually sitting on a dirty grid rather than being badly run.
 GRID_OUTLIER = 1.4
+
+# A supplier hitting its date less often than this is not merely unreliable.
+# It is quietly pushing freight onto air to recover, which is where the money
+# and the carbon both turn up.
+ON_TIME_TARGET = 0.95
+
+# Past this a lead time stops being a schedule and becomes a forecast, and
+# every order placed against it is a guess about demand that far out.
+LEAD_TIME_LONG_DAYS = 45
+
+# A minimum order covering more than this many months of demand is stock held
+# because the supplier set a floor, not because the business needs it.
+MOQ_MONTHS_LIMIT = 3.0
 
 # Returns above this share of a lane's orders stop being noise.
 RETURN_RATE_LIMIT = 0.08
@@ -26,8 +39,96 @@ def _money(lane):
     return lane["cost"]
 
 
+# The six stages this tool can actually compute. A business does not have to
+# describe itself in these words or this order, so names, order and which
+# stages apply are all editable. What sits behind each one does not move: only
+# the label, the position, and whether it is shown at all.
+BUILTIN_STAGES = (
+    ("suppliers", "Suppliers", "Where your goods come from before you own them"),
+    (
+        "inbound",
+        "Inbound freight",
+        "Getting goods from suppliers into your warehouses",
+    ),
+    (
+        "warehousing",
+        "Warehousing",
+        "Holding, handling and powering the buildings in between",
+    ),
+    (
+        "outbound",
+        "Outbound freight",
+        "Getting goods from warehouses out to customers",
+    ),
+    (
+        "customers",
+        "Customers",
+        "Everywhere you deliver to, and what each one costs you",
+    ),
+    (
+        "returns",
+        "Returns",
+        "Everything that comes back, and the second trip it pays for",
+    ),
+)
+
+BUILTIN_KEYS = frozenset(key for key, _, _ in BUILTIN_STAGES)
+
+
+def settings(conn):
+    """The stage list as the user has arranged it, seeded on first read."""
+    rows = conn.execute("SELECT * FROM stages ORDER BY position").fetchall()
+    if not rows:
+        conn.executemany(
+            """
+            INSERT INTO stages (key, name, blurb, position, hidden, builtin)
+            VALUES (?, ?, ?, ?, 0, 1)
+            """,
+            [
+                (key, name, blurb, index)
+                for index, (key, name, blurb) in enumerate(BUILTIN_STAGES)
+            ],
+        )
+        conn.commit()
+        rows = conn.execute("SELECT * FROM stages ORDER BY position").fetchall()
+    return [dict(row) for row in rows]
+
+
 def build(conn):
-    """Return the five stages plus returns, each with its own problems."""
+    """The stages in the order the user keeps them, each with its problems."""
+    computed = {stage["key"]: stage for stage in _computed(conn)}
+    if not computed:
+        return []
+
+    ordered = []
+    for row in settings(conn):
+        if row["hidden"]:
+            continue
+        stage = computed.get(row["key"]) or _custom_stage(row["key"])
+        stage = dict(
+            stage,
+            name=row["name"],
+            blurb=row["blurb"],
+            builtin=bool(row["builtin"]),
+        )
+        ordered.append(stage)
+    return ordered
+
+
+def _custom_stage(key):
+    """A stage somebody added themselves.
+
+    Nothing computes into it, so it carries no figures and runs no checks.
+    It exists to make the picture match a business that has a step this tool
+    knows nothing about. Saying it measures nothing is more honest than
+    inventing a number to fill the gap.
+    """
+    return _stage(key, key, "", None, "", 0.0, 0.0, [])
+
+
+def _computed(conn):
+    """The six stages this tool works out from the data, in their natural
+    order. What the user does with them afterwards is settings, not this."""
     lanes = scoring.rank(conn)
     if not lanes:
         return []
@@ -76,7 +177,16 @@ def _stage(key, name, blurb, headline, unit, cost, co2e, problems):
     }
 
 
-def _problem(title, detail, cost_at_stake, co2e_at_stake, edge_id=None, fix=None):
+def _problem(
+    title,
+    detail,
+    cost_at_stake,
+    co2e_at_stake,
+    edge_id=None,
+    fix=None,
+    note=None,
+    kind=None,
+):
     return {
         "title": title,
         "detail": detail,
@@ -84,11 +194,103 @@ def _problem(title, detail, cost_at_stake, co2e_at_stake, edge_id=None, fix=None
         "co2e_at_stake": co2e_at_stake,
         "edge_id": edge_id,
         "fix": fix,
+        # What sort of check produced this. The report reads it to tell a
+        # supplier's commercial terms apart from its freight, since they are
+        # in the same stage but are not the same problem.
+        "kind": kind,
+        # Some problems are real without being costable from an orders file.
+        # The note says what the reader is looking at instead of a figure, so
+        # an empty column does not read as a number that failed to load.
+        "note": note,
     }
 
 
+def _supplier_terms_problems(suppliers, inbound):
+    """What the commercial terms cost, on top of what the freight costs.
+
+    Lead time, minimum order quantity and on-time rate are the three things a
+    buyer actually negotiates, and none of them are freight. They belong in
+    this stage because the way a missed date gets recovered is always air, so
+    a service problem turns into a carbon one without anybody deciding to.
+    """
+    lanes_by_supplier = {}
+    for lane in inbound:
+        lanes_by_supplier.setdefault(lane["origin_id"], []).append(lane)
+
+    found = []
+    for supplier in suppliers:
+        lanes = lanes_by_supplier.get(supplier["id"], [])
+        name = supplier["name"]
+
+        on_time = supplier.get("on_time_rate")
+        if on_time is not None and on_time < ON_TIME_TARGET:
+            cost = co2e = 0.0
+            for lane in lanes:
+                penalty = analysis.expedite_penalty(
+                    lane["total_weight_kg"],
+                    lane["distance_km"],
+                    lane["mode"],
+                    on_time,
+                )
+                if penalty:
+                    cost += penalty["cost"]
+                    co2e += penalty["co2e"]
+            if cost > 0 or co2e > 0:
+                found.append(
+                    _problem(
+                        name,
+                        f"Delivers on time {on_time:.0%} of the time against a "
+                        f"{ON_TIME_TARGET:.0%} target, and "
+                        f"{factors.EXPEDITE_SHARE_OF_LATE:.0%} of what slips is "
+                        f"assumed to be flown in to catch up",
+                        cost,
+                        co2e,
+                        None,
+                        "Hold the supplier to the date, or carry enough stock "
+                        "to absorb the slip without flying",
+                        kind="on_time",
+                    )
+                )
+
+        lead = supplier.get("lead_time_days")
+        if lead is not None and lead > LEAD_TIME_LONG_DAYS:
+            found.append(
+                _problem(
+                    name,
+                    f"{lead:,.0f} day lead time, so every order is placed "
+                    f"against a demand forecast {lead / 30:,.1f} months out",
+                    0.0,
+                    0.0,
+                    None,
+                    "Shorten the lead time, or dual source it closer to home",
+                    note="No freight cost of its own",
+                    kind="lead_time",
+                )
+            )
+
+        moq = supplier.get("min_order_qty")
+        annual = sum(lane["total_weight_kg"] for lane in lanes)
+        if moq and annual > 0:
+            months = moq / (annual / 12.0)
+            if months > MOQ_MONTHS_LIMIT:
+                found.append(
+                    _problem(
+                        name,
+                        f"Minimum order of {moq:,.0f} kg is {months:,.1f} months "
+                        f"of demand, against {annual / 1000:,.1f} t a year",
+                        0.0,
+                        0.0,
+                        None,
+                        "Negotiate the minimum down, or consolidate it with "
+                        "another line from the same supplier",
+                        note="Ties up working capital",
+                        kind="min_order",
+                    )
+                )
+    return found
+
+
 def _suppliers_stage(suppliers, inbound):
-    countries = {s["country"] for s in suppliers if s["country"]}
     problems = []
     for lane in sorted(inbound, key=lambda l: -l["priority"]):
         if not lane["flagged"]:
@@ -104,6 +306,7 @@ def _suppliers_stage(suppliers, inbound):
                 f"Move this supplier to {lane['switch']['mode']}",
             )
         )
+    problems.extend(_supplier_terms_problems(suppliers, inbound))
     return _stage(
         "suppliers",
         "Suppliers",
@@ -194,8 +397,6 @@ def _warehousing_stage(warehouses, lanes):
 
 
 def _customers_stage(customers, outbound):
-    countries = {c["country"] for c in customers if c["country"]}
-
     per_dest = []
     for lane in outbound:
         tonnes = lane["total_weight_kg"] / 1000
@@ -267,6 +468,99 @@ def _returns_stage(lanes):
         returns_co2e,
         problems[:6],
     )
+
+
+def _slug(name):
+    text = "".join(c.lower() if c.isalnum() else "-" for c in name).strip("-")
+    while "--" in text:
+        text = text.replace("--", "-")
+    return text or "stage"
+
+
+def rename_stage(conn, key, name, blurb):
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("a stage needs a name")
+    settings(conn)
+    conn.execute(
+        "UPDATE stages SET name = ?, blurb = ? WHERE key = ?",
+        (name, (blurb or "").strip(), key),
+    )
+    conn.commit()
+
+
+def set_stage_hidden(conn, key, hidden):
+    """Hide a stage that does not apply. Built-in stages are hidden rather
+    than deleted, because the data behind them still exists and a hidden
+    stage has to be able to come back without losing anything."""
+    settings(conn)
+    conn.execute(
+        "UPDATE stages SET hidden = ? WHERE key = ?", (1 if hidden else 0, key)
+    )
+    conn.commit()
+
+
+def move_stage(conn, key, direction):
+    """Swap a stage with its neighbour."""
+    rows = settings(conn)
+    index = next((i for i, row in enumerate(rows) if row["key"] == key), None)
+    if index is None:
+        raise ValueError("no such stage")
+
+    target = index - 1 if direction == "up" else index + 1
+    if not 0 <= target < len(rows):
+        return
+
+    conn.execute(
+        "UPDATE stages SET position = ? WHERE key = ?", (rows[target]["position"], key)
+    )
+    conn.execute(
+        "UPDATE stages SET position = ? WHERE key = ?",
+        (rows[index]["position"], rows[target]["key"]),
+    )
+    conn.commit()
+
+
+def add_stage(conn, name, blurb=""):
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("a stage needs a name")
+
+    key = _slug(name)
+    taken = {row["key"] for row in settings(conn)}
+    if key in taken:
+        suffix = 2
+        while f"{key}-{suffix}" in taken:
+            suffix += 1
+        key = f"{key}-{suffix}"
+
+    position = conn.execute("SELECT MAX(position) FROM stages").fetchone()[0]
+    conn.execute(
+        """
+        INSERT INTO stages (key, name, blurb, position, hidden, builtin)
+        VALUES (?, ?, ?, ?, 0, 0)
+        """,
+        (key, name, (blurb or "").strip(), (position or 0) + 1),
+    )
+    conn.commit()
+    return key
+
+
+def remove_stage(conn, key):
+    settings(conn)
+    row = conn.execute("SELECT builtin FROM stages WHERE key = ?", (key,)).fetchone()
+    if row is None:
+        raise ValueError("no such stage")
+    if row["builtin"]:
+        raise ValueError("built-in stages can be hidden but not deleted")
+    conn.execute("DELETE FROM stages WHERE key = ?", (key,))
+    conn.commit()
+
+
+def reset_stages(conn):
+    conn.execute("DELETE FROM stages")
+    conn.commit()
+    return settings(conn)
 
 
 # The chain drawn as one river of money. Geometry lives here rather than in

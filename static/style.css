@@ -2781,3 +2781,288 @@ select:disabled {
 .report-save:active {
     transform: scale(0.985);
 }
+
+/* Editing the chain. Kept behind a disclosure because the picture is the
+   point of the page and this is housekeeping, but visible enough that nobody
+   assumes the six default stages are the only thing on offer. */
+.stage-editor {
+    margin: 18px 2px 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    padding: 0 18px;
+}
+
+.stage-editor > summary {
+    cursor: pointer;
+    padding: 14px 0;
+    font-size: 16px;
+    color: var(--ink-2);
+    list-style: none;
+}
+
+.stage-editor > summary::-webkit-details-marker {
+    display: none;
+}
+
+.stage-editor > summary::before {
+    content: "+ ";
+    color: var(--carbon);
+}
+
+.stage-editor[open] > summary::before {
+    content: "- ";
+}
+
+.stage-editor > summary:hover {
+    color: var(--ink);
+}
+
+.stage-editor > .sub {
+    margin: 0 0 16px;
+    font-size: 16px;
+    color: var(--ink-3);
+    max-width: 74ch;
+    text-wrap: pretty;
+}
+
+.stage-error {
+    margin: 0 0 14px;
+    padding: 9px 12px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: 16px;
+}
+
+.stage-rows {
+    list-style: none;
+    margin: 0 0 16px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stage-row form,
+.stage-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* A hidden stage stays in the list so it can be brought back, but it should
+   not read as part of the chain while it is out of the picture. */
+.stage-row.is-hidden {
+    opacity: 0.5;
+}
+
+.stage-row input,
+.stage-add input {
+    padding: 8px 11px;
+    background: var(--page);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+}
+
+.stage-row input:focus,
+.stage-add input:focus {
+    outline: none;
+    border-color: var(--carbon);
+}
+
+.stage-name {
+    flex: 0 1 16ch;
+}
+
+.stage-blurb,
+.stage-add input[name="blurb"] {
+    flex: 1 1 28ch;
+    min-width: 0;
+}
+
+.stage-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.stage-row button,
+.stage-add button {
+    padding: 8px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink-2);
+    font-size: 15px;
+}
+
+.stage-row button:hover:not(:disabled),
+.stage-add button:hover {
+    color: var(--ink);
+    border-color: var(--carbon-line);
+    background: var(--carbon-soft);
+}
+
+.stage-row button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.stage-remove:hover {
+    color: var(--danger) !important;
+    border-color: var(--danger) !important;
+    background: var(--danger-soft) !important;
+}
+
+.stage-add {
+    padding-top: 14px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.stage-reset {
+    margin: 12px 0 18px;
+    padding: 0;
+    background: none;
+    border: none;
+    color: var(--ink-3);
+    font-size: 15px;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.stage-reset:hover {
+    color: var(--ink);
+}
+
+/* Reshaping the network. Sites are checkboxes because closing one is a yes or
+   no, and a checked box that unchecks reads as "this building goes away" more
+   plainly than any button would. */
+.network-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px 28px;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.site-toggles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.site-toggles label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--panel-2);
+    font-size: 16px;
+    cursor: pointer;
+    transition: opacity 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+
+.site-toggles label:hover {
+    border-color: var(--carbon-line);
+}
+
+.site-toggles input {
+    accent-color: var(--carbon);
+    margin: 0;
+}
+
+.site-toggles input:not(:checked) + span {
+    color: var(--ink-3);
+    text-decoration: line-through;
+}
+
+.site-add {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    font-size: 16px;
+    color: var(--ink-2);
+}
+
+.site-add input {
+    padding: 8px 11px;
+    background: var(--page);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+}
+
+.site-add input:focus {
+    outline: none;
+    border-color: var(--carbon);
+}
+
+#new-site {
+    width: 20ch;
+}
+
+#new-site-country {
+    width: 9ch;
+}
+
+.site-add button {
+    padding: 8px 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    color: var(--ink);
+    font-size: 16px;
+}
+
+.site-add button:hover {
+    border-color: var(--carbon-line);
+    background: var(--carbon-soft);
+}
+
+.network-result:empty::before {
+    content: "Uncheck a site, or name a city, to see what the network would do.";
+    color: var(--ink-3);
+    font-size: 16px;
+}
+
+.network-warn {
+    margin: 12px 0 0;
+    padding: 10px 13px;
+    border-radius: var(--radius-sm);
+    background: var(--danger-soft);
+    color: var(--danger);
+    font-size: 16px;
+    max-width: 74ch;
+    text-wrap: pretty;
+}
+
+.network-sites {
+    margin-top: 16px;
+}
+
+.network-sites .site-closed td {
+    color: var(--ink-3);
+    text-decoration: line-through;
+}
+
+.network-sites .site-added td {
+    color: var(--carbon);
+}
+
+.network-sites .site-full td {
+    color: var(--danger);
+}

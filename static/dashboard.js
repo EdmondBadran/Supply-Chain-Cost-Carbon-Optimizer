@@ -597,6 +597,95 @@ async function runSimulation(edgeId) {
     drawDetail();
 }
 
+/* Reshaping the network: closing sites and opening new ones */
+
+function networkResult(result) {
+    const cost = result.saved.cost;
+    const co2e = result.saved.co2e;
+    const good = cost > 0 && co2e > 0;
+    const bad = cost < 0 && co2e < 0;
+    const tone = good ? "good" : bad ? "bad" : "mixed";
+    const verb = (value) => (value > 0 ? "saves " : "adds ");
+
+    const rows = result.sites
+        .map(
+            (site) => `
+      <tr class="site-${site.status}${site.full ? " site-full" : ""}">
+        <td>${site.name}</td>
+        <td class="num">${site.status}</td>
+        <td class="num">${site.tonnes_before.toLocaleString("en-US", { maximumFractionDigits: 1 })} t</td>
+        <td class="num">${site.status === "closed" ? "&mdash;" : site.tonnes_after.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " t"}</td>
+        <td class="num">${site.status === "closed" ? "&mdash;" : site.lanes}</td>
+      </tr>`
+        )
+        .join("");
+
+    return `
+    <div class="sim ${tone}">
+      <p class="sim-line">
+        ${verb(cost)}<strong>${money(Math.abs(cost))}</strong>
+        and ${verb(co2e)}<strong>${tonnes(Math.abs(co2e))} CO2e</strong> a year
+      </p>
+      <p class="sim-sub">
+        ${result.moved_lanes} route${result.moved_lanes === 1 ? "" : "s"} would be
+        served from somewhere else.
+        ${good ? "Both fall." : bad ? "Both rise." : "One improves at the other's expense."}
+      </p>
+    </div>
+    ${
+        result.over_capacity
+            ? `<p class="network-warn">At least one site is over the volume it could
+                 credibly take. The numbers above assume it copes anyway, so treat
+                 this shape as a question rather than an answer.</p>`
+            : ""
+    }
+    <table class="grid network-sites">
+      <thead>
+        <tr><th>Site</th><th>Status</th><th>Handles now</th><th>Would handle</th><th>Routes</th></tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+async function runNetwork() {
+    const panel = document.getElementById("network-result");
+    const closed = [...document.querySelectorAll("#site-toggles input:not(:checked)")].map(
+        (box) => Number(box.dataset.site)
+    );
+
+    panel.innerHTML = '<p class="whatif-hint">Working it out.</p>';
+    let result;
+    try {
+        const response = await fetch("/api/network", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                closed: closed,
+                city: document.getElementById("new-site").value,
+                country: document.getElementById("new-site-country").value,
+            }),
+        });
+        result = await response.json();
+        if (!response.ok) {
+            panel.innerHTML = `<p class="network-warn">${result.error || "That could not be worked out."}</p>`;
+            return;
+        }
+    } catch {
+        panel.innerHTML =
+            '<p class="network-warn">The server did not answer. Try again.</p>';
+        return;
+    }
+    panel.innerHTML = networkResult(result);
+}
+
+document.getElementById("run-network").addEventListener("click", runNetwork);
+document.querySelectorAll("#site-toggles input").forEach((box) => {
+    box.addEventListener("change", runNetwork);
+});
+document.getElementById("new-site").addEventListener("keydown", (event) => {
+    if (event.key === "Enter") runNetwork();
+});
+
 // Arriving from a problem in the value chain opens that exact lane. Otherwise
 // open on the biggest win, so the page arrives showing something rather than
 // asking to be explored first.

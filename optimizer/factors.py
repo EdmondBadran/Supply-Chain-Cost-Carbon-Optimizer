@@ -18,8 +18,9 @@ EMISSION_FACTORS = {
 # Air is the one worth stating a source for, because getting it wrong throws
 # every result off. Long haul general air cargo runs roughly 2 to 5 USD per kg,
 # so about 3,000 USD a tonne over a 16,000 km route, which is 0.19 per
-# tonne-km. Air is still roughly 20 times road and 30 times sea, which is
-# what makes it worth moving off, but it is not 100 times.
+# tonne-km. That puts air about 1.6 times road and 24 times sea on cost. The
+# case for moving off it is carbon rather than money: on emissions it is about
+# 10 times road and 75 times sea.
 COST_FACTORS = {
     "road": 0.12,
     "rail": 0.04,
@@ -38,6 +39,14 @@ RETURN_LEG_MULTIPLIER = 1.25
 RETURN_HANDLING_COST = 6.50
 
 DEFAULT_GRID_INTENSITY = 0.35  # kg CO2e per kWh, world average-ish
+
+# A supplier that misses its date does not just deliver late. Somebody expedites
+# the shipment to protect the line or the customer promise, and expediting means
+# air. Not every late delivery is urgent enough to be worth that, so only a share
+# of them are assumed to move. This is a planning assumption rather than a
+# measured figure, and it is the one number in the supplier stage worth arguing
+# about: halve it and the supplier problems roughly halve with it.
+EXPEDITE_SHARE_OF_LATE = 0.5
 
 
 def emission_factor(mode):

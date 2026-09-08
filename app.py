@@ -11,7 +11,7 @@ from flask import (
     url_for,
 )
 
-from optimizer import analysis, chain, db, diagnosis, factors, ingest, scoring
+from optimizer import analysis, chain, db, diagnosis, factors, geo, ingest, scoring
 
 ROOT = Path(__file__).resolve().parent
 SAMPLE = ROOT / "data" / "Sample B Small BB"
@@ -71,9 +71,51 @@ def chain_page():
             flow=chain.flow_layout(stages),
             report=diagnosis.build(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
+            stage_settings=chain.settings(conn),
+            stage_error=request.args.get("stage_error"),
         )
     finally:
         conn.close()
+
+
+@app.post("/chain/stages")
+def edit_stages():
+    """Rename, reorder, hide or add a stage.
+
+    A plain form post rather than an API call, because every one of these
+    changes the picture the page is built from. Re-rendering the whole page
+    is both simpler and more honest than patching half of it in the browser.
+    """
+    action = request.form.get("action")
+    key = request.form.get("key")
+    error = None
+
+    conn = get_conn()
+    try:
+        if action == "rename":
+            chain.rename_stage(
+                conn, key, request.form.get("name"), request.form.get("blurb")
+            )
+        elif action in ("up", "down"):
+            chain.move_stage(conn, key, action)
+        elif action == "hide":
+            chain.set_stage_hidden(conn, key, True)
+        elif action == "show":
+            chain.set_stage_hidden(conn, key, False)
+        elif action == "add":
+            chain.add_stage(conn, request.form.get("name"), request.form.get("blurb"))
+        elif action == "remove":
+            chain.remove_stage(conn, key)
+        elif action == "reset":
+            chain.reset_stages(conn)
+        else:
+            error = "unknown action"
+    except ValueError as exc:
+        error = str(exc)
+    finally:
+        conn.close()
+
+    return redirect(url_for("chain_page", stage_error=error) + "#stage-editor")
 
 
 @app.route("/data")
@@ -100,6 +142,11 @@ def method():
         effort_weights=scoring.EFFORT_WEIGHT,
         sea_minimum=scoring.SEA_MINIMUM_KM,
         surface_range=scoring.SURFACE_RANGE_KM,
+        expedite_share=factors.EXPEDITE_SHARE_OF_LATE,
+        on_time_target=chain.ON_TIME_TARGET,
+        lead_time_limit=chain.LEAD_TIME_LONG_DAYS,
+        moq_months=chain.MOQ_MONTHS_LIMIT,
+        capacity_headroom=scoring.CAPACITY_HEADROOM,
     )
 
 
@@ -172,6 +219,35 @@ def api_simulate():
             origin_id=int(payload["origin_id"]) if payload.get("origin_id") else None,
         )
         return jsonify(result)
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    finally:
+        conn.close()
+
+
+@app.post("/api/network")
+def api_network():
+    """Reshape the network: close sites, open one, reassign everything."""
+    payload = request.get_json(silent=True) or {}
+
+    try:
+        closed = [int(value) for value in payload.get("closed") or []]
+    except (TypeError, ValueError):
+        return jsonify({"error": "closed must be a list of site ids"}), 400
+
+    added = None
+    city = (payload.get("city") or "").strip()
+    if city:
+        country = (payload.get("country") or "").strip() or None
+        try:
+            lat, lon = geo.locate(city, country)
+        except geo.GeocodeError as exc:
+            return jsonify({"error": str(exc)}), 400
+        added = {"name": f"{city.title()} (new)", "lat": lat, "lon": lon}
+
+    conn = get_conn()
+    try:
+        return jsonify(scoring.simulate_network(conn, closed, added))
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
     finally:

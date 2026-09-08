@@ -40,6 +40,29 @@ def lane_emissions(weight_kg, distance_km, mode, order_count, return_count):
     return {"transport": transport, "packaging": packaging, "returns": returns}
 
 
+def expedite_penalty(weight_kg, distance_km, mode, on_time_rate):
+    """What a supplier's missed dates cost when the recovery is air freight.
+
+    This is the link between supplier terms and carbon. Lateness on its own is
+    a service problem, but the way it gets fixed is a freight decision, and it
+    is always the expensive dirty one.
+    """
+    if on_time_rate is None or on_time_rate >= 1.0:
+        return None
+    mode = factors.normalise_mode(mode)
+    if mode == "air":
+        return None
+
+    share = (1.0 - on_time_rate) * factors.EXPEDITE_SHARE_OF_LATE
+    tonne_km = (weight_kg / 1000.0) * distance_km * share
+    return {
+        "share": share,
+        "cost": tonne_km * (factors.cost_factor("air") - factors.cost_factor(mode)),
+        "co2e": tonne_km
+        * (factors.emission_factor("air") - factors.emission_factor(mode)),
+    }
+
+
 def lane_transit_days(distance_km, mode):
     """Rough door-to-door days for a lane, so a mode switch can be priced in
     lead time as well as money and carbon."""

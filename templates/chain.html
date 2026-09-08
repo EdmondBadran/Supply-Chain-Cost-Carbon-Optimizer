@@ -49,7 +49,11 @@
               style="left: {{ "%.3f"|format(mark.x / flow.width * 100) }}%;">
         <span class="river-name">{{ mark.stage.name }}</span>
         <span class="river-count">
+          {% if mark.stage.headline is not none %}
           {{ "{:,}".format(mark.stage.headline) }} {{ mark.stage.unit }}
+          {% else %}
+          your own stage
+          {% endif %}
         </span>
         <span class="river-foot">
         <span class="river-figures">
@@ -60,7 +64,9 @@
           <span class="carbon-ink">{{ "{:,.0f}".format(mark.stage.co2e / 1000) }} t</span>
           {% endif %}
           {% if not mark.stage.cost and not mark.stage.co2e %}
-          <span class="muted-ink">counted next door</span>
+          <span class="muted-ink">
+            {{ "nothing measured" if mark.stage.headline is none else "counted next door" }}
+          </span>
           {% endif %}
         </span>
         {% if mark.stage.problem_count %}
@@ -98,6 +104,63 @@
     way and paying for the trip a second time.
     <span class="river-hint">Pick any stage to open it.</span>
   </p>
+
+  <details class="stage-editor" id="stage-editor"{{ " open" if stage_error }}>
+    <summary>These are not your only options</summary>
+    <p class="sub">
+      This is the chain the tool can measure, not the one you run. Rename a
+      stage to what your business calls it, move it, hide one that does not
+      apply, or add a step of your own. Hiding a stage only removes it from the
+      picture. The figures behind it are still counted in the totals.
+    </p>
+
+    {% if stage_error %}
+    <p class="stage-error">{{ stage_error }}</p>
+    {% endif %}
+
+    <ul class="stage-rows">
+      {% for row in stage_settings %}
+      <li class="stage-row{{ ' is-hidden' if row.hidden }}">
+        <form method="post" action="{{ url_for('edit_stages') }}">
+          <input type="hidden" name="key" value="{{ row.key }}">
+          <input class="stage-name" type="text" name="name" value="{{ row.name }}"
+                 required maxlength="40" aria-label="Stage name">
+          <input class="stage-blurb" type="text" name="blurb" value="{{ row.blurb }}"
+                 maxlength="120" aria-label="What happens at this stage">
+          <span class="stage-actions">
+            <button type="submit" name="action" value="rename">Save</button>
+            <button type="submit" name="action" value="up"
+                    {{ "disabled" if loop.first }} aria-label="Move earlier">&uarr;</button>
+            <button type="submit" name="action" value="down"
+                    {{ "disabled" if loop.last }} aria-label="Move later">&darr;</button>
+            {% if row.hidden %}
+            <button type="submit" name="action" value="show">Show</button>
+            {% else %}
+            <button type="submit" name="action" value="hide">Hide</button>
+            {% endif %}
+            {% if not row.builtin %}
+            <button type="submit" name="action" value="remove" class="stage-remove">Delete</button>
+            {% endif %}
+          </span>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+
+    <form class="stage-add" method="post" action="{{ url_for('edit_stages') }}">
+      <input type="text" name="name" placeholder="Add a stage, for example Assembly"
+             required maxlength="40" aria-label="New stage name">
+      <input type="text" name="blurb" placeholder="What happens there"
+             maxlength="120" aria-label="What happens at the new stage">
+      <button type="submit" name="action" value="add">Add</button>
+    </form>
+
+    <form method="post" action="{{ url_for('edit_stages') }}">
+      <button type="submit" name="action" value="reset" class="stage-reset">
+        Put the six default stages back
+      </button>
+    </form>
+  </details>
 </section>
 {% endif %}
 
@@ -135,6 +198,9 @@
           {% endif %}
           {% if problem.co2e_at_stake %}
           <span class="carbon-ink">{{ "{:,.1f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          {% endif %}
+          {% if problem.note and not problem.cost_at_stake and not problem.co2e_at_stake %}
+          <span class="problem-note">{{ problem.note }}</span>
           {% endif %}
           {% if problem.edge_id %}
           <a class="problem-link" href="{{ url_for('dashboard') }}?lane={{ problem.edge_id }}">

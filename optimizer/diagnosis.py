@@ -139,7 +139,7 @@ def _flow(stages):
 
     for stage in stages:
         count = stage["headline"]
-        told = f"{count:,} {stage['unit']}"
+        told = f"{count:,} {stage['unit']}" if count is not None else ""
         problems = stage["problem_count"]
         spend = (
             f"This costs {money(stage['cost'])} a year and emits "
@@ -158,12 +158,29 @@ def _flow(stages):
                 f"belongs to the next stage, so this one carries no money of "
                 f"its own."
             )
+            # Two different kinds of problem live in this stage. Freight is
+            # the same lane the inbound stage already lists. Terms are not
+            # freight at all, and saying so is the whole point of the stage.
+            freight = sum(1 for p in stage["problems"] if p["kind"] is None)
+            terms = problems - freight
+            parts = []
+            if freight:
+                parts.append(
+                    f"{freight} ship on a mode that could be cheaper and "
+                    f"cleaner, which is the same route inbound freight lists, "
+                    f"seen from the supplier end"
+                )
+            if terms:
+                parts.append(
+                    f"{terms} carry terms that cost you something no freight "
+                    f"decision can fix: lateness, lead time, or a minimum "
+                    f"order bigger than you need"
+                )
             found = (
-                f"{problems} of them ship on a mode that could be cheaper and "
-                f"cleaner. Those are the same routes listed under inbound "
-                f"freight, seen from the supplier end."
-                if problems
-                else "Every supplier already ships on a sensible mode."
+                "Of those, " + " and ".join(parts) + "."
+                if parts
+                else "Every supplier already ships on a sensible mode, on "
+                "terms that are not costing you anything."
             )
         elif stage["key"] == "inbound":
             what = f"{told} bring goods from suppliers into your warehouses. {spend}"
@@ -186,6 +203,16 @@ def _flow(stages):
                 if problems
                 else "No destination stands out as expensive to reach."
             )
+        elif stage["key"] not in chain.BUILTIN_KEYS:
+            # A stage somebody added themselves. Nothing feeds it, so the
+            # report says so rather than describing figures it does not have.
+            what = (
+                "You added this stage yourself. Nothing in an orders file "
+                "measures it, so it carries no figures here and no checks run "
+                "against it. It is in the picture because it is part of your "
+                "chain, not because this tool can see it."
+            )
+            found = "Nothing to check here."
         else:
             what = (
                 f"{count:,} order{'s' if count != 1 else ''} came back. That "
@@ -270,6 +297,42 @@ def _problems(lanes, stages, totals):
             found.append(_mode_switch_problem(lane, totals))
 
     by_key = {stage["key"]: stage for stage in stages}
+
+    # Only the on-time check reaches the report. Lead time and minimum order
+    # are real problems but neither can be costed from an orders file, and a
+    # plan step worth no money and no carbon is not a plan step.
+    for item in by_key.get("suppliers", {}).get("problems", []):
+        if item["kind"] != "on_time":
+            continue
+        if not item["cost_at_stake"] and not item["co2e_at_stake"]:
+            continue
+        found.append(
+            _problem(
+                stage="Suppliers",
+                title=item["title"],
+                happening=f"{item['detail']}.",
+                why=(
+                    "A missed delivery date does not stay a service problem. "
+                    "Somebody expedites the shipment to protect the promise "
+                    "downstream, and expediting means flying it. The supplier "
+                    "is not paying for that. You are, twice, once in freight "
+                    "and once in carbon."
+                ),
+                cost_at_stake=item["cost_at_stake"],
+                co2e_at_stake=item["co2e_at_stake"],
+                totals=totals,
+                action=(
+                    "Put this supplier's on-time rate into the contract, or "
+                    "hold enough stock to absorb a late delivery without air."
+                ),
+                note=(
+                    "This is a buying conversation, not a freight one. The "
+                    "figure assumes half of what runs late gets flown, which "
+                    "is a planning assumption rather than something measured. "
+                    "Your own expedite records would sharpen it."
+                ),
+            )
+        )
 
     for item in by_key.get("warehousing", {}).get("problems", []):
         found.append(

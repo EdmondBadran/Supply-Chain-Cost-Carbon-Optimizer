@@ -213,6 +213,57 @@
     Medians are used rather than averages throughout, so one extreme site or
     destination cannot drag the comparison line with it.
   </p>
+
+  <h3>Supplier terms</h3>
+  <p>
+    Lead time, minimum order quantity and on-time rate are commercial terms
+    rather than freight, so they are only counted when a supplier file supplies
+    them. Two of the three carry no money here, and the page says so rather
+    than inventing a figure.
+  </p>
+  <ul>
+    <li>
+      <strong>On-time rate</strong> below
+      {{ "{:.0%}".format(on_time_target) }}. This is the one with money on it.
+      A missed date gets recovered by expediting, and expediting means air, so
+      {{ "{:.0%}".format(expedite_share) }} of whatever runs late is assumed to
+      fly. The cost and carbon shown are the difference between the lane's
+      normal mode and air for that share only. A supplier already shipping by
+      air raises nothing, because there is nothing faster to escalate to
+    </li>
+    <li>
+      <strong>Lead time</strong> over {{ lead_time_limit }} days. Flagged, not
+      costed: past this you are ordering against a demand forecast rather than
+      a schedule, and what that is worth depends on your demand, which is not
+      in an orders file
+    </li>
+    <li>
+      <strong>Minimum order quantity</strong> covering more than
+      {{ "{:,.0f}".format(moq_months) }} months of demand. Flagged, not costed:
+      it ties up working capital at a rate this tool does not know
+    </li>
+  </ul>
+  <p class="caveat">
+    The {{ "{:.0%}".format(expedite_share) }} expedite assumption is the single
+    softest number in this tool. It is a planning figure, not a measurement.
+    Halve it and the supplier findings roughly halve with it, so if you have
+    your own expedite records, use those instead.
+  </p>
+
+  <h3>Closing and opening warehouses</h3>
+  <p>
+    The map's network panel reassigns work when a site closes or a new one
+    opens. Only routes actually affected move: a route whose site is still open,
+    and still the nearest, stays exactly where it is. Changing nothing therefore
+    saves exactly nothing, which is the only way the rest of the answer can be
+    trusted.
+  </p>
+  <ul>
+    <li>A closed site's routes go to the nearest remaining site with room, heaviest routes first</li>
+    <li>A site is assumed to absorb up to {{ "{:.0%}".format(capacity_headroom - 1) }} more than the volume it handles today. Past that the overflow goes to the next nearest, and if nothing has room the page says the shape is over capacity rather than pretending otherwise</li>
+    <li>Closing a site removes its storage cost and its electricity, which is usually most of the reason closing one looks attractive</li>
+    <li>A new site is priced at the median cost and energy per tonne of your existing sites, on the world average grid intensity of {{ grid_default }} kg CO2e per kWh, because nothing in your data describes a building that does not exist yet</li>
+  </ul>
 </section>
 
 <section class="panel prose">
@@ -220,9 +271,9 @@
   <ul>
     <li>Transit time is estimated from typical door-to-door speeds per mode, not quoted by a carrier. It is good enough to tell you a change adds weeks rather than days, and not good enough to plan against</li>
     <li>It does not model inventory. Slower shipping means more stock in transit and more working capital tied up, and that cost is not counted here</li>
-    <li>It does not model capacity. Moving volume to a different warehouse assumes that warehouse can take it</li>
+    <li>Capacity is a single headroom figure applied to every site. Real warehouses are limited by racking, doors, labour and licence, none of which is in a CSV, so treat an over-capacity warning as a prompt to check rather than a measurement</li>
     <li>It covers freight, storage, packaging and returns. It is not a full product carbon footprint and says nothing about manufacturing, raw materials or end of life</li>
-    <li>Supplier terms beyond freight, meaning lead time, minimum order quantity and on-time rate, are not modelled yet</li>
+    <li>Supplier terms are only as good as the terms you supply. Without a lead time, a minimum order or an on-time rate in the supplier file, none of those checks run at all, and the supplier stage falls back to freight alone</li>
   </ul>
   <p>
     Everything above is arithmetic on figures you can check. There is no
