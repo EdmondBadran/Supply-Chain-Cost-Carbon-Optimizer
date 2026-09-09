@@ -3343,3 +3343,26 @@ a.report-save {
     letter-spacing: 0;
     color: var(--ink-3);
 }
+
+/* A nine-column table cannot live inside the 460px cap that suits the
+   two-column ones elsewhere. It gets its own scrolling box, so a wide table
+   scrolls inside itself instead of pushing the page sideways. */
+.table-scroll {
+    overflow-x: auto;
+    margin: 14px 0 6px;
+    scrollbar-width: thin;
+}
+
+.prose .table-scroll .grid {
+    max-width: none;
+    min-width: 460px;
+    margin: 0;
+}
+
+/* Browsers make a scrollable region keyboard focusable on its own, and
+   reaching the far columns without a mouse depends on that, so it needs a
+   visible ring like anything else that takes focus. */
+.table-scroll:focus-visible {
+    outline: 2px solid var(--cost);
+    outline-offset: 4px;
+}

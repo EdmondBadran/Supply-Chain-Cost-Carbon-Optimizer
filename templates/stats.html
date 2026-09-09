@@ -106,14 +106,16 @@
   <div class="split-2">
     <div>
       <h3>Most carbon per dollar spent</h3>
-      <table class="grid">
-        <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
-        <tbody>
-        {% for row in ov.dirtiest %}
-          <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
-        {% endfor %}
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="grid">
+          <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
+          <tbody>
+          {% for row in ov.dirtiest %}
+            <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
       <p class="source">
         A high figure here is a route where the money you spend buys an unusual
         amount of damage. It is not the same as an expensive route, and the two
@@ -125,14 +127,16 @@
     </div>
     <div>
       <h3>Least carbon per dollar spent</h3>
-      <table class="grid">
-        <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
-        <tbody>
-        {% for row in ov.cleanest %}
-          <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
-        {% endfor %}
-        </tbody>
-      </table>
+      <div class="table-scroll">
+        <table class="grid">
+          <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
+          <tbody>
+          {% for row in ov.cleanest %}
+            <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
       <p class="source">
         These are the routes where spending more would do least harm, which is
         the other half of the same question and the one nobody asks.
@@ -175,27 +179,29 @@
     That is the practical answer to how long the fix list needs to be.
   </p>
 
-  <table class="grid">
-    <thead>
-      <tr>
-        <th>Biggest routes by cost</th><th>Mode</th>
-        <th class="num">Cost</th><th class="num">Share</th>
-        <th class="num">Carbon</th><th class="num">Share</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for row in c.top_lanes %}
-      <tr>
-        <td>{{ row.name }}</td>
-        <td>{{ row.mode }}</td>
-        <td class="num">${{ "{:,.0f}".format(row.cost) }}</td>
-        <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
-        <td class="num">{{ "{:,.0f}".format(row.co2e) }} kg</td>
-        <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Biggest routes by cost</th><th>Mode</th>
+          <th class="num">Cost</th><th class="num">Share</th>
+          <th class="num">Carbon</th><th class="num">Share</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in c.top_lanes %}
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ row.mode }}</td>
+          <td class="num">${{ "{:,.0f}".format(row.cost) }}</td>
+          <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
+          <td class="num">{{ "{:,.0f}".format(row.co2e) }} kg</td>
+          <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <section class="panel prose" id="uncertainty">
@@ -263,18 +269,20 @@
 
   {% if un.always_flagged %}
   <h3>How safe each recommendation is</h3>
-  <table class="grid">
-    <thead><tr><th>Route</th><th>Change</th><th class="num">Still worth it in</th></tr></thead>
-    <tbody>
-    {% for row in un.always_flagged %}
-      <tr>
-        <td>{{ row.name }}</td>
-        <td>{{ row.mode }} to {{ row.switch }}</td>
-        <td class="num">{{ "{:.0%}".format(row.confidence) }} of runs</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead><tr><th>Route</th><th>Change</th><th class="num">Still worth it in</th></tr></thead>
+      <tbody>
+      {% for row in un.always_flagged %}
+        <tr>
+          <td>{{ row.name }}</td>
+          <td>{{ row.mode }} to {{ row.switch }}</td>
+          <td class="num">{{ "{:.0%}".format(row.confidence) }} of runs</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   <p class="source">
     A route at 100% is one where the recommendation does not depend on the
     factors being right, only on the ordering being right. Start there.
@@ -311,36 +319,40 @@
 
   {% if report.outliers.cost %}
   <h3>On cost, median ${{ "%.2f"|format(report.outliers.cost_median) }} per tonne-km</h3>
-  <table class="grid">
-    <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
-    <tbody>
-    {% for row in report.outliers.cost %}
-      <tr>
-        <td>{{ row.name }}</td><td>{{ row.mode }}</td>
-        <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
-        <td class="num">${{ "%.2f"|format(row.rate) }}</td>
-        <td class="num">{{ "%.1f"|format(row.z) }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
+      <tbody>
+      {% for row in report.outliers.cost %}
+        <tr>
+          <td>{{ row.name }}</td><td>{{ row.mode }}</td>
+          <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
+          <td class="num">${{ "%.2f"|format(row.rate) }}</td>
+          <td class="num">{{ "%.1f"|format(row.z) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% endif %}
 
   {% if report.outliers.co2e %}
   <h3>On carbon, median {{ "%.3f"|format(report.outliers.co2e_median) }} kg CO2e per tonne-km</h3>
-  <table class="grid">
-    <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
-    <tbody>
-    {% for row in report.outliers.co2e %}
-      <tr>
-        <td>{{ row.name }}</td><td>{{ row.mode }}</td>
-        <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
-        <td class="num">{{ "%.3f"|format(row.rate) }}</td>
-        <td class="num">{{ "%.1f"|format(row.z) }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
+      <tbody>
+      {% for row in report.outliers.co2e %}
+        <tr>
+          <td>{{ row.name }}</td><td>{{ row.mode }}</td>
+          <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
+          <td class="num">{{ "%.3f"|format(row.rate) }}</td>
+          <td class="num">{{ "%.1f"|format(row.z) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
   {% endif %}
 
   {% if report.outliers.cost or report.outliers.co2e %}
@@ -464,26 +476,28 @@
     enough volume to judge{% endif %}.
   </p>
 
-  <table class="grid">
-    <thead>
-      <tr>
-        <th>Route</th><th class="num">Orders</th><th class="num">Returns</th>
-        <th class="num">Rate</th><th class="num">Could really be</th><th>Verdict</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for row in rt.rows %}
-      <tr>
-        <td>{{ row.name }}</td>
-        <td class="num">{{ row.orders }}</td>
-        <td class="num">{{ row.returns }}</td>
-        <td class="num">{{ "{:.1%}".format(row.rate) }}</td>
-        <td class="num">{{ "{:.1%}".format(row.low) }} to {{ "{:.1%}".format(row.high) }}</td>
-        <td>{% if row.worse %}<span class="tag bad">worse than the network</span>{% else %}<span class="tag">within the noise</span>{% endif %}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Route</th><th class="num">Orders</th><th class="num">Returns</th>
+          <th class="num">Rate</th><th class="num">Could really be</th><th>Verdict</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in rt.rows %}
+        <tr>
+          <td>{{ row.name }}</td>
+          <td class="num">{{ row.orders }}</td>
+          <td class="num">{{ row.returns }}</td>
+          <td class="num">{{ "{:.1%}".format(row.rate) }}</td>
+          <td class="num">{{ "{:.1%}".format(row.low) }} to {{ "{:.1%}".format(row.high) }}</td>
+          <td>{% if row.worse %}<span class="tag bad">worse than the network</span>{% else %}<span class="tag">within the noise</span>{% endif %}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <p class="stat-read">
     Across the whole network {{ "{:.1%}".format(rt.network_rate) }} of
@@ -520,31 +534,33 @@
     the right one for comparing modes.
   </p>
 
-  <table class="grid">
-    <thead>
-      <tr>
-        <th>Mode</th><th class="num">Routes</th><th class="num">Share of tonne-km</th>
-        <th class="num">Share of cost</th><th class="num">Share of carbon</th>
-        <th class="num">All in $/t-km</th><th class="num">Freight rate</th>
-        <th class="num">All in kg/t-km</th><th class="num">Freight rate</th>
-      </tr>
-    </thead>
-    <tbody>
-    {% for row in report.modes %}
-      <tr>
-        <td>{{ row.mode }}</td>
-        <td class="num">{{ row.lanes }}</td>
-        <td class="num">{{ "{:.0%}".format(row.tonne_km_share) }}</td>
-        <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
-        <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
-        <td class="num">${{ "%.3f"|format(row.cost_rate) }}</td>
-        <td class="num muted-ink">${{ "%.3f"|format(row.published_cost) }}</td>
-        <td class="num">{{ "%.3f"|format(row.co2e_rate) }}</td>
-        <td class="num muted-ink">{{ "%.3f"|format(row.published_co2e) }}</td>
-      </tr>
-    {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Mode</th><th class="num">Routes</th><th class="num">Share of tonne-km</th>
+          <th class="num">Share of cost</th><th class="num">Share of carbon</th>
+          <th class="num">All in $/t-km</th><th class="num">Freight rate</th>
+          <th class="num">All in kg/t-km</th><th class="num">Freight rate</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for row in report.modes %}
+        <tr>
+          <td>{{ row.mode }}</td>
+          <td class="num">{{ row.lanes }}</td>
+          <td class="num">{{ "{:.0%}".format(row.tonne_km_share) }}</td>
+          <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
+          <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
+          <td class="num">${{ "%.3f"|format(row.cost_rate) }}</td>
+          <td class="num muted-ink">${{ "%.3f"|format(row.published_cost) }}</td>
+          <td class="num">{{ "%.3f"|format(row.co2e_rate) }}</td>
+          <td class="num muted-ink">{{ "%.3f"|format(row.published_co2e) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
 
   <p class="caveat">
     <strong>A mode carrying a small share of tonne-kilometres and a large
