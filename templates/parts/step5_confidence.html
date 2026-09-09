@@ -2,13 +2,11 @@
    somebody else's analysis. #}
 
 <p class="step-lede">
-  Nothing in this step changes a single recommendation. It answers the
-  question you should be asking by now, which is how much of the above to
-  believe. Three things: whether the waste sits on a few routes or is spread
-  thinly everywhere, how far out the savings figure could be, and whether
-  money and emissions really do pile up on the same routes rather than that
-  just being a nice story. The method behind each answer is named as it goes,
-  so anybody who wants to check it can.
+  Nothing here changes a recommendation. It tells you how hard to lean on one:
+  whether the waste is concentrated enough to be worth chasing, how far the
+  estimate could be out given the factors underneath it, and whether cost and
+  carbon genuinely land on the same routes in your network or only in the
+  pitch.
 </p>
 
 {% set c = stats.concentration %}
@@ -17,37 +15,35 @@
 
 <div class="figure-row">
   <div class="figure">
-    <span class="figure-label">How lopsided the cost is</span>
+    <span class="figure-label">Cost concentration</span>
     <strong class="figure-value cost-ink">{{ "%.2f"|format(c.cost_gini) }}</strong>
-    <span class="figure-foot">0 means every route costs the same, 1 means one route is all of it. Called a Gini coefficient</span>
+    <span class="figure-foot">Gini, 0 is even and 1 is all in one route</span>
   </div>
   <div class="figure">
-    <span class="figure-label">How lopsided the emissions are</span>
+    <span class="figure-label">Carbon concentration</span>
     <strong class="figure-value carbon-ink">{{ "%.2f"|format(c.co2e_gini) }}</strong>
-    <span class="figure-foot">the same 0 to 1 scale, on greenhouse gas</span>
+    <span class="figure-foot">same measure, on emissions</span>
   </div>
   <div class="figure lit">
-    <span class="figure-label">Do the two problems overlap</span>
+    <span class="figure-label">Cost and carbon agreement</span>
     <strong class="figure-value">{% if ov.rho is not none %}{{ "%.2f"|format(ov.rho) }}{% else %}n/a{% endif %}</strong>
-    <span class="figure-foot">1 means the expensive routes are exactly the dirty ones, 0 means no relation at all</span>
+    <span class="figure-foot">rank correlation across routes</span>
   </div>
   <div class="figure lit">
-    <span class="figure-label">The saving, with the doubt shown</span>
+    <span class="figure-label">Recoverable, with the doubt</span>
     <strong class="figure-value range cost-ink">${{ "{:,.0f}".format(un.p10) }}<span>to</span>${{ "{:,.0f}".format(un.p90) }}</strong>
     <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
   </div>
 </div>
 
 <section class="panel prose" id="overlap">
-  <h3>Are the expensive routes the same ones as the dirty routes</h3>
+  <h3>Do cost and carbon actually overlap here</h3>
   <p class="sub">
-    The whole tool rests on the idea that the routes wasting money are the
-    same routes doing the damage. That is worth checking on your own numbers
-    rather than taking on trust. Each dot below is one route, with what it
-    costs along the bottom and what it emits up the side. If the idea holds,
-    the dots climb from bottom left to top right together. The scale doubles
-    at each step rather than adding, because the biggest route is thousands of
-    times the smallest and a plain scale would squash them all into a corner.
+    This is the assumption the whole tool is built on, so it is the one worth
+    testing rather than asserting. Each dot is one route: money along the
+    bottom, emissions up the side, both on a log scale because route sizes
+    span several orders of magnitude. If the assumption holds the dots climb
+    together.
   </p>
 
   <div class="chart-wrap">
@@ -130,13 +126,11 @@
 </section>
 
 <section class="panel prose" id="concentration">
-  <h3>Is the waste on a few routes or spread everywhere</h3>
+  <h3>How concentrated the damage is</h3>
   <p class="sub">
-    This decides whether your fix list is four conversations or a two year
-    programme. The dotted line is what perfectly even would look like, every
-    route costing the same as every other. The further your curve sags below
-    it, the more of your money is piled onto a handful of routes, and the
-    fewer decisions it takes to move the total.
+    A curve hugging the diagonal means every route costs about the same and
+    there is no shortcut. A curve pushed into the corner means a few routes
+    carry nearly all of it, and a handful of decisions move the total.
   </p>
 
   <div class="chart-wrap">
@@ -191,17 +185,14 @@
 </section>
 
 <section class="panel prose" id="uncertainty">
-  <h3>How wrong could the savings figure be</h3>
+  <h3>How wrong the recoverable figure could be</h3>
   <p class="sub">
-    Every saving here is worked out from published figures for what shipping
-    costs and emits, and those are published as ranges rather than exact
-    numbers, because the real answer moves with fuel, season and contract. So
-    quoting you a saving to the nearest dollar would be pretending to a
-    precision nobody has. Instead the entire calculation was run again
-    {{ "{:,}".format(un.trials) }} times, each time picking slightly different
-    figures from within those ranges, up to
-    {{ "{:.0%}".format(un.spread) }} either side. Below is the spread of
-    answers that came back.
+    Every saving in this tool is the gap between two estimates built on
+    published freight and emission factors, and those are ranges, not
+    constants. So the whole ranking was re-run {{ "{:,}".format(un.trials) }}
+    times with the factors redrawn each time, up to
+    {{ "{:.0%}".format(un.spread) }} either side of the published value. This
+    is the spread of answers that came back.
   </p>
 
   <div class="chart-wrap">
@@ -257,7 +248,7 @@
   </p>
 
   {% if un.always_flagged %}
-  <h4>Which recommendations you can trust most</h4>
+  <h4>How safe each recommendation is</h4>
   <div class="table-scroll">
     <table class="grid">
       <thead><tr><th>Route</th><th>Change</th><th class="num">Still worth it in</th></tr></thead>
@@ -280,14 +271,14 @@
 </section>
 
 <section class="panel prose" id="outliers">
-  <h3>Routes that cost unlike all the others</h3>
+  <h3>Routes priced unlike the rest</h3>
   <p class="sub">
-    Everything here is measured as cost per tonne carried per kilometre
-    travelled, so a route cannot appear just for being big. What is left is a
-    route priced unlike the rest of yours. The comparison is against the
-    middle route rather than the average, because with a few dozen routes one
-    genuinely odd one drags an average far enough to stop looking odd itself.
-    The last column counts how far from the middle each one sits.
+    Cost per tonne-kilometre takes size out of the comparison, so nothing
+    appears here for being big. Distance from the median is measured in median
+    absolute deviations rather than standard deviations, because with a few
+    dozen routes one genuine outlier is enough to drag an ordinary average
+    until the outlier stops looking unusual. Anything past
+    {{ stats.outliers.threshold }} is listed.
   </p>
 
   {% if not stats.outliers.cost and not stats.outliers.co2e %}
@@ -295,9 +286,8 @@
     Nothing in this network crosses the threshold, on either measure. That is
     a result rather than an empty table: every route is priced and emitting in
     line with the rest once size is taken out, so there is no single odd
-    contract or badly priced route hiding in here. The savings are in how
-    things are shipped, which is where the rest of the tool is already
-    looking.
+    contract or mispriced lane hiding in here. The savings are in the mode
+    choices, which is where the rest of the tool is already looking.
   </p>
   <p class="source">
     The medians it was measured against: ${{ "%.2f"|format(stats.outliers.cost_median) }}
@@ -308,10 +298,10 @@
   {% endif %}
 
   {% if stats.outliers.cost %}
-  <h4>On cost. Your middle route costs ${{ "%.2f"|format(stats.outliers.cost_median) }} to move a tonne one kilometre</h4>
+  <h4>On cost, median ${{ "%.2f"|format(stats.outliers.cost_median) }} per tonne-km</h4>
   <div class="table-scroll">
     <table class="grid">
-      <thead><tr><th>Route</th><th>How</th><th class="num">Distance</th><th class="num">Per tonne, per km</th><th class="num">How far from normal</th></tr></thead>
+      <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
       <tbody>
       {% for row in stats.outliers.cost %}
         <tr>
@@ -327,10 +317,10 @@
   {% endif %}
 
   {% if stats.outliers.co2e %}
-  <h4>On emissions. Your middle route puts out {{ "%.3f"|format(stats.outliers.co2e_median) }} kg moving a tonne one kilometre</h4>
+  <h4>On carbon, median {{ "%.3f"|format(stats.outliers.co2e_median) }} kg CO2e per tonne-km</h4>
   <div class="table-scroll">
     <table class="grid">
-      <thead><tr><th>Route</th><th>How</th><th class="num">Distance</th><th class="num">Per tonne, per km</th><th class="num">How far from normal</th></tr></thead>
+      <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
       <tbody>
       {% for row in stats.outliers.co2e %}
         <tr>
@@ -359,12 +349,12 @@
 {% if stats.order_sizes %}
 {% set sz = stats.order_sizes %}
 <section class="panel prose" id="orders">
-  <h3>Are your orders mostly big or mostly small</h3>
+  <h3>The shape of the order book</h3>
   <p class="sub">
-    Boxes, labels and the time it takes somebody to pick an order cost the
-    same whether the order is one kilo or five hundred. So a pile of tiny
-    orders costs far more than its weight suggests, and that never shows up in
-    a report measured in tonnes. Each bar below counts orders of a given size.
+    Packaging and handling are charged per order, not per kilo, so the small
+    end of this distribution costs more than its weight suggests. On a log
+    scale, because order books bunch at the low end and a linear chart would
+    be one bar and a lot of empty paper.
   </p>
 
   <div class="chart-wrap">
@@ -409,12 +399,10 @@
 {% if stats.seasonality %}
 {% set se = stats.seasonality %}
 <section class="panel prose" id="seasonality">
-  <h3>Is your year steady or does it spike</h3>
+  <h3>Through the year</h3>
   <p class="sub">
-    Every figure on this site is a year's worth. That is only useful if your
-    months look roughly alike. If they do not, an annual saving divided by
-    twelve describes none of them, and the space you need is set by your
-    busiest month rather than your average one.
+    Everything else on this site is quoted as an annual figure. This is
+    whether any month actually looks like a twelfth of it.
   </p>
 
   <div class="chart-wrap">
@@ -457,18 +445,15 @@
 {% if stats.returns and stats.returns.rows %}
 {% set rt = stats.returns %}
 <section class="panel prose" id="returns">
-  <h3>Which routes get too much sent back</h3>
+  <h3>Returns, with the uncertainty attached</h3>
   <p class="sub">
-    A route where one delivery out of four came back has a 25% return rate,
-    and tells you nothing at all: with four deliveries, one more or one fewer
-    swings it wildly. So every rate below is shown with the range it could
-    really be, given how many deliveries it is based on. A route is only
-    called worse than the rest when even the good end of its range is still
-    above your network average. Routes with fewer than {{ rt.min_sample }}
-    deliveries are left out{% if rt.skipped %}, which is {{ rt.skipped }} of
-    them{% else %}, though here every route has enough to judge{% endif %}.
-    The range is worked out with a method called a Wilson interval, which
-    behaves sensibly on small numbers where the textbook one does not.
+    A route with one return in four has a 25% return rate and has told you
+    nothing. Each rate below carries a 95% interval worked out with the Wilson
+    method, which behaves at small samples where the textbook one produces
+    bounds below zero. Routes under {{ rt.min_sample }} shipments are left out
+    rather than ranked on noise{% if rt.skipped %}, which excludes
+    {{ rt.skipped }} of them{% else %}, though on this network every route has
+    enough volume to judge{% endif %}.
   </p>
 
   <div class="table-scroll">
@@ -513,12 +498,12 @@
 {% endif %}
 
 <section class="panel prose" id="modes">
-  <h3>What each way of shipping really costs</h3>
+  <h3>What each mode actually costs you</h3>
   <p class="sub">
     The freight rate is what a tonne-kilometre costs and emits in transit. The
     all-in figure adds packaging, the warehouse and the return leg, which is
     what serving the route actually takes. The gap between the two columns is
-    the part of the real cost that a shipping quote never shows you.
+    the part of cost to serve that a freight quote never shows.
   </p>
   <p class="sub">
     Expect the gap to be enormous on short domestic routes and almost nothing
@@ -533,10 +518,10 @@
     <table class="grid">
       <thead>
         <tr>
-          <th>How it travels</th><th class="num">Routes</th><th class="num">Share of the work</th>
+          <th>Mode</th><th class="num">Routes</th><th class="num">Share of tonne-km</th>
           <th class="num">Share of cost</th><th class="num">Share of carbon</th>
-          <th class="num">Real cost</th><th class="num">Shipping quote</th>
-          <th class="num">Real emissions</th><th class="num">Shipping quote</th>
+          <th class="num">All in $/t-km</th><th class="num">Freight rate</th>
+          <th class="num">All in kg/t-km</th><th class="num">Freight rate</th>
         </tr>
       </thead>
       <tbody>

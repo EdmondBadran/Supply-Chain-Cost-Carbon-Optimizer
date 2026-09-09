@@ -1,10 +1,9 @@
 {# Step 3: the same findings on a map, and the what-if panels. #}
 
 <p class="step-lede">
-  The same problems, in the places they happen. Every line is one route, and
-  the colour is how it travels. Click one and you can try sending it a
-  different way, or from a different warehouse, and watch the cost and the
-  emissions move before you commit to anything.
+  The problems above, in the places they actually happen. Every line is one
+  route. Click any of them to try a different transport mode or a different
+  warehouse and watch the numbers move before you commit to anything.
 </p>
 
 <div id="finding" class="finding"></div>
@@ -14,9 +13,8 @@
     <div>
       <h3>Your chain, end to end</h3>
       <p class="sub">
-        Suppliers send to your warehouses, your warehouses send to customers.
-        Every line is one route, coloured by how it travels. Point at a line to
-        read it, click to open it, scroll to zoom in.
+        Suppliers feed warehouses, warehouses serve customers. Every line is
+        one route. Hover to read it, click to open it, scroll to zoom.
       </p>
     </div>
   </div>
@@ -54,7 +52,7 @@
   <div class="panel-head">
     <div>
       <h3>Fix these first</h3>
-      <p class="sub">Biggest saving at the top. Mark how hard each one would be and the list reorders itself around what you can realistically do.</p>
+      <p class="sub">Biggest saving at the top. Say how hard each one would be and the order changes to match what you can actually do.</p>
     </div>
   </div>
   <p id="wins-trouble" class="trouble" hidden></p>
@@ -64,12 +62,12 @@
 <section class="panel network-panel">
   <div class="panel-head">
     <div>
-      <h3>What if your warehouses were somewhere else</h3>
+      <h3>What if the network were shaped differently</h3>
       <p class="sub">
-        Untick a warehouse to close it. Its work moves to whichever of your
-        remaining buildings is nearest and has space, and you stop paying rent
-        and power on the one you closed. Name a city to try opening a new one.
-        Every affected route is worked out again from scratch, not guessed.
+        Close a site and its work moves to whichever remaining site is nearest
+        and has room, and the building stops costing you. Open one and the
+        routes closer to it move across. Every route is reassigned and repriced,
+        not estimated.
       </p>
     </div>
   </div>
@@ -99,23 +97,22 @@
   <div id="network-result" class="network-result"></div>
 
   <p class="meta">
-    If your warehouse file says how much a building can hold, that limit is
-    used. If it does not, each building is assumed to cope with half as much
-    again as it handles today, and every row says which of the two it used.
-    Anything that will not fit goes to the next nearest building, and the
-    answer tells you when that happens. A new building is costed at what your
-    existing ones cost per tonne, because nothing in your data describes a
-    place that does not exist yet.
+    A site with a stated capacity is held to it. Without one it is assumed to
+    absorb up to half as much again as it handles today, and every site says
+    which of the two it used. Past that the overflow goes to the next nearest,
+    and the answer says so. A new site is priced at what your own sites cost
+    and burn per tonne, on an average grid, because nothing in your data
+    describes a building that does not exist yet.
   </p>
 </section>
 
 <div class="split-2">
   <section class="panel">
-    <h3>What each destination costs you</h3>
-    <p class="sub">The eight most expensive places you deliver to, counting everything it takes to get goods there.</p>
+    <h3>Cost by destination</h3>
+    <p class="sub">Top eight by cost to serve.</p>
     <div class="table-scroll">
       <table class="grid">
-        <thead><tr><th>Destination</th><th class="num">Orders</th><th class="num">Cost</th><th class="num">Emissions</th></tr></thead>
+        <thead><tr><th>Destination</th><th class="num">Orders</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
         <tbody>
         {% for region in regions %}
           <tr>
@@ -132,29 +129,29 @@
 
   <section class="panel">
     <h3>Where the money goes</h3>
-    <p class="sub">The same totals, split by what you are actually paying for.</p>
+    <p class="sub">Cost and carbon split by driver.</p>
     <div class="table-scroll">
       <table class="grid">
-        <thead><tr><th>What for</th><th class="num">Cost</th><th class="num">Emissions</th></tr></thead>
+        <thead><tr><th>Driver</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
         <tbody>
           <tr>
-            <td>Getting things there</td>
+            <td>Transport</td>
             <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
             <td class="num">{{ "{:,.0f}".format(totals.transport_co2e / 1000) }} t</td>
           </tr>
           <tr>
-            <td>Warehouses and packaging</td>
+            <td>Warehouse and packaging</td>
             <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
             <td class="num">{{ "{:,.0f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
           </tr>
           <tr>
-            <td>Things sent back</td>
+            <td>Returns</td>
             <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
             <td class="num">{{ "{:,.0f}".format(totals.returns_co2e / 1000) }} t</td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="meta">Across {{ summary.edges }} routes you move the equivalent of one tonne travelling {{ "{:,.0f}".format(totals.tonne_km) }} kilometres.</p>
+    <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} lanes.</p>
   </section>
 </div>

@@ -1,9 +1,9 @@
 {# Step 1: what the chain is and what it costs. #}
 
 <p class="step-lede">
-  Orders that travel the same way have been grouped into routes, and the
-  routes into the six stages your goods pass through. This is all of it on one
-  page, with the money piling up as things move from left to right.
+  Every order you loaded has been collapsed into routes, and the routes into
+  stages. This is the whole chain on one page, with the money accumulating as
+  goods move through it.
 </p>
 
 {% if report %}
@@ -11,12 +11,12 @@
   <div class="figure">
     <span class="figure-label">Chain cost a year</span>
     <strong class="figure-value">${{ "{:,.0f}".format(report.overview.cost) }}</strong>
-    <span class="figure-foot">to move everything, across {{ "{:,}".format(report.overview.routes) }} routes</span>
+    <span class="figure-foot">across {{ "{:,}".format(report.overview.routes) }} routes</span>
   </div>
   <div class="figure">
     <span class="figure-label">Chain carbon a year</span>
     <strong class="figure-value">{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
-    <span class="figure-foot">greenhouse gas, every stage</span>
+    <span class="figure-foot">CO2e, all stages</span>
   </div>
   <div class="figure lit">
     <span class="figure-label">Money recoverable</span>

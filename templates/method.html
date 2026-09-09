@@ -10,26 +10,19 @@
     Every figure this tool shows, where it comes from, and what it does not
     account for. Nothing here is a black box.
   </p>
-  <p class="sub">
-    This is the one page written for checking rather than for reading. The
-    report itself needs no background at all, but if you want to reproduce a
-    number by hand, or argue with one, the units and the sources are here. A
-    tonne-kilometre, which most of it is measured in, is simply one tonne of
-    goods carried one kilometre.
-  </p>
 </section>
 
 <section class="panel prose">
   <h2>The shape of the calculation</h2>
   <p>
     Your CSV becomes a graph. Suppliers, warehouses and customer cities are
-    points. Every shipping route between two points is a route. Orders going
-    the same way by the same transport mode are grouped into one, so a
-    year of deliveries to London becomes a single route carrying a year of
+    points. Every shipping route between two points is a lane. Orders going
+    the same way by the same transport mode are grouped into one lane, so a
+    year of deliveries to London becomes a single lane carrying a year of
     weight.
   </p>
   <p>
-    Everything after that is worked out per route, then added up. Nothing is
+    Everything after that is worked out per lane, then added up. Nothing is
     estimated at the company level and divided down.
   </p>
 </section>
@@ -47,7 +40,7 @@
     straight lines. Road distance typically runs 15 to 25 percent longer than
     great-circle, and sea routes can be far longer where they route around
     land masses or through canals. Absolute distances here run low. The
-    comparison between two options on the same route is unaffected, because
+    comparison between two options on the same lane is unaffected, because
     both are measured the same way, and that comparison is what the ranking
     rests on.
   </p>
@@ -57,7 +50,7 @@
   <h2>Emissions</h2>
   <p>
     Freight emissions are measured in kg CO2e per tonne-kilometre, which is
-    the standard unit for the job: one tonne carried one kilometre. A route's
+    the standard unit for the job: one tonne carried one kilometre. A lane's
     transport emissions are its annual weight in tonnes, times distance in km,
     times the factor for its mode.
   </p>
@@ -82,7 +75,7 @@
   <p>
     Air is roughly 75 times sea per tonne-km. That single ratio is why air
     freight dominates the results on any chain that uses it, and why moving a
-    route off air is almost always the largest carbon win available.
+    lane off air is almost always the largest carbon win available.
   </p>
 
   <h3>The other two sources of emissions</h3>
@@ -93,7 +86,7 @@
   </p>
   <p>
     <strong>Warehouse energy</strong> is each site's annual kWh times its grid
-    carbon intensity, shared across that site's routes by weight. If you do not
+    carbon intensity, shared across that site's lanes by weight. If you do not
     supply a grid intensity, {{ grid_default }} kg CO2e per kWh is assumed,
     which is roughly the world average. Supplying real figures matters here:
     the gap between a site on hydro power and one on a coal-heavy grid is
@@ -109,7 +102,7 @@
 <section class="panel prose">
   <h2>Cost to serve</h2>
   <p>
-    Cost per route is transport, plus that route's share of the warehouse it
+    Cost per lane is transport, plus that lane's share of the warehouse it
     ships from, plus what its returns cost.
   </p>
   <table class="grid">
@@ -136,8 +129,8 @@
 
   <h3>How warehouse cost is shared out</h3>
   <p>
-    A site's annual storage and handling cost is divided across its routes by
-    weight. A route carrying a fifth of what leaves a warehouse absorbs a fifth
+    A site's annual storage and handling cost is divided across its lanes by
+    weight. A lane carrying a fifth of what leaves a warehouse absorbs a fifth
     of that warehouse's cost.
   </p>
   <p class="caveat">
@@ -145,7 +138,7 @@
     count under-charges heavy freight, which uses far more of a building than
     a small parcel does. Splitting by revenue mixes up cost to serve with
     margin, which are different questions. Weight is the closest honest proxy
-    for how much of a warehouse a route actually consumes. It is still a proxy:
+    for how much of a warehouse a lane actually consumes. It is still a proxy:
     a pallet of something bulky and light occupies more space than its weight
     suggests.
   </p>
@@ -160,13 +153,13 @@
 <section class="panel prose">
   <h2>What counts as a problem</h2>
   <p>
-    A route being expensive is a procurement question. A route being dirty is a
-    reporting question. Neither is what this tool is for. It flags routes where
+    A lane being expensive is a procurement question. A lane being dirty is a
+    reporting question. Neither is what this tool is for. It flags lanes where
     changing the transport mode cuts <em>both</em> cost and carbon by at least
     {{ "{:.0%}".format(flag_threshold) }} each.
   </p>
   <p>
-    Being large is not enough on its own. A route already running the best mode
+    Being large is not enough on its own. A lane already running the best mode
     available to it has nothing to recover, so it never appears no matter how
     big the number beside it is. The ranking runs on what a change would give
     back, not on the size of the problem.
@@ -174,7 +167,7 @@
 
   <h3>Which mode changes are offered</h3>
   <p>
-    Without real routing data, the safe assumption is that a route keeps
+    Without real routing data, the safe assumption is that a lane keeps
     reaching its destination the way it already does.
   </p>
   <ul>
@@ -211,10 +204,10 @@
     sits, and applies a check appropriate to that stage.
   </p>
   <ul>
-    <li><strong>Suppliers and freight:</strong> routes flagged by the mode-switch test above</li>
+    <li><strong>Suppliers and freight:</strong> lanes flagged by the mode-switch test above</li>
     <li><strong>Warehousing:</strong> sites emitting at least 40 percent more carbon per tonne handled than the median of your other sites, which usually means a dirty grid rather than a badly run building</li>
     <li><strong>Customers:</strong> destinations costing at least 50 percent more per tonne to serve than the median destination</li>
-    <li><strong>Returns:</strong> routes where more than 8 percent of orders come back</li>
+    <li><strong>Returns:</strong> lanes where more than 8 percent of orders come back</li>
   </ul>
   <p class="caveat">
     Medians are used rather than averages throughout, so one extreme site or
@@ -232,22 +225,22 @@
     <li>
       <strong>On-time rate</strong> below
       {{ "{:.0%}".format(on_time_target) }}. This is the one with money on it.
-      A missed date gets recovered by rushing by air, and rushing by air means air, so
+      A missed date gets recovered by expediting, and expediting means air, so
       {{ "{:.0%}".format(expedite_share) }} of whatever runs late is assumed to
-      fly. The cost and carbon shown are the difference between the route's
+      fly. The cost and carbon shown are the difference between the lane's
       normal mode and air for that share only. A supplier already shipping by
       air raises nothing, because there is nothing faster to escalate to
     </li>
     <li>
       <strong>Lead time</strong> over {{ lead_time_limit }} days. Flagged, not
-      costed: past this you are ordering against a guess at future demand rather than
+      costed: past this you are ordering against a demand forecast rather than
       a schedule, and what that is worth depends on your demand, which is not
       in an orders file
     </li>
     <li>
       <strong>Minimum order quantity</strong> covering more than
       {{ "{:,.0f}".format(moq_months) }} months of demand. Flagged, not costed:
-      it leaves money sitting in stock, and what that costs you depends on your own borrowing, which this tool does not know
+      it ties up working capital at a rate this tool does not know
     </li>
   </ul>
   <p class="caveat">
@@ -334,7 +327,7 @@
   <h2>What this tool does not do</h2>
   <ul>
     <li>Transit time is estimated from typical door-to-door speeds per mode, not quoted by a carrier. It is good enough to tell you a change adds weeks rather than days, and not good enough to plan against</li>
-    <li>It does not count stock. Shipping something slowly means more of your goods sitting on a ship rather than on a shelf, which is money you cannot spend elsewhere, and that cost is not in these figures</li>
+    <li>It does not model inventory. Slower shipping means more stock in transit and more working capital tied up, and that cost is not counted here</li>
     <li>Where no capacity is given, one headroom figure stands in for racking, doors, labour and licence, none of which an orders file knows about. Treat an over-capacity warning on an assumed limit as a prompt to check rather than a measurement, and give the warehouse file a <code>capacity_kg</code> column if you want the answer to mean something</li>
     <li>It covers freight, storage, packaging and returns. It is not a full product carbon footprint and says nothing about manufacturing, raw materials or end of life</li>
     <li>Supplier terms are only as good as the terms you supply. Without a lead time, a minimum order or an on-time rate in the supplier file, none of those checks run at all, and the supplier stage falls back to freight alone</li>
