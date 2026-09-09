@@ -3304,3 +3304,42 @@ a.report-save {
     text-decoration: none;
     display: inline-block;
 }
+
+/* The square charts stay square. A Lorenz curve is read against its diagonal,
+   which has to be at 45 degrees to mean anything, and a scatter of circles
+   turns into a scatter of ellipses the moment it is stretched. The bar charts
+   are the opposite case and fill the width, which is why they carry
+   preserveAspectRatio="none" and these do not. */
+.chart.scatter,
+.chart.lorenz {
+    aspect-ratio: 1;
+    height: auto;
+    width: min(100%, 380px);
+    justify-self: center;
+}
+
+/* The bar charts are wide and shallow on purpose: their x axis carries a
+   range and their y axis only carries "more" and "less". */
+.histogram,
+.months {
+    height: clamp(200px, 26vw, 280px);
+}
+
+/* A range is two figures, not one long one. Setting them on their own lines
+   with the joining word small and between them keeps the tile the same shape
+   as the three single-figure tiles beside it. */
+.figure-value.range {
+    font-size: clamp(1.1rem, 1.9vw, 1.4rem);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.15;
+}
+
+.figure-value.range span {
+    font-family: "Times New Roman", Times, serif;
+    font-size: 15px;
+    font-weight: 400;
+    letter-spacing: 0;
+    color: var(--ink-3);
+}

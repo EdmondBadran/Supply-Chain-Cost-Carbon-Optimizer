@@ -51,7 +51,7 @@
   </div>
   <div class="figure lit">
     <span class="figure-label">Recoverable, with the doubt</span>
-    <strong class="figure-value cost-ink">${{ "{:,.0f}".format(un.p10) }} to ${{ "{:,.0f}".format(un.p90) }}</strong>
+    <strong class="figure-value range cost-ink">${{ "{:,.0f}".format(un.p10) }}<span>to</span>${{ "{:,.0f}".format(un.p90) }}</strong>
     <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
   </div>
 </section>
@@ -210,7 +210,8 @@
   </p>
 
   <div class="chart-wrap">
-    <svg class="chart histogram" viewBox="0 0 100 100" role="img"
+    <svg class="chart histogram" viewBox="0 0 100 100" preserveAspectRatio="none"
+         role="img"
          aria-label="Distribution of recoverable cost across the simulation runs">
       {% for bar in un.histogram.bars %}
       <rect class="bar"
@@ -365,8 +366,8 @@
   </p>
 
   <div class="chart-wrap">
-    <svg class="chart histogram" viewBox="0 0 100 100" role="img"
-         aria-label="Distribution of order weights">
+    <svg class="chart histogram" viewBox="0 0 100 100" preserveAspectRatio="none"
+         role="img" aria-label="Distribution of order weights">
       {% for bar in sz.histogram.bars %}
       <rect class="bar carbon"
             x="{{ "%.2f"|format(bar.x + 0.15) }}"
