@@ -9,7 +9,7 @@ different spreadsheets.
 This tool loads your order data, works out what every route costs to serve and
 what it emits, and ranks the places where one change fixes both.
 
-## The five views
+## The six views
 
 **The landing page** is where it opens, and it explains the problem before
 showing a single number. The demo is already loaded and one click away, so
@@ -37,6 +37,13 @@ in plain language, the problems ranked across stages, how each figure was
 reached, and a numbered plan with the money, the carbon and the operational
 catch on every step. It ends with the three things to do if you only do three.
 Every sentence is built from your own data.
+
+**The statistics page** turns the tool's own output back on itself. How
+concentrated cost and carbon are across routes, whether the two actually land
+on the same routes in your network or only in the pitch, how far the
+recoverable figure moves when the factors are redrawn inside their published
+ranges, and which recommendations survive that unchanged. It is the page that
+tells you how hard to lean on the rest of them.
 
 **The method page** shows the working. Every formula, every factor with its
 source, every assumption, and a section on what the tool does not account for
@@ -82,8 +89,10 @@ on a working value chain rather than an upload form.
     /chain      the value chain and the diagnosis
     /dashboard  the optimizer, map and what-if
     /diagnosis  the written report and the plan
+    /stats      how much of it to believe
     /method     how every number is worked out
     /data       load your own CSV
+    /privacy    what happens to a file you upload
 
 ## Your own data
 
@@ -107,9 +116,9 @@ If somewhere is too small to be in there, add `origin_lat` / `origin_lon` /
 `dest_lat` / `dest_lon` and those win over the lookup.
 
 You can also upload two more files. Warehouse costs, with `name`,
-`storage_cost_annual`, `energy_kwh_annual` and `grid_intensity`, without
-which the warehouse side falls back to defaults and the cost-to-serve numbers
-get less useful. And suppliers, with `name`, `city`, `country`, `supplies`
+`storage_cost_annual`, `energy_kwh_annual`, `grid_intensity` and
+`capacity_kg`, without which the warehouse side falls back to defaults and the
+cost-to-serve numbers get less useful. And suppliers, with `name`, `city`, `country`, `supplies`
 (the warehouse it feeds), `mode`, `annual_weight_kg`, `shipments_per_year`
 and `annual_cost`, which is what turns the outbound network into a full
 chain.
@@ -159,6 +168,50 @@ sea on a long haul or to road and rail on a short one. Road can move to rail.
 Sea is already the cheapest and cleanest per tonne-km, so nothing beats it
 and those lanes are left alone.
 
+## How much of it to believe
+
+Every saving here is the gap between two estimates built on published freight
+and emission factors, and those are ranges rather than constants. Quoting a
+figure to the dollar off inputs like that implies a precision they do not
+have, so the statistics page does five things about it.
+
+**The uncertainty band.** The whole ranking is re-run two thousand times with
+every cost and emission factor redrawn from a triangular distribution up to a
+third either side of its published value. What comes back is a 10th to 90th
+percentile band around the recoverable figure. The factors are drawn once per
+run and applied to every route together, because if fuel is dearer than
+assumed it is dearer everywhere on the same day; drawing them independently
+would let the errors cancel and give a band far narrower than the truth. It
+also reports which recommendations survive every single run, and those are the
+ones to open with, because they do not depend on the factors being right, only
+on the ordering being right.
+
+**Whether the premise holds.** The Spearman rank correlation between cost and
+carbon across routes, which is the assumption this entire tool is built on,
+put back under test on your data instead of asserted. Ranks rather than raw
+values, because route sizes are heavy-tailed and one enormous route would
+otherwise decide the answer alone. If it comes back weak, the page says so:
+that this network needs the cost work and the carbon work planned separately
+is more useful than a chart implying otherwise.
+
+**Concentration.** Gini coefficients and Lorenz curves for cost and carbon,
+and the smallest number of routes covering eighty percent of each. That is the
+practical answer to whether the fix list is four conversations or a programme.
+
+**Outliers that are really outliers.** Routes priced unlike the rest, measured
+in median absolute deviations rather than standard deviations, because with a
+few dozen routes one genuine outlier inflates the spread it is measured
+against until it stops looking unusual.
+
+**Return rates with the doubt attached.** One return in four is a 25 percent
+return rate and means nothing. Every rate carries a Wilson score interval,
+which behaves at the small samples where the textbook one produces bounds
+below zero, and a route is only called worse than the network when its whole
+interval sits above the network rate.
+
+All of it is standard library. The sample sizes are small, the methods are
+textbook, and numpy would buy nothing but a wheel to install.
+
 ## Built with
 
 Python, Flask and SQLite, with D3 for the map. Flask is the only dependency.
@@ -177,11 +230,13 @@ optimizer/
   scoring.py        bottleneck ranking and what-if
   chain.py          the value chain stages and their problem checks
   diagnosis.py      the written report: diagnosis, method and plan
+  stats.py          concentration, correlation and the uncertainty band
+  store.py          one in-memory workspace per visitor
 static/
   dashboard.js      the map, the ranking and the what-if panel
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              tests around the hand-tuned scoring thresholds
+tests/              81 tests: the scoring thresholds and the statistics
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -200,10 +255,14 @@ nothing. That sounds obvious and is the whole reason the rest of the answer
 can be trusted: a panel that quietly re-plans the entire network on every run
 credits unrelated savings to whatever you just clicked.
 
-Capacity is one headroom figure, half as much again as a site handles today.
-Past that the overflow goes to the next nearest, and if nothing has room the
-answer says the shape is over capacity rather than pretending a warehouse is
-infinitely elastic.
+Capacity comes from the warehouse file where you give it. Put a `capacity_kg`
+against a site and closing its neighbour is checked against what that building
+can really hold. Leave it out and a headroom figure stands in, half as much
+again as the site handles today, and every site says which of the two it used
+so a measured limit is never mistaken for a rule of thumb. Either way the
+overflow goes to the next nearest, and if nothing has room the answer says the
+shape is over capacity rather than pretending a warehouse is infinitely
+elastic.
 
 ## Editing the chain
 
@@ -223,6 +282,8 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
+81 of them, stdlib unittest, no test dependency.
+
 The scoring thresholds decide which routes get flagged and in what order, and
 they were tuned by hand. The risk was never that they are wrong, it is that
 someone changes one and nothing complains until the output looks strange weeks
@@ -230,11 +291,33 @@ later. The tests pin the behaviour the thresholds exist to produce rather than
 the numbers themselves, so moving one on purpose stays easy and moving one by
 accident is loud.
 
+The statistics get the opposite treatment. A Gini of a flat list is zero and a
+Spearman of a reversed list is minus one, so those are pinned to the values
+themselves. What sits on top of them is pinned to behaviour: the uncertainty
+band has to bracket the figure quoted everywhere else, has to have width, and
+has to give the same answer on every page load.
+
+## Your data
+
+Nothing you upload is written to disk. The file is spooled to a temporary
+path for as long as the CSV parser needs to read it and deleted before the
+request finishes. What survives is a graph in an in-memory SQLite database
+belonging to your browser session alone, dropped after two hours idle, when
+you press clear, or when the server restarts. Your browser holds one signed
+cookie carrying a random identifier and nothing else.
+
+That is deliberately not the same as claiming the server cannot read your
+data. It can, because it is the thing doing the arithmetic. Making that untrue
+would mean encrypting in the browser and calculating there, which is a
+different piece of software, and claiming it without having built it would
+fall apart the first time somebody asked how. `optimizer/store.py` and the
+upload handler are about a hundred lines between them and are worth reading
+rather than believing.
+
 ## Not done
 
-**Uploads are shared.** There is one SQLite file for the whole site, so if this
-were hosted, one visitor's upload would replace another's. Fine on your own
-machine, not fine anywhere else, and it is the next thing to fix.
+**Screenshots in this file.** A portfolio repo wants a picture of the value
+chain and one of the map, and there is not one here yet.
 
 **Inventory.** Slower shipping ties up more working capital in stock and that
 cost is not counted anywhere. Transit time itself is now estimated, from

@@ -231,10 +231,13 @@
     <h2>Check any of this yourself</h2>
     <p class="sub">
       Every route above is on the map, where you can change its mode or its
-      warehouse and watch the numbers move before committing to anything.
+      warehouse and watch the numbers move before committing to anything. How
+      far each figure could move, and which recommendations survive the
+      factors being wrong, is set out separately.
     </p>
   </div>
   <a class="ghost-link" href="{{ url_for('dashboard') }}">Open the optimizer</a>
+  <a class="ghost-link" href="{{ url_for('stats_page') }}">See how much to believe</a>
 </section>
 
 {% endblock %}
