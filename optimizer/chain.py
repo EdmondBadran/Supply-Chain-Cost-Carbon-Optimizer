@@ -239,15 +239,18 @@ def _supplier_terms_problems(suppliers, inbound):
                 found.append(
                     _problem(
                         name,
-                        f"Delivers on time {on_time:.0%} of the time against a "
-                        f"{ON_TIME_TARGET:.0%} target, and "
-                        f"{factors.EXPEDITE_SHARE_OF_LATE:.0%} of what slips is "
-                        f"assumed to be flown in to catch up",
+                        f"Arrives when promised {on_time:.0%} of the time. "
+                        f"You should expect {ON_TIME_TARGET:.0%}. When a "
+                        f"delivery is late somebody has to rush the next one, "
+                        f"and rushing means flying it, so "
+                        f"{factors.EXPEDITE_SHARE_OF_LATE:.0%} of what arrives "
+                        f"late is counted here as going by air",
                         cost,
                         co2e,
                         None,
-                        "Hold the supplier to the date, or carry enough stock "
-                        "to absorb the slip without flying",
+                        "Hold this supplier to the date they promised, or "
+                        "keep enough stock on hand that a late delivery does "
+                        "not have to be flown in",
                         kind="on_time",
                     )
                 )
@@ -257,13 +260,15 @@ def _supplier_terms_problems(suppliers, inbound):
             found.append(
                 _problem(
                     name,
-                    f"{lead:,.0f} day lead time, so every order is placed "
-                    f"against a demand forecast {lead / 30:,.1f} months out",
+                    f"Takes {lead:,.0f} days to arrive after you order it. "
+                    f"That means guessing what you will need "
+                    f"{lead / 30:,.1f} months ahead, every time",
                     0.0,
                     0.0,
                     None,
-                    "Shorten the lead time, or dual source it closer to home",
-                    note="No freight cost of its own",
+                    "Ask for a shorter wait, or find a second supplier "
+                    "nearer to you for the same goods",
+                    note="No shipping cost of its own",
                     kind="lead_time",
                 )
             )
@@ -276,14 +281,17 @@ def _supplier_terms_problems(suppliers, inbound):
                 found.append(
                     _problem(
                         name,
-                        f"Minimum order of {moq:,.0f} kg is {months:,.1f} months "
-                        f"of demand, against {annual / 1000:,.1f} t a year",
+                        f"Will not sell you less than {moq:,.0f} kg at a "
+                        f"time. You only use {annual / 1000:,.1f} tonnes a "
+                        f"year, so one order is {months:,.1f} months of "
+                        f"stock sitting in your warehouse",
                         0.0,
                         0.0,
                         None,
-                        "Negotiate the minimum down, or consolidate it with "
-                        "another line from the same supplier",
-                        note="Ties up working capital",
+                        "Ask them to sell in smaller batches, or combine "
+                        "it with something else you buy from them so the "
+                        "order still adds up to their minimum",
+                        note="Money sitting in stock you cannot spend elsewhere",
                         kind="min_order",
                     )
                 )
@@ -375,12 +383,15 @@ def _warehousing_stage(warehouses, lanes):
             problems.append(
                 _problem(
                     site["name"],
-                    f"{intensity:,.0f} kg CO2e per tonne handled, against "
-                    f"{typical:,.0f} across your other sites",
+                    f"Every tonne through this building creates "
+                    f"{intensity:,.0f} kg of greenhouse gas, against "
+                    f"{typical:,.0f} kg at your other sites. The difference "
+                    f"is how the local electricity is generated",
                     0.0,
                     max(avoidable, 0.0),
                     None,
-                    "Cleaner power at this site, or move volume to another one",
+                    "Buy cleaner electricity for this site, or move some "
+                    "of the work to one of your other buildings",
                 )
             )
 
@@ -449,12 +460,14 @@ def _returns_stage(lanes):
         problems.append(
             _problem(
                 f"{lane['origin_name']} to {lane['dest_name']}",
-                f"{rate:.0%} of orders come back, against a "
-                f"{RETURN_RATE_LIMIT:.0%} threshold",
+                f"{rate:.0%} of what you send here comes back, and "
+                f"anything over {RETURN_RATE_LIMIT:.0%} is worth looking at",
                 lane["returns_cost"],
                 lane["returns_co2e"],
                 lane["id"],
-                "Returns here are a product or fulfilment problem, not a freight one",
+                "Changing how you ship this will not help. Something is "
+                "wrong with the product, the description of it, or the way "
+                "the order is picked and packed",
             )
         )
 

@@ -77,11 +77,13 @@ def _overview(lanes, totals, problems, total_found):
 
     if not problems:
         truth = (
-            f"You spend {money(cost)} a year moving goods and emit "
-            f"{tonnes(co2e)} of CO2e doing it. Nothing in your chain is on a "
-            f"transport mode that a cheaper and cleaner one could replace, so "
-            f"the savings you are looking for are not in freight mode. They "
-            f"are in rates, volumes or network shape."
+            f"Moving your goods costs {money(cost)} a year and puts "
+            f"{tonnes(co2e)} of greenhouse gas into the air, counted as the "
+            f"weight of carbon dioxide that would do the same damage. Nothing "
+            f"you ship is going by a method that a cheaper and cleaner one "
+            f"could replace, so the savings you are after are not in how you "
+            f"ship. They are in what you pay, how much you move, or where "
+            f"your buildings are."
         )
         concentration = ""
     else:
@@ -92,11 +94,13 @@ def _overview(lanes, totals, problems, total_found):
                 f"{len(problems)} worth doing first."
             )
         truth = (
-            f"You spend {money(cost)} a year moving goods and emit "
-            f"{tonnes(co2e)} of CO2e doing it. {money(recoverable_cost)} of "
-            f"that cost and {tonnes(recoverable_co2e)} of that carbon sit on "
-            f"{len(problems)} problems, and in most cases the same single "
-            f"change fixes both at once.{more}"
+            f"Moving your goods costs {money(cost)} a year and puts "
+            f"{tonnes(co2e)} of greenhouse gas into the air, counted as the "
+            f"weight of carbon dioxide that would do the same damage. "
+            f"{money(recoverable_cost)} of that cost and "
+            f"{tonnes(recoverable_co2e)} of that gas sit on "
+            f"{len(problems)} problems, and in most cases one change fixes "
+            f"both at once.{more}"
         )
         top = problems[0]
         share = top["cost_at_stake"] / recoverable_cost if recoverable_cost else 0
@@ -263,25 +267,27 @@ def _mode_switch_problem(lane, totals):
         stage="Inbound freight" if lane["leg"] == "inbound" else "Outbound freight",
         title=f"{lane['origin_name']} to {lane['dest_name']}",
         happening=(
-            f"{tonnes(lane['total_weight_kg'])} a year travel "
-            f"{lane['distance_km']:,.0f} km by {from_mode}."
+            f"You send {tonnes(lane['total_weight_kg'])} along this route "
+            f"every year, {lane['distance_km']:,.0f} km each time, by "
+            f"{from_mode}."
         ),
         why=(
-            f"Per tonne carried, {from_mode} costs about "
-            f"{cost_ratio:,.0f} times what {to_mode} costs and emits about "
-            f"{co2e_ratio:,.0f} times as much. Over a distance this long that "
-            f"gap turns into real money and real carbon."
+            f"For every tonne you move a kilometre, {from_mode} costs "
+            f"about {cost_ratio:,.0f} times what {to_mode} costs and puts out "
+            f"about {co2e_ratio:,.0f} times the gas. Over a trip this long "
+            f"that difference adds up to real money and real damage."
         ),
         cost_at_stake=switch["saved_cost"],
         co2e_at_stake=switch["saved_co2e"],
         totals=totals,
         action=f"Move this route from {from_mode} to {to_mode}.",
         note=(
-            f"Lead time goes from {days(before_days)} to {days(after_days)}, "
-            f"so {days(after_days - before_days)} longer. Check your customers "
-            f"can wait, and that you can hold enough stock to cover the gap. "
-            f"If this freight is on {from_mode} because of a promise you made "
-            f"someone, that promise is the real cost."
+            f"It would take {days(after_days)} to arrive instead of "
+            f"{days(before_days)}, so {days(after_days - before_days)} longer. "
+            f"Check your customers can wait that long, and that you can keep "
+            f"enough stock to cover the extra wait. If this is going by "
+            f"{from_mode} because of a delivery promise you made somebody, "
+            f"that promise is what this is really costing you."
         ),
         edge_id=lane["id"],
         effort=lane["effort"],
@@ -312,24 +318,27 @@ def _problems(lanes, stages, totals):
                 title=item["title"],
                 happening=f"{item['detail']}.",
                 why=(
-                    "A missed delivery date does not stay a service problem. "
-                    "Somebody expedites the shipment to protect the promise "
-                    "downstream, and expediting means flying it. The supplier "
-                    "is not paying for that. You are, twice, once in freight "
-                    "and once in carbon."
+                    "A supplier missing a date does not stay a supplier "
+                    "problem. Somebody has to rush the next delivery to keep "
+                    "your own promise to your customer, and rushing means "
+                    "putting it on a plane. The supplier does not pay for "
+                    "that. You do, twice: once in what the flight costs and "
+                    "once in what it puts into the air."
                 ),
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
                 action=(
-                    "Put this supplier's on-time rate into the contract, or "
-                    "hold enough stock to absorb a late delivery without air."
+                    "Write the delivery date into the contract with "
+                    "something attached to missing it, or keep enough stock "
+                    "on hand that a late delivery does not have to be flown."
                 ),
                 note=(
-                    "This is a buying conversation, not a freight one. The "
-                    "figure assumes half of what runs late gets flown, which "
-                    "is a planning assumption rather than something measured. "
-                    "Your own expedite records would sharpen it."
+                    "This is a conversation with the supplier, not with "
+                    "the shipping company. The figure assumes half of what "
+                    "arrives late ends up being flown, which is an "
+                    "assumption rather than something measured. Your own "
+                    "records of what you have rushed would sharpen it."
                 ),
             )
         )
@@ -397,17 +406,17 @@ def _problems(lanes, stages, totals):
                 title=item["title"],
                 happening=f"On this route {item['detail']}.",
                 why=(
-                    "Every return pays for the trip out a second time and "
-                    "gives you nothing back for it. At this rate the route is "
-                    "carrying a cost that no amount of freight buying will "
-                    "remove."
+                    "Every item sent back pays for the journey out a "
+                    "second time and gives you nothing for it. At this rate "
+                    "the route is carrying a cost that no amount of haggling "
+                    "with shipping companies will remove."
                 ),
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
                 action=(
-                    "Find out why goods come back on this route before "
-                    "touching its freight."
+                    "Find out why things come back from here before "
+                    "changing anything about how you ship to it."
                 ),
                 note=(
                     "This is a product or listing problem, not a logistics "
@@ -506,8 +515,8 @@ def _step(number, problem):
         co2e_line = problem["co2e_line"]
     elif problem["co2e_at_stake"]:
         co2e_line = (
-            f"About {tonnes(problem['co2e_at_stake'])} of CO2e a year, which "
-            f"is {problem['co2e_share']:.1%} of your total."
+            f"About {tonnes(problem['co2e_at_stake'])} of greenhouse gas a "
+            f"year, which is {problem['co2e_share']:.1%} of your total."
         )
     else:
         co2e_line = "No measurable carbon change. This one is about the money."
@@ -544,16 +553,17 @@ def _method():
             ),
             (
                 "Warehouse carbon",
-                "A site's electricity use for the year, times the carbon "
-                "intensity of its local grid, shared across its routes by "
-                "weight.",
+                "How much electricity the building uses in a year, times "
+                "how dirty the local power is, split across the routes it "
+                "serves according to how much each one weighs.",
             ),
             (
                 "Returns",
-                f"A returned order pays its outbound trip again at "
-                f"{factors.RETURN_LEG_MULTIPLIER} times, because the journey "
-                f"back is less full than the journey out, plus "
-                f"{money(factors.RETURN_HANDLING_COST)} to handle it.",
+                f"Something sent back pays for its journey out a second "
+                f"time, at {factors.RETURN_LEG_MULTIPLIER} times the price, "
+                f"because a vehicle coming back is emptier than one going "
+                f"out. Plus {money(factors.RETURN_HANDLING_COST)} for "
+                f"somebody to unpack and check it.",
             ),
         ],
         "costs": factors.COST_FACTORS,
@@ -619,15 +629,17 @@ def _method():
             ),
         ],
         "limits": [
-            "Inventory is not modelled. Slower shipping ties up more working "
-            "capital in stock, and that cost is not counted here.",
-            "Warehouse capacity is not modelled. Moving volume to another site "
-            "assumes that site can take it.",
-            "This covers freight, storage, packaging and returns. It is not a "
-            "full product footprint and says nothing about manufacturing or "
-            "raw materials.",
-            "The tool does not know why a route is on the mode it is on. Air "
-            "freight is often there for a good reason, and that reason will "
-            "not be in your CSV.",
+            "Stock is not counted. Shipping something more slowly means "
+            "more of your goods sitting on a ship instead of on a shelf, "
+            "which is money you cannot spend on anything else, and none of "
+            "that is in these figures.",
+            "Unless your warehouse file says how much each building holds, "
+            "moving work to another one assumes it has the space.",
+            "This covers shipping, storage, packaging and things sent back. "
+            "It says nothing about making the product in the first place, or "
+            "the raw materials that went into it.",
+            "The tool cannot know why something is shipped the way it is. "
+            "Air freight is often there for a good reason, and that reason "
+            "will not be anywhere in your spreadsheet.",
         ],
     }
