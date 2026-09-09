@@ -267,6 +267,63 @@
 </section>
 
 <section class="panel prose">
+  <h2>The statistics on top of the arithmetic</h2>
+  <p>
+    Everything above turns your file into figures. The
+    <a href="{{ url_for('stats_page') }}">statistics page</a> turns those
+    figures back on themselves and asks how much weight they will take. Five
+    standard methods, each chosen because the obvious alternative fails on
+    data this shape.
+  </p>
+  <dl class="formulas">
+    <dt>Gini coefficient and the Lorenz curve</dt>
+    <dd>
+      How unevenly cost and carbon are shared across routes. Zero is every
+      route carrying the same amount, one is a single route carrying all of
+      it. It answers whether the fix list is four conversations or a
+      programme.
+    </dd>
+    <dt>Spearman rank correlation</dt>
+    <dd>
+      Whether the expensive routes and the dirty routes are the same routes,
+      which is the assumption this whole tool rests on. Ranks rather than
+      Pearson on the raw values, because route sizes are heavy-tailed and one
+      enormous route would otherwise decide the answer on its own.
+    </dd>
+    <dt>Monte Carlo over the factors</dt>
+    <dd>
+      The ranking re-run {{ "{:,}".format(trials) }} times with every cost and
+      emission factor redrawn from a triangular distribution up to
+      {{ "{:.0%}".format(factor_spread) }} either side of the published value.
+      The factors are drawn once per run and applied to every route together,
+      because if fuel is dearer than assumed it is dearer everywhere at once.
+      Drawing them per route would let the errors cancel and give a band far
+      narrower than the truth.
+    </dd>
+    <dt>Median absolute deviation</dt>
+    <dd>
+      Finding routes priced unlike the rest. A standard deviation is no use
+      with a few dozen routes: one genuine outlier inflates the spread it is
+      being measured against until it stops looking unusual. The median does
+      not move.
+    </dd>
+    <dt>Wilson score interval</dt>
+    <dd>
+      Return rates with the uncertainty attached. Below about thirty
+      observations the textbook interval produces bounds under zero, and most
+      routes in a small network sit in exactly that range. A route is only
+      called worse than the network when its whole interval is above the
+      network rate.
+    </dd>
+  </dl>
+  <p class="caveat">
+    <strong>None of this changes a recommendation.</strong> It tells you how
+    hard to lean on one, which is a different and more useful thing than a
+    confidence score attached to the answer itself.
+  </p>
+</section>
+
+<section class="panel prose">
   <h2>What this tool does not do</h2>
   <ul>
     <li>Transit time is estimated from typical door-to-door speeds per mode, not quoted by a carrier. It is good enough to tell you a change adds weeks rather than days, and not good enough to plan against</li>

@@ -44,7 +44,13 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
 
 def ensure_data(conn):
     """Never let a page open empty. A cold start loads the sample, so the
-    first thing anyone sees is a working chain rather than a form."""
+    first thing anyone sees is a working chain rather than a form.
+
+    Every page that reads data calls this, not just the landing page. Since
+    each visitor gets their own empty workspace, whichever page they arrive on
+    is the one that has to fill it, and a link shared straight to the map has
+    to work as well as the front door.
+    """
     if not db.summary(conn):
         ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
         analysis.run(conn)
@@ -185,6 +191,7 @@ def diagnosis_page():
     """The whole chain read back as a report: the truth, what is wrong, how
     every figure was reached, and the order to fix things in."""
     with store.workspace() as conn:
+        ensure_data(conn)
         report = diagnosis.build(conn)
         if report is None:
             return redirect(url_for("chain_page"))
@@ -196,6 +203,7 @@ def diagnosis_page():
 @app.route("/dashboard")
 def dashboard():
     with store.workspace() as conn:
+        ensure_data(conn)
         summary = db.summary(conn)
         if not summary:
             return redirect(url_for("chain_page"))
