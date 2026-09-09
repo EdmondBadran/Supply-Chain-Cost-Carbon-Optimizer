@@ -41,9 +41,17 @@
       data and this works out what every lane costs to serve and what it
       emits, then ranks where fixing one fixes the other.
     </p>
-    <form method="post" action="{{ url_for('sample') }}">
-      <button class="primary" type="submit">Open the sample supply chain</button>
-    </form>
+    <div class="sample-picks">
+      {% for key, spec in samples.items() %}
+      <form method="post" action="{{ url_for('sample') }}">
+        <input type="hidden" name="sample" value="{{ key }}">
+        <button class="{{ 'primary' if loop.first else 'ghost' }}" type="submit">
+          {{ spec.label }}
+        </button>
+        <span>{{ spec.blurb }}</span>
+      </form>
+      {% endfor %}
+    </div>
   </div>
   <dl class="hero-aside">
     <dt>Sample network</dt>
@@ -73,9 +81,30 @@
   {% endif %}
   <div class="row-actions">
     <a class="primary" href="{{ url_for('chain_page') }}">See the value chain</a>
+    <a class="ghost-link" href="{{ url_for('findings_csv') }}">Download the findings</a>
     <form method="post" action="{{ url_for('clear') }}">
       <button class="ghost" type="submit">Clear this data</button>
     </form>
+  </div>
+</section>
+
+<section class="panel">
+  <h2>The two sample networks</h2>
+  <p class="sub">
+    One is small enough to check by hand, the other is where the ranking has
+    to do real work. Loading either replaces whatever you have open.
+  </p>
+  <div class="sample-picks">
+    {% for key, spec in samples.items() %}
+    <form method="post" action="{{ url_for('sample') }}">
+      <input type="hidden" name="sample" value="{{ key }}">
+      <button class="{{ 'ghost' if key == loaded_sample else 'primary' }}"
+              type="submit"{{ ' disabled' if key == loaded_sample }}>
+        {{ spec.label }}{{ ", loaded" if key == loaded_sample }}
+      </button>
+      <span>{{ spec.blurb }}</span>
+    </form>
+    {% endfor %}
   </div>
 </section>
 {% endif %}

@@ -14,7 +14,10 @@
   {% if o.concentration %}
   <p class="truth-note">{{ o.concentration }}</p>
   {% endif %}
-  <button class="report-save" type="button" data-print>Save as PDF</button>
+  <div class="report-actions">
+    <button class="report-save" type="button" data-print>Save as PDF</button>
+    <a class="report-save" href="{{ url_for('findings_csv') }}">Download as CSV</a>
+  </div>
 </section>
 
 <section class="report-figures">

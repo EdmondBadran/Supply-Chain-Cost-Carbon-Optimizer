@@ -245,10 +245,19 @@
     narrower than the truth.
   </p>
   <p class="stat-read">
-    The number of routes worth changing held between
-    {{ un.flag_range[0] }} and {{ un.flag_range[1] }} across every run, most
-    often {{ un.typical_flagged }}. Which routes to fix is a far more stable
-    answer than how much they are worth, and it is the one to act on.
+    The number of routes worth changing came out between
+    {{ un.flag_range[0] }} and {{ un.flag_range[1] }} across the runs, most
+    often {{ un.typical_flagged }}.
+    {% if un.flag_range[1] - un.flag_range[0] <= 2 %}
+    That is a narrow spread: which routes to fix is a far more stable answer
+    than how much they are worth, and it is the one to act on.
+    {% else %}
+    That is a wide spread, and worth being honest about. Routes near the
+    threshold cross it in one direction or the other depending on the factors
+    drawn, so the length of the list is not something to quote. The table
+    below separates the routes that qualify under every draw from the ones
+    that only sometimes do.
+    {% endif %}
   </p>
 
   {% if un.always_flagged %}
@@ -272,7 +281,6 @@
   {% endif %}
 </section>
 
-{% if report.outliers.cost or report.outliers.co2e %}
 <section class="panel prose" id="outliers">
   <h2>Routes priced unlike the rest</h2>
   <p class="sub">
@@ -283,6 +291,22 @@
     until the outlier stops looking unusual. Anything past
     {{ report.outliers.threshold }} is listed.
   </p>
+
+  {% if not report.outliers.cost and not report.outliers.co2e %}
+  <p class="stat-read">
+    Nothing in this network crosses the threshold, on either measure. That is
+    a result rather than an empty table: every route is priced and emitting in
+    line with the rest once size is taken out, so there is no single odd
+    contract or mispriced lane hiding in here. The savings are in the mode
+    choices, which is where the rest of the tool is already looking.
+  </p>
+  <p class="source">
+    The medians it was measured against: ${{ "%.2f"|format(report.outliers.cost_median) }}
+    per tonne-kilometre on cost and
+    {{ "%.3f"|format(report.outliers.co2e_median) }} kg CO2e per tonne-kilometre
+    on carbon.
+  </p>
+  {% endif %}
 
   {% if report.outliers.cost %}
   <h3>On cost, median ${{ "%.2f"|format(report.outliers.cost_median) }} per tonne-km</h3>
@@ -318,6 +342,7 @@
   </table>
   {% endif %}
 
+  {% if report.outliers.cost or report.outliers.co2e %}
   <p class="caveat">
     <strong>Read the distance column before acting on this.</strong> A very
     short route lands here for a reason that is not a pricing problem: it
@@ -325,8 +350,8 @@
     tonne-kilometres to spread that over. A long route on this list is the
     interesting kind, and it is nearly always the mode.
   </p>
+  {% endif %}
 </section>
-{% endif %}
 
 {% if report.order_sizes %}
 {% set sz = report.order_sizes %}
@@ -432,9 +457,10 @@
     A route with one return in four has a 25% return rate and has told you
     nothing. Each rate below carries a 95% interval worked out with the Wilson
     method, which behaves at small samples where the textbook one produces
-    bounds below zero. Routes under {{ rt.min_sample }} orders are left out
-    entirely rather than ranked on noise, which excludes
-    {{ rt.skipped }} of them.
+    bounds below zero. Routes under {{ rt.min_sample }} shipments are left out
+    rather than ranked on noise{% if rt.skipped %}, which excludes
+    {{ rt.skipped }} of them{% else %}, though on this network every route has
+    enough volume to judge{% endif %}.
   </p>
 
   <table class="grid">

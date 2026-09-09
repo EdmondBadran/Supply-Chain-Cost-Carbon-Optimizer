@@ -1,10 +1,14 @@
+import csv
+import io
 import os
 import secrets
 import tempfile
+from datetime import date
 from pathlib import Path
 
 from flask import (
     Flask,
+    Response,
     jsonify,
     redirect,
     render_template,
@@ -26,10 +30,44 @@ from optimizer import (
 )
 
 ROOT = Path(__file__).resolve().parent
-SAMPLE = ROOT / "data" / "Sample B Small BB"
-SAMPLE_ORDERS = SAMPLE / "orders.csv"
-SAMPLE_WAREHOUSES = SAMPLE / "warehouses.csv"
-SAMPLE_SUPPLIERS = SAMPLE / "suppliers.csv"
+
+# Two sample networks, because one dataset only ever proves the tool works on
+# that dataset. The roastery is small enough to check by hand, which is what
+# makes it the default: somebody can count the routes and agree with the
+# answer. The distributor is where the ranking has to do real work, and it is
+# now one click away rather than a code change.
+SAMPLES = {
+    "roastery": {
+        "label": "Bristol coffee roastery",
+        "blurb": (
+            "Five growers, one warehouse, twelve UK and Irish cities. Small "
+            "enough to check the arithmetic by hand."
+        ),
+        "folder": "Sample B Small BB",
+        "files": ("orders.csv", "warehouses.csv", "suppliers.csv"),
+    },
+    "distributor": {
+        "label": "Global electronics distributor",
+        "blurb": (
+            "Nine suppliers, four warehouses on three continents, thirty-two "
+            "destination cities. Where the ranking has to earn its keep."
+        ),
+        "folder": "Sample A",
+        "files": (
+            "sample_orders.csv",
+            "sample_warehouses.csv",
+            "sample_suppliers.csv",
+        ),
+    },
+}
+
+DEFAULT_SAMPLE = "roastery"
+
+
+def sample_paths(key):
+    spec = SAMPLES[key]
+    folder = ROOT / "data" / spec["folder"]
+    return tuple(folder / name for name in spec["files"])
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
@@ -52,9 +90,14 @@ def ensure_data(conn):
     to work as well as the front door.
     """
     if not db.summary(conn):
-        ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
-        analysis.run(conn)
-        db.set_meta(conn, "source", "sample")
+        load_sample(conn, DEFAULT_SAMPLE)
+
+
+def load_sample(conn, key):
+    ingest.load(conn, *sample_paths(key))
+    analysis.run(conn)
+    db.set_meta(conn, "source", "sample")
+    db.set_meta(conn, "sample", key)
 
 
 @app.route("/")
@@ -133,7 +176,12 @@ def edit_stages():
 @app.route("/data")
 def upload_page():
     with store.workspace() as conn:
-        return render_template("index.html", summary=db.summary(conn))
+        return render_template(
+            "index.html",
+            summary=db.summary(conn),
+            samples=SAMPLES,
+            loaded_sample=db.get_meta(conn, "sample"),
+        )
 
 
 @app.route("/method")
@@ -198,6 +246,66 @@ def diagnosis_page():
         return render_template(
             "diagnosis.html", report=report, summary=db.summary(conn)
         )
+
+
+@app.route("/findings.csv")
+def findings_csv():
+    """The ranked findings as a spreadsheet.
+
+    A report somebody agrees with is still a web page. This is the same
+    findings in the form the next conversation actually happens in, which is
+    a spreadsheet with a column for who is doing it.
+    """
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        if report is None:
+            return redirect(url_for("chain_page"))
+
+        buffer = io.StringIO()
+        writer = csv.writer(buffer)
+        writer.writerow(
+            [
+                "rank",
+                "stage",
+                "problem",
+                "what is happening",
+                "why it matters",
+                "what to do",
+                "the catch",
+                "cost at stake usd per year",
+                "share of chain cost",
+                "co2e at stake kg per year",
+                "share of chain carbon",
+                "effort",
+            ]
+        )
+        for index, problem in enumerate(report["problems"], start=1):
+            cost_share = "{:.4f}".format(problem["cost_share"])
+            co2e_share = "{:.4f}".format(problem["co2e_share"])
+            writer.writerow(
+                [
+                    index,
+                    problem["stage"],
+                    problem["title"],
+                    problem["happening"],
+                    problem["why"],
+                    problem["action"],
+                    problem["note"],
+                    round(problem["cost_at_stake"] or 0, 2),
+                    cost_share,
+                    round(problem["co2e_at_stake"] or 0, 2),
+                    co2e_share,
+                    problem["effort"] or "",
+                ]
+            )
+
+    name = "findings-" + date.today().isoformat() + ".csv"
+    return Response(
+        buffer.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": 'attachment; filename="' + name + '"'},
+    )
 
 
 @app.route("/dashboard")
@@ -323,6 +431,7 @@ def upload():
                 analysis.run(conn)
                 summary = db.summary(conn)
                 db.set_meta(conn, "source", "upload")
+                db.set_meta(conn, "sample", "")
             except ingest.ValidationError as exc:
                 return render_error(str(exc))
             except UnicodeDecodeError:
@@ -330,15 +439,22 @@ def upload():
     finally:
         _cleanup(tmpdir)
 
-    return render_template("index.html", summary=summary, report=report)
+    return render_template(
+        "index.html",
+        summary=summary,
+        report=report,
+        samples=SAMPLES,
+        loaded_sample=None,
+    )
 
 
 @app.post("/sample")
 def sample():
+    key = request.form.get("sample") or DEFAULT_SAMPLE
+    if key not in SAMPLES:
+        return render_error("There is no sample by that name.")
     with store.workspace() as conn:
-        ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
-        analysis.run(conn)
-        db.set_meta(conn, "source", "sample")
+        load_sample(conn, key)
     return redirect(url_for("chain_page"))
 
 
@@ -384,7 +500,13 @@ def network_payload(conn):
 
 def render_error(message):
     with store.workspace() as conn:
-        return render_template("index.html", summary=db.summary(conn), error=message)
+        return render_template(
+            "index.html",
+            summary=db.summary(conn),
+            samples=SAMPLES,
+            loaded_sample=db.get_meta(conn, "sample"),
+            error=message,
+        )
 
 
 def _cleanup(tmpdir):

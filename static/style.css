@@ -3260,3 +3260,47 @@ select:disabled {
         justify-self: start;
     }
 }
+
+/* Two sample networks side by side on the data page. The blurb matters as
+   much as the button: which one somebody loads should be a decision, not a
+   guess between two identical-looking options. */
+.sample-picks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 18px;
+    margin-top: 4px;
+}
+
+.sample-picks form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.sample-picks button {
+    width: 100%;
+}
+
+.sample-picks button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.sample-picks span {
+    color: var(--ink-2);
+    font-size: 16px;
+    text-wrap: pretty;
+}
+
+.report-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+a.report-save {
+    text-decoration: none;
+    display: inline-block;
+}
