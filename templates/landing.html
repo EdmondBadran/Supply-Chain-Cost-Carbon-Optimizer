@@ -17,7 +17,7 @@
     why they survive. This tool reads your order data and finds them.
   </p>
   <div class="lp-actions">
-    <a class="lp-primary" href="{{ url_for('chain_page') }}">
+    <a class="lp-primary" href="{{ url_for('report_page') }}">
       Open the live demo
     </a>
     <a class="lp-secondary" href="{{ url_for('upload_page') }}">
@@ -124,7 +124,7 @@
       factors underneath are published ranges rather than constants. The
       whole ranking is re-run two thousand times with those factors redrawn
       to work out how far the answer could move.
-      <a href="{{ url_for('stats_page') }}">The statistics are here</a>.
+      <a href="{{ url_for('report_page') + '#step-5' }}">The statistics are here</a>.
     </p>
   </div>
 </section>
@@ -213,7 +213,7 @@
     The demo is a sample company with a real problem in it: one route carrying
     a fifth of the network's entire carbon footprint.
   </p>
-  <a class="lp-primary" href="{{ url_for('chain_page') }}">Open the live demo</a>
+  <a class="lp-primary" href="{{ url_for('report_page') }}">Open the live demo</a>
 </section>
 
 {% endblock %}

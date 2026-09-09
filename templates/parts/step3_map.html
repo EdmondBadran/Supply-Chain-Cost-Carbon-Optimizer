@@ -1,30 +1,17 @@
-{% extends "base.html" %}
+{# Step 3: the same findings on a map, and the what-if panels. #}
 
-{% block title %}Network dashboard{% endblock %}
+<p class="step-lede">
+  The problems above, in the places they actually happen. Every line is one
+  route. Click any of them to try a different transport mode or a different
+  warehouse and watch the numbers move before you commit to anything.
+</p>
 
-{% block content %}
-
-<section class="board-head">
-  <div>
-    <h1>What your chain is wasting</h1>
-    <div id="finding" class="finding"></div>
-  </div>
-  <div class="headline">
-    <div class="figure">
-      <span>Whole chain, per year</span>
-      <strong class="cost-ink">${{ "{:,.0f}".format(totals.cost) }}</strong>
-    </div>
-    <div class="figure">
-      <span>Emissions, per year</span>
-      <strong class="carbon-ink">{{ "{:,.0f}".format(totals.co2e / 1000) }} t CO2e</strong>
-    </div>
-  </div>
-</section>
+<div id="finding" class="finding"></div>
 
 <section class="panel map-panel">
   <div class="panel-head">
     <div>
-      <h2>Your chain, end to end</h2>
+      <h3>Your chain, end to end</h3>
       <p class="sub">
         Suppliers feed warehouses, warehouses serve customers. Every line is
         one route. Hover to read it, click to open it, scroll to zoom.
@@ -64,7 +51,7 @@
 <section class="panel">
   <div class="panel-head">
     <div>
-      <h2>Fix these first</h2>
+      <h3>Fix these first</h3>
       <p class="sub">Biggest saving at the top. Say how hard each one would be and the order changes to match what you can actually do.</p>
     </div>
   </div>
@@ -75,7 +62,7 @@
 <section class="panel network-panel">
   <div class="panel-head">
     <div>
-      <h2>What if the network were shaped differently</h2>
+      <h3>What if the network were shaped differently</h3>
       <p class="sub">
         Close a site and its work moves to whichever remaining site is nearest
         and has room, and the building stops costing you. Open one and the
@@ -110,63 +97,61 @@
   <div id="network-result" class="network-result"></div>
 
   <p class="meta">
-    A site is assumed to absorb up to half as much again as it handles today.
-    Past that the overflow goes to the next nearest one, and the answer says
-    so. A new site is priced at what your own sites cost and burn per tonne,
-    on an average grid, because nothing in your data describes a building that
-    does not exist yet.
+    A site with a stated capacity is held to it. Without one it is assumed to
+    absorb up to half as much again as it handles today, and every site says
+    which of the two it used. Past that the overflow goes to the next nearest,
+    and the answer says so. A new site is priced at what your own sites cost
+    and burn per tonne, on an average grid, because nothing in your data
+    describes a building that does not exist yet.
   </p>
 </section>
 
 <div class="split-2">
   <section class="panel">
-    <h2>Cost by destination</h2>
+    <h3>Cost by destination</h3>
     <p class="sub">Top eight by cost to serve.</p>
-    <table class="grid">
-      <thead><tr><th>Destination</th><th>Orders</th><th>Cost</th><th>CO2e</th></tr></thead>
-      <tbody>
-      {% for region in regions %}
-        <tr>
-          <td>{{ region.name }}</td>
-          <td class="num">{{ "{:,}".format(region.orders) }}</td>
-          <td class="num">${{ "{:,.0f}".format(region.cost) }}</td>
-          <td class="num">{{ "{:,.0f}".format(region.co2e / 1000) }} t</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="grid">
+        <thead><tr><th>Destination</th><th class="num">Orders</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
+        <tbody>
+        {% for region in regions %}
+          <tr>
+            <td>{{ region.name }}</td>
+            <td class="num">{{ "{:,}".format(region.orders) }}</td>
+            <td class="num">${{ "{:,.0f}".format(region.cost) }}</td>
+            <td class="num">{{ "{:,.0f}".format(region.co2e / 1000) }} t</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <section class="panel">
-    <h2>Where the money goes</h2>
+    <h3>Where the money goes</h3>
     <p class="sub">Cost and carbon split by driver.</p>
-    <table class="grid">
-      <thead><tr><th>Driver</th><th>Cost</th><th>CO2e</th></tr></thead>
-      <tbody>
-        <tr>
-          <td>Transport</td>
-          <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
-          <td class="num">{{ "{:,.0f}".format(totals.transport_co2e / 1000) }} t</td>
-        </tr>
-        <tr>
-          <td>Warehouse and packaging</td>
-          <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
-          <td class="num">{{ "{:,.0f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
-        </tr>
-        <tr>
-          <td>Returns</td>
-          <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
-          <td class="num">{{ "{:,.0f}".format(totals.returns_co2e / 1000) }} t</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="grid">
+        <thead><tr><th>Driver</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Transport</td>
+            <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
+            <td class="num">{{ "{:,.0f}".format(totals.transport_co2e / 1000) }} t</td>
+          </tr>
+          <tr>
+            <td>Warehouse and packaging</td>
+            <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
+            <td class="num">{{ "{:,.0f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
+          </tr>
+          <tr>
+            <td>Returns</td>
+            <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
+            <td class="num">{{ "{:,.0f}".format(totals.returns_co2e / 1000) }} t</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} lanes.</p>
   </section>
 </div>
-
-<script id="network-data" type="application/json">{{ network | tojson }}</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
-<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
-
-{% endblock %}

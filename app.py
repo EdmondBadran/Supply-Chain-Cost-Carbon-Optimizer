@@ -79,6 +79,12 @@ app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
 
+# In debug, never let the browser hold on to a stylesheet or a script. An
+# edit that appears not to have worked, because the page is still running the
+# previous version of the file, costs more time than the caching ever saves.
+if os.environ.get("FLASK_DEBUG", "1") != "0":
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
 
 def ensure_data(conn):
     """Never let a page open empty. A cold start loads the sample, so the
@@ -115,22 +121,55 @@ def index():
         )
 
 
-@app.route("/chain")
-def chain_page():
-    """The diagnostic itself, written for whoever runs the logistics."""
+@app.route("/report")
+def report_page():
+    """The whole analysis as one document.
+
+    This used to be four pages: the chain, the map, the written report and the
+    statistics. Each opened cold, none of them said why you had arrived, and
+    the owner of the tool got lost moving between them. They are five steps of
+    one argument, so they are now five steps of one page.
+    """
     with store.workspace() as conn:
         ensure_data(conn)
         stages = chain.build(conn)
         return render_template(
-            "chain.html",
+            "report.html",
             summary=db.summary(conn),
             stages=stages,
             flow=chain.flow_layout(stages),
             report=diagnosis.build(conn),
+            stats=stats.build(conn),
+            totals=analysis.totals(conn),
+            network=network_payload(conn),
+            regions=analysis.by_region(conn, limit=8),
+            warehouses=analysis.by_warehouse(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
             stage_settings=chain.settings(conn),
             stage_error=request.args.get("stage_error"),
         )
+
+
+# The addresses these pages used to live at. Kept so a link already sent to
+# somebody still lands somewhere sensible, and pointed at the step that
+# replaced them rather than at the top.
+LEGACY_STEPS = {
+    "/chain": "step-1",
+    "/diagnosis": "step-2",
+    "/dashboard": "step-3",
+    "/stats": "step-5",
+}
+
+
+@app.route("/chain")
+@app.route("/diagnosis")
+@app.route("/dashboard")
+@app.route("/stats")
+def legacy_page():
+    step = LEGACY_STEPS.get(request.path, "step-1")
+    query = request.query_string.decode()
+    target = url_for("report_page") + ("?" + query if query else "") + "#" + step
+    return redirect(target, code=301)
 
 
 @app.post("/chain/stages")
@@ -170,7 +209,9 @@ def edit_stages():
         except ValueError as exc:
             error = str(exc)
 
-    return redirect(url_for("chain_page", stage_error=error) + "#stage-editor")
+    return redirect(
+        url_for("report_page", stage_error=error) + "#stage-editor"
+    )
 
 
 @app.route("/data")
@@ -220,34 +261,6 @@ def privacy():
     )
 
 
-@app.route("/stats")
-def stats_page():
-    """The statistics behind the headline: how concentrated the network is,
-    how far the estimate could be out, and whether cost and carbon really do
-    land on the same lanes."""
-    with store.workspace() as conn:
-        ensure_data(conn)
-        return render_template(
-            "stats.html",
-            summary=db.summary(conn),
-            report=stats.build(conn),
-        )
-
-
-@app.route("/diagnosis")
-def diagnosis_page():
-    """The whole chain read back as a report: the truth, what is wrong, how
-    every figure was reached, and the order to fix things in."""
-    with store.workspace() as conn:
-        ensure_data(conn)
-        report = diagnosis.build(conn)
-        if report is None:
-            return redirect(url_for("chain_page"))
-        return render_template(
-            "diagnosis.html", report=report, summary=db.summary(conn)
-        )
-
-
 @app.route("/findings.csv")
 def findings_csv():
     """The ranked findings as a spreadsheet.
@@ -260,7 +273,7 @@ def findings_csv():
         ensure_data(conn)
         report = diagnosis.build(conn)
         if report is None:
-            return redirect(url_for("chain_page"))
+            return redirect(url_for("report_page"))
 
         buffer = io.StringIO()
         writer = csv.writer(buffer)
@@ -306,23 +319,6 @@ def findings_csv():
         mimetype="text/csv",
         headers={"Content-Disposition": 'attachment; filename="' + name + '"'},
     )
-
-
-@app.route("/dashboard")
-def dashboard():
-    with store.workspace() as conn:
-        ensure_data(conn)
-        summary = db.summary(conn)
-        if not summary:
-            return redirect(url_for("chain_page"))
-        return render_template(
-            "dashboard.html",
-            summary=summary,
-            totals=analysis.totals(conn),
-            network=network_payload(conn),
-            regions=analysis.by_region(conn, limit=8),
-            warehouses=analysis.by_warehouse(conn),
-        )
 
 
 @app.post("/api/effort")
@@ -455,7 +451,7 @@ def sample():
         return render_error("There is no sample by that name.")
     with store.workspace() as conn:
         load_sample(conn, key)
-    return redirect(url_for("chain_page"))
+    return redirect(url_for("report_page"))
 
 
 @app.post("/clear")

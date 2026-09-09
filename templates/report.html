@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Your supply chain, start to finish{% endblock %}
+
+{% block content %}
+
+{#
+  One page instead of four. The chain, the problems, the map, the plan and the
+  confidence used to be separate destinations you picked off a menu, which
+  meant every one of them opened cold and none of them said why you had
+  arrived. They are five steps of one argument, so they are now five steps of
+  one page, and the rail on the left says which one you are in.
+#}
+
+{% set steps = [
+  ("step-1", "What you spend", "The whole chain, and what running it costs"),
+  ("step-2", "What is wrong", "Everything worth fixing, ranked"),
+  ("step-3", "Where it is", "The same problems on a map, and what if"),
+  ("step-4", "What to do", "The plan, in order, with the catch on each"),
+  ("step-5", "How sure", "How much of this to believe"),
+] %}
+
+<div class="report-layout">
+
+  <nav class="rail" aria-label="Steps through the report">
+    <p class="rail-title">This report</p>
+    <ol>
+      {% for key, name, blurb in steps %}
+      <li>
+        <a href="#{{ key }}" data-rail="{{ key }}">
+          <span class="rail-number">{{ loop.index }}</span>
+          <span class="rail-text">
+            <span class="rail-name">{{ name }}</span>
+            <span class="rail-blurb">{{ blurb }}</span>
+          </span>
+        </a>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="rail-foot">
+      <a href="{{ url_for('method') }}">How every number is worked out</a>
+      <a href="{{ url_for('findings_csv') }}">Download the findings</a>
+      <button class="rail-print" type="button" data-print>Save as PDF</button>
+    </p>
+  </nav>
+
+  <div class="report-body">
+
+    <header class="report-open">
+      <p class="eyebrow">
+        {% if using_sample %}Sample company{% else %}Your data{% endif %}
+        &middot; {{ "{:,}".format(summary.orders) }} orders
+        &middot; {{ summary.edges }} routes
+        &middot; {{ summary.countries }} countries
+      </p>
+      <h1>Your supply chain, start to finish</h1>
+      <p class="report-open-lede">
+        Five steps. What you spend, what is wrong with it, where those problems
+        are, what to do about them, and how much of it you should believe. Read
+        straight down, or jump to a step.
+      </p>
+    </header>
+
+    {% for key, name, blurb in steps %}
+    <section class="step" id="{{ key }}" data-step="{{ key }}">
+      <div class="step-head">
+        <span class="step-number">Step {{ loop.index }} of {{ steps|length }}</span>
+        <h2>{{ name }}</h2>
+      </div>
+
+      {% if key == "step-1" %}{% include "parts/step1_chain.html" %}
+      {% elif key == "step-2" %}{% include "parts/step2_problems.html" %}
+      {% elif key == "step-3" %}{% include "parts/step3_map.html" %}
+      {% elif key == "step-4" %}{% include "parts/step4_plan.html" %}
+      {% elif key == "step-5" %}{% include "parts/step5_confidence.html" %}
+      {% endif %}
+
+      {% if not loop.last %}
+      <a class="step-next" href="#{{ steps[loop.index0 + 1][0] }}">
+        <span class="step-next-label">Next</span>
+        <span class="step-next-name">
+          Step {{ loop.index + 1 }}. {{ steps[loop.index0 + 1][1] }}
+        </span>
+        <span class="step-next-blurb">{{ steps[loop.index0 + 1][2] }}</span>
+      </a>
+      {% endif %}
+    </section>
+    {% endfor %}
+
+    <section class="panel next-step quiet">
+      <div>
+        <h2>Run it on your own numbers</h2>
+        <p class="sub">
+          {% if using_sample %}
+          Everything above is the built-in sample company. Load a CSV export
+          and the whole report rebuilds around your own chain.
+          {% else %}
+          Replace what is loaded, or add supplier and warehouse files to fill
+          out the chain.
+          {% endif %}
+        </p>
+      </div>
+      <a class="primary" href="{{ url_for('upload_page') }}">Load a CSV</a>
+    </section>
+
+  </div>
+</div>
+
+<script id="network-data" type="application/json">{{ network | tojson }}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='chain.js') }}"></script>
+<script src="{{ url_for('static', filename='report.js') }}" defer></script>
+
+{% endblock %}

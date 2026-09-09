@@ -1,0 +1,90 @@
+{# Step 4: the findings turned into an ordered set of changes. #}
+
+<p class="step-lede">
+  Each one is a single change with the money, the carbon, and the operational
+  catch attached. Work down the list.
+</p>
+
+{% if report.top_three %}
+<section class="panel three">
+  <h3>If you do only three things</h3>
+  <ol>
+    {% for problem in report.top_three %}
+    <li>
+      <strong>{{ problem.title }}.</strong> {{ problem.action }}
+      <span class="three-stake">
+        {% if problem.cost_at_stake %}${{ "{:,.0f}".format(problem.cost_at_stake) }}{% endif %}
+        {% if problem.cost_at_stake and problem.co2e_at_stake %}and{% endif %}
+        {% if problem.co2e_at_stake %}{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e{% endif %}
+        a year.
+      </span>
+    </li>
+    {% endfor %}
+  </ol>
+  <p class="closing">{{ report.closing }}</p>
+</section>
+{% endif %}
+
+<section class="panel prose">
+  <h3>The full plan</h3>
+  <p class="sub">
+    Every problem from step two, in the order worth doing them.
+  </p>
+
+  <ol class="plan">
+    {% for step in report.plan %}
+    <li class="plan-step">
+      <div class="plan-head">
+        <span class="plan-rank">{{ step.number }}</span>
+        <div>
+          <span class="finding-stage">{{ step.stage }}</span>
+          <h4>{{ step.title }}</h4>
+        </div>
+      </div>
+      <div class="plan-grid">
+        <div>
+          <span class="plan-label">Do this</span>
+          <p>{{ step.action }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Money</span>
+          <p>{{ step.cost_line }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Carbon</span>
+          <p>{{ step.co2e_line }}</p>
+        </div>
+        <div>
+          <span class="plan-label">Before you commit</span>
+          <p>{{ step.note }}</p>
+        </div>
+      </div>
+      {% if step.alternatives %}
+      <p class="plan-alt">
+        <strong>If that is not possible:</strong>
+        {% for alt in step.alternatives %}{{ alt }} {% endfor %}
+      </p>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+
+<section class="panel prose">
+  <h3>How these numbers were worked out</h3>
+  <p class="sub">
+    The short version. Every formula and every factor with its source is on
+    the method page.
+  </p>
+  <dl class="formulas">
+    {% for name, words in report.method.formulas %}
+    <dt>{{ name }}</dt>
+    <dd>{{ words }}</dd>
+    {% endfor %}
+  </dl>
+  <p class="caveat">
+    <strong>What this does not account for.</strong>
+    {{ report.method.limits | join("; ") }}.
+  </p>
+  <a class="ghost-link" href="{{ url_for('method') }}">Read the full method</a>
+</section>

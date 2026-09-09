@@ -1,15 +1,37 @@
-{% extends "base.html" %}
+{# Step 1: what the chain is and what it costs. #}
 
-{% block title %}Your value chain{% endblock %}
+<p class="step-lede">
+  Every order you loaded has been collapsed into routes, and the routes into
+  stages. This is the whole chain on one page, with the money accumulating as
+  goods move through it.
+</p>
 
-{% block content %}
+{% if report %}
+<div class="figure-row">
+  <div class="figure">
+    <span class="figure-label">Chain cost a year</span>
+    <strong class="figure-value">${{ "{:,.0f}".format(report.overview.cost) }}</strong>
+    <span class="figure-foot">across {{ "{:,}".format(report.overview.routes) }} routes</span>
+  </div>
+  <div class="figure">
+    <span class="figure-label">Chain carbon a year</span>
+    <strong class="figure-value">{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
+    <span class="figure-foot">CO2e, all stages</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Money recoverable</span>
+    <strong class="figure-value cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</strong>
+    <span class="figure-foot">{{ "{:.0%}".format(report.overview.cost_share) }} of what you spend</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Carbon recoverable</span>
+    <strong class="figure-value carbon-ink">{{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} t</strong>
+    <span class="figure-foot">{{ "{:.0%}".format(report.overview.co2e_share) }} of what you emit</span>
+  </div>
+</div>
 
-<section class="act-head">
-  <h1>This is your value chain</h1>
-  {% if report %}
-  <p class="act-lede">{{ report.overview.truth }}</p>
-  {% endif %}
-</section>
+<p class="truth">{{ report.overview.truth }}</p>
+{% endif %}
 
 {% if flow %}
 <section class="river-wrap">
@@ -169,7 +191,7 @@
   <div class="panel">
     <div class="panel-head">
       <div>
-        <h2>{{ stage.name }}</h2>
+        <h3>{{ stage.name }}</h3>
         <p class="sub">{{ stage.blurb }}</p>
       </div>
       {% if stage.at_risk_cost or stage.at_risk_co2e %}
@@ -188,7 +210,7 @@
       {% for problem in stage.problems %}
       <li>
         <div class="problem-body">
-          <h3>{{ problem.title }}</h3>
+          <h4>{{ problem.title }}</h4>
           <p class="problem-detail">{{ problem.detail }}</p>
           <p class="problem-fix">{{ problem.fix }}</p>
         </div>
@@ -203,7 +225,7 @@
           <span class="problem-note">{{ problem.note }}</span>
           {% endif %}
           {% if problem.edge_id %}
-          <a class="problem-link" href="{{ url_for('dashboard') }}?lane={{ problem.edge_id }}">
+          <a class="problem-link" href="{{ url_for('report_page') }}?lane={{ problem.edge_id }}#step-3">
             Open on the map
           </a>
           {% endif %}
@@ -220,90 +242,3 @@
   </div>
 </section>
 {% endfor %}
-
-{% if report and report.top_three %}
-<section class="act-head second">
-  <h2>This is what is wrong</h2>
-  <p class="act-lede">
-    {{ report.overview.concentration }}
-  </p>
-</section>
-
-<section class="worst">
-  {% for problem in report.top_three %}
-  <article class="worst-card">
-    <span class="finding-stage">{{ problem.stage }}</span>
-    <h3>{{ problem.title }}</h3>
-    <p class="worst-what">{{ problem.happening }}</p>
-    <div class="worst-stake">
-      {% if problem.cost_at_stake %}
-      <div>
-        <strong class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</strong>
-        <span>a year</span>
-      </div>
-      {% endif %}
-      {% if problem.co2e_at_stake %}
-      <div>
-        <strong class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t</strong>
-        <span>CO2e a year</span>
-      </div>
-      {% endif %}
-    </div>
-    <details class="worst-why">
-      <summary>Why this matters</summary>
-      <p>{{ problem.why }}</p>
-    </details>
-  </article>
-  {% endfor %}
-</section>
-
-<section class="act-head second">
-  <h2>This is what to do about it</h2>
-  <p class="act-lede">
-    Every problem above becomes one change, with the money, the carbon, and
-    the operational catch attached to it.
-  </p>
-</section>
-
-<section class="panel next-step">
-  <div>
-    <h2>Read the full diagnosis</h2>
-    <p class="sub">
-      The {{ report.problems|length }} biggest problems ranked, how every
-      figure was reached, and a numbered plan you can take into a meeting.
-    </p>
-  </div>
-  <a class="primary" href="{{ url_for('diagnosis_page') }}">Open the report</a>
-</section>
-{% endif %}
-
-<section class="panel next-step quiet">
-  <div>
-    <h2>Try a change before committing to it</h2>
-    <p class="sub">
-      Every route on a world map, where you can switch its transport mode or
-      the warehouse serving it and watch cost and carbon move.
-    </p>
-  </div>
-  <a class="ghost-link" href="{{ url_for('dashboard') }}">Open the optimizer</a>
-</section>
-
-<section class="panel next-step quiet">
-  <div>
-    <h2>Use your own data</h2>
-    <p class="sub">
-      {% if using_sample %}
-      This chain is the built-in sample company. Load a CSV export and it
-      rebuilds around your own suppliers, warehouses and customers.
-      {% else %}
-      Replace what is loaded with a different export, or add supplier and
-      warehouse files to fill out the chain.
-      {% endif %}
-    </p>
-  </div>
-  <a class="ghost-link" href="{{ url_for('upload_page') }}">Load a CSV</a>
-</section>
-
-<script src="{{ url_for('static', filename='chain.js') }}"></script>
-
-{% endblock %}

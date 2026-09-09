@@ -1,39 +1,19 @@
-{% extends "base.html" %}
+{# Step 5: the same numbers, put under the tests you would run on
+   somebody else's analysis. #}
 
-{% block title %}The statistics behind the number{% endblock %}
+<p class="step-lede">
+  Nothing here changes a recommendation. It tells you how hard to lean on one:
+  whether the waste is concentrated enough to be worth chasing, how far the
+  estimate could be out given the factors underneath it, and whether cost and
+  carbon genuinely land on the same routes in your network or only in the
+  pitch.
+</p>
 
-{% block content %}
+{% set c = stats.concentration %}
+{% set ov = stats.overlap %}
+{% set un = stats.uncertainty %}
 
-{% if not report %}
-<section class="panel">
-  <h2>Nothing loaded</h2>
-  <p class="sub">Load a file or open the sample and the statistics come with it.</p>
-  <a class="primary" href="{{ url_for('upload_page') }}">Load data</a>
-</section>
-{% else %}
-
-{% set c = report.concentration %}
-{% set ov = report.overlap %}
-{% set un = report.uncertainty %}
-
-<section class="report-head">
-  <p class="eyebrow">Statistics</p>
-  <h1>How much of this should you believe</h1>
-  <p class="truth">
-    The rest of this tool tells you what to change. This page puts the same
-    numbers under the tests you would run on somebody else's analysis: is the
-    waste concentrated enough to be worth chasing, how far could the estimate
-    be out given the factors it rests on, and do cost and carbon genuinely
-    land on the same routes in your network or only in the pitch.
-  </p>
-  <p class="truth-note">
-    Worked out across {{ report.lane_count }} route{{ "s" if report.lane_count != 1 }}
-    and {{ "{:,}".format(report.order_count) }} order lines. Every method used
-    is named where it is used.
-  </p>
-</section>
-
-<section class="report-figures">
+<div class="figure-row">
   <div class="figure">
     <span class="figure-label">Cost concentration</span>
     <strong class="figure-value cost-ink">{{ "%.2f"|format(c.cost_gini) }}</strong>
@@ -54,10 +34,10 @@
     <strong class="figure-value range cost-ink">${{ "{:,.0f}".format(un.p10) }}<span>to</span>${{ "{:,.0f}".format(un.p90) }}</strong>
     <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
   </div>
-</section>
+</div>
 
 <section class="panel prose" id="overlap">
-  <h2>Do cost and carbon actually overlap here</h2>
+  <h3>Do cost and carbon actually overlap here</h3>
   <p class="sub">
     This is the assumption the whole tool is built on, so it is the one worth
     testing rather than asserting. Each dot is one route: money along the
@@ -105,7 +85,7 @@
 
   <div class="split-2">
     <div>
-      <h3>Most carbon per dollar spent</h3>
+      <h4>Most carbon per dollar spent</h4>
       <div class="table-scroll">
         <table class="grid">
           <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
@@ -126,7 +106,7 @@
       </p>
     </div>
     <div>
-      <h3>Least carbon per dollar spent</h3>
+      <h4>Least carbon per dollar spent</h4>
       <div class="table-scroll">
         <table class="grid">
           <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
@@ -146,7 +126,7 @@
 </section>
 
 <section class="panel prose" id="concentration">
-  <h2>How concentrated the damage is</h2>
+  <h3>How concentrated the damage is</h3>
   <p class="sub">
     A curve hugging the diagonal means every route costs about the same and
     there is no shortcut. A curve pushed into the corner means a few routes
@@ -171,7 +151,7 @@
   </p>
 
   <p class="stat-read">
-    {{ c.cost_pareto.lanes }} of your {{ report.lane_count }} routes
+    {{ c.cost_pareto.lanes }} of your {{ stats.lane_count }} routes
     ({{ "{:.0%}".format(c.cost_pareto.share_of_lanes) }}) carry
     {{ "{:.0%}".format(c.cost_pareto.share_of_total) }} of the cost.
     On carbon it is {{ c.co2e_pareto.lanes }} routes for
@@ -205,7 +185,7 @@
 </section>
 
 <section class="panel prose" id="uncertainty">
-  <h2>How wrong the recoverable figure could be</h2>
+  <h3>How wrong the recoverable figure could be</h3>
   <p class="sub">
     Every saving in this tool is the gap between two estimates built on
     published freight and emission factors, and those are ranges, not
@@ -268,7 +248,7 @@
   </p>
 
   {% if un.always_flagged %}
-  <h3>How safe each recommendation is</h3>
+  <h4>How safe each recommendation is</h4>
   <div class="table-scroll">
     <table class="grid">
       <thead><tr><th>Route</th><th>Change</th><th class="num">Still worth it in</th></tr></thead>
@@ -291,17 +271,17 @@
 </section>
 
 <section class="panel prose" id="outliers">
-  <h2>Routes priced unlike the rest</h2>
+  <h3>Routes priced unlike the rest</h3>
   <p class="sub">
     Cost per tonne-kilometre takes size out of the comparison, so nothing
     appears here for being big. Distance from the median is measured in median
     absolute deviations rather than standard deviations, because with a few
     dozen routes one genuine outlier is enough to drag an ordinary average
     until the outlier stops looking unusual. Anything past
-    {{ report.outliers.threshold }} is listed.
+    {{ stats.outliers.threshold }} is listed.
   </p>
 
-  {% if not report.outliers.cost and not report.outliers.co2e %}
+  {% if not stats.outliers.cost and not stats.outliers.co2e %}
   <p class="stat-read">
     Nothing in this network crosses the threshold, on either measure. That is
     a result rather than an empty table: every route is priced and emitting in
@@ -310,20 +290,20 @@
     choices, which is where the rest of the tool is already looking.
   </p>
   <p class="source">
-    The medians it was measured against: ${{ "%.2f"|format(report.outliers.cost_median) }}
+    The medians it was measured against: ${{ "%.2f"|format(stats.outliers.cost_median) }}
     per tonne-kilometre on cost and
-    {{ "%.3f"|format(report.outliers.co2e_median) }} kg CO2e per tonne-kilometre
+    {{ "%.3f"|format(stats.outliers.co2e_median) }} kg CO2e per tonne-kilometre
     on carbon.
   </p>
   {% endif %}
 
-  {% if report.outliers.cost %}
-  <h3>On cost, median ${{ "%.2f"|format(report.outliers.cost_median) }} per tonne-km</h3>
+  {% if stats.outliers.cost %}
+  <h4>On cost, median ${{ "%.2f"|format(stats.outliers.cost_median) }} per tonne-km</h4>
   <div class="table-scroll">
     <table class="grid">
       <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
       <tbody>
-      {% for row in report.outliers.cost %}
+      {% for row in stats.outliers.cost %}
         <tr>
           <td>{{ row.name }}</td><td>{{ row.mode }}</td>
           <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
@@ -336,13 +316,13 @@
   </div>
   {% endif %}
 
-  {% if report.outliers.co2e %}
-  <h3>On carbon, median {{ "%.3f"|format(report.outliers.co2e_median) }} kg CO2e per tonne-km</h3>
+  {% if stats.outliers.co2e %}
+  <h4>On carbon, median {{ "%.3f"|format(stats.outliers.co2e_median) }} kg CO2e per tonne-km</h4>
   <div class="table-scroll">
     <table class="grid">
       <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
       <tbody>
-      {% for row in report.outliers.co2e %}
+      {% for row in stats.outliers.co2e %}
         <tr>
           <td>{{ row.name }}</td><td>{{ row.mode }}</td>
           <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
@@ -355,7 +335,7 @@
   </div>
   {% endif %}
 
-  {% if report.outliers.cost or report.outliers.co2e %}
+  {% if stats.outliers.cost or stats.outliers.co2e %}
   <p class="caveat">
     <strong>Read the distance column before acting on this.</strong> A very
     short route lands here for a reason that is not a pricing problem: it
@@ -366,10 +346,10 @@
   {% endif %}
 </section>
 
-{% if report.order_sizes %}
-{% set sz = report.order_sizes %}
+{% if stats.order_sizes %}
+{% set sz = stats.order_sizes %}
 <section class="panel prose" id="orders">
-  <h2>The shape of the order book</h2>
+  <h3>The shape of the order book</h3>
   <p class="sub">
     Packaging and handling are charged per order, not per kilo, so the small
     end of this distribution costs more than its weight suggests. On a log
@@ -416,10 +396,10 @@
 </section>
 {% endif %}
 
-{% if report.seasonality %}
-{% set se = report.seasonality %}
+{% if stats.seasonality %}
+{% set se = stats.seasonality %}
 <section class="panel prose" id="seasonality">
-  <h2>Through the year</h2>
+  <h3>Through the year</h3>
   <p class="sub">
     Everything else on this site is quoted as an annual figure. This is
     whether any month actually looks like a twelfth of it.
@@ -462,10 +442,10 @@
 </section>
 {% endif %}
 
-{% if report.returns and report.returns.rows %}
-{% set rt = report.returns %}
+{% if stats.returns and stats.returns.rows %}
+{% set rt = stats.returns %}
 <section class="panel prose" id="returns">
-  <h2>Returns, with the uncertainty attached</h2>
+  <h3>Returns, with the uncertainty attached</h3>
   <p class="sub">
     A route with one return in four has a 25% return rate and has told you
     nothing. Each rate below carries a 95% interval worked out with the Wilson
@@ -518,7 +498,7 @@
 {% endif %}
 
 <section class="panel prose" id="modes">
-  <h2>What each mode actually costs you</h2>
+  <h3>What each mode actually costs you</h3>
   <p class="sub">
     The freight rate is what a tonne-kilometre costs and emits in transit. The
     all-in figure adds packaging, the warehouse and the return leg, which is
@@ -545,7 +525,7 @@
         </tr>
       </thead>
       <tbody>
-      {% for row in report.modes %}
+      {% for row in stats.modes %}
         <tr>
           <td>{{ row.mode }}</td>
           <td class="num">{{ row.lanes }}</td>
@@ -571,17 +551,3 @@
     budget.
   </p>
 </section>
-
-<section class="next-step">
-  <h2>Where this leads</h2>
-  <p>
-    Nothing on this page changes a recommendation. It tells you how hard to
-    lean on one.
-  </p>
-  <a class="primary" href="{{ url_for('diagnosis_page') }}">Read the diagnosis</a>
-  <a class="ghost-link" href="{{ url_for('method') }}">Or the method behind every factor</a>
-</section>
-
-{% endif %}
-
-{% endblock %}

@@ -26,8 +26,16 @@ sys.path.insert(0, str(ROOT))
 import app as application
 from optimizer import store
 
-PAGES = ("/", "/chain", "/dashboard", "/diagnosis", "/stats", "/method",
-         "/privacy", "/data")
+PAGES = ("/", "/report", "/method", "/privacy", "/data")
+
+# The four addresses the report used to be split across. Kept as redirects so
+# a link somebody has already sent still lands on the right part of it.
+LEGACY = {
+    "/chain": "step-1",
+    "/diagnosis": "step-2",
+    "/dashboard": "step-3",
+    "/stats": "step-5",
+}
 
 TINY_CSV = b"""origin_name,origin_city,origin_country,dest_city,dest_country,weight_kg,mode
 Depot,Leeds,GB,Paris,FR,120,road
@@ -74,12 +82,59 @@ class Routes(unittest.TestCase):
         workspace, and both used to bounce them to the chain. Any page that
         reads data has to load the sample itself.
         """
-        for path in ("/dashboard", "/diagnosis", "/stats", "/chain", "/"):
+        for path in ("/report", "/"):
             with self.subTest(path=path):
                 fresh = application.app.test_client()
                 response = fresh.get(path)
                 self.assertEqual(response.status_code, 200, path)
                 self.assertNotIn(b"Redirecting", response.data)
+
+    def test_the_old_addresses_land_on_the_step_that_replaced_them(self):
+        """Four pages became five steps of one. A link already sent to
+        somebody has to keep working, and has to arrive at the part they were
+        pointed at rather than at the top of a long page."""
+        for path, step in LEGACY.items():
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertEqual(response.status_code, 301, path)
+                self.assertTrue(
+                    response.headers["Location"].endswith("/report#" + step),
+                    response.headers["Location"],
+                )
+
+    def test_a_lane_link_survives_the_redirect(self):
+        """Opening a problem on the map is a query string plus an anchor, and
+        dropping either half would land the reader on the map with nothing
+        selected."""
+        response = self.client.get("/dashboard?lane=3")
+        location = response.headers["Location"]
+        self.assertIn("lane=3", location)
+        self.assertTrue(location.endswith("#step-3"), location)
+
+    def test_every_step_is_on_the_page(self):
+        body = self.client.get("/report").get_data(as_text=True)
+        for step in ("step-1", "step-2", "step-3", "step-4", "step-5"):
+            with self.subTest(step=step):
+                self.assertIn('id="' + step + '"', body)
+
+    def test_the_map_still_has_everything_its_script_needs(self):
+        """The map moved from its own page into a section of this one. Its
+        script finds its pieces by id, so a rename during the merge would
+        leave a blank rectangle and no error anybody would see."""
+        body = self.client.get("/report").get_data(as_text=True)
+        for element in (
+            'id="network-data"',
+            'id="map"',
+            'id="tip"',
+            'id="detail"',
+            'id="wins"',
+            'id="finding"',
+            'id="site-toggles"',
+            'id="run-network"',
+            'id="network-result"',
+        ):
+            with self.subTest(element=element):
+                self.assertIn(element, body)
 
     def test_a_missing_page_is_a_404_not_a_crash(self):
         self.assertEqual(self.client.get("/no-such-page").status_code, 404)
@@ -173,7 +228,7 @@ class Samples(unittest.TestCase):
                     "/sample", data={"sample": key}, follow_redirects=True
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertIn(b"value chain", response.data)
+                self.assertIn(b"start to finish", response.data)
 
     def test_an_unknown_sample_is_refused(self):
         response = self.client.post("/sample", data={"sample": "nope"})

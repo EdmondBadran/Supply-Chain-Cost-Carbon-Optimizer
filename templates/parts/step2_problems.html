@@ -1,0 +1,76 @@
+{# Step 2: everything wrong, ranked across stages. #}
+
+<p class="step-lede">
+  {{ report.overview.concentration }}
+</p>
+
+{% if report.top_three %}
+<section class="worst">
+  {% for problem in report.top_three %}
+  <article class="worst-card">
+    <span class="finding-stage">{{ problem.stage }}</span>
+    <h3>{{ problem.title }}</h3>
+    <p class="worst-what">{{ problem.happening }}</p>
+    <div class="worst-stake">
+      {% if problem.cost_at_stake %}
+      <div>
+        <strong class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</strong>
+        <span>a year</span>
+      </div>
+      {% endif %}
+      {% if problem.co2e_at_stake %}
+      <div>
+        <strong class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t</strong>
+        <span>CO2e a year</span>
+      </div>
+      {% endif %}
+    </div>
+    <details class="worst-why">
+      <summary>Why this matters</summary>
+      <p>{{ problem.why }}</p>
+    </details>
+  </article>
+  {% endfor %}
+</section>
+{% endif %}
+
+<section class="panel prose">
+  <h3>All {{ report.problems|length }} of them, in order</h3>
+  <p class="sub">
+    Ranked by how much of your whole chain each one gives back, so a dirty
+    warehouse can be weighed against an expensive route honestly.
+  </p>
+
+  <ol class="findings">
+    {% for problem in report.problems %}
+    <li class="finding">
+      <div class="finding-head">
+        <span class="finding-rank">{{ "%02d"|format(loop.index) }}</span>
+        <div>
+          <span class="finding-stage">{{ problem.stage }}</span>
+          <h4>{{ problem.title }}</h4>
+        </div>
+        <div class="finding-stake">
+          {% if problem.cost_at_stake %}
+          <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
+          {% endif %}
+          {% if problem.co2e_at_stake %}
+          <span class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          {% endif %}
+        </div>
+      </div>
+      <dl class="finding-body">
+        <dt>What is happening</dt>
+        <dd>{{ problem.happening }}</dd>
+        <dt>Why it matters</dt>
+        <dd>{{ problem.why }}</dd>
+      </dl>
+      {% if problem.edge_id %}
+      <a class="problem-link" href="{{ url_for('report_page') }}?lane={{ problem.edge_id }}#step-3">
+        Open on the map
+      </a>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ol>
+</section>

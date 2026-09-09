@@ -27,12 +27,9 @@
   <nav class="topnav">
     {% set here = request.endpoint %}
     {% for endpoint, label in [
-      ('chain_page', 'Value chain'),
-      ('dashboard', 'Optimizer'),
-      ('diagnosis_page', 'Report'),
-      ('stats_page', 'Statistics'),
+      ('report_page', 'The report'),
       ('method', 'How it works'),
-      ('upload_page', 'Data'),
+      ('upload_page', 'Your data'),
     ] %}
     <a href="{{ url_for(endpoint) }}"{% if endpoint == here %} aria-current="page"{% endif %}>{{ label }}</a>
     {% endfor %}

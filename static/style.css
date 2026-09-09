@@ -3394,3 +3394,358 @@ a.report-save {
 .lp-data-note a:hover {
     color: var(--carbon);
 }
+
+/* ==== The report as one document ====
+   Four pages became five steps of one page. The rail is the thing that fixes
+   the confusion the split caused: it is always visible, it says which step
+   you are in, and it makes the length of the argument obvious before you
+   start scrolling through it. */
+
+.report-layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+}
+
+.rail {
+    position: sticky;
+    top: 84px;
+    align-self: start;
+    /* The rail is navigation, not content, so it must not be able to grow a
+       scrollbar of its own and trap the page scroll inside it. */
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.rail-title {
+    margin: 0 0 14px;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+}
+
+.rail ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-left: 1px solid var(--line);
+}
+
+.rail a {
+    position: relative;
+    display: flex;
+    gap: 12px;
+    padding: 10px 0 10px 16px;
+    color: var(--ink-3);
+    text-decoration: none;
+    transition: color 0.2s var(--ease);
+}
+
+.rail a::before {
+    content: "";
+    position: absolute;
+    left: -1px;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    background: transparent;
+    transition: background 0.25s var(--ease);
+}
+
+.rail a:hover { color: var(--ink-2); }
+
+.rail a.on {
+    color: var(--ink);
+}
+
+.rail a.on::before {
+    background: var(--cost);
+}
+
+.rail-number {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 14px;
+    opacity: 0.7;
+    padding-top: 2px;
+}
+
+.rail-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.rail-name {
+    font-size: 17px;
+    line-height: 1.25;
+}
+
+.rail-blurb {
+    font-size: 14.5px;
+    color: var(--ink-3);
+    line-height: 1.35;
+    text-wrap: pretty;
+}
+
+.rail a.on .rail-blurb { color: var(--ink-2); }
+
+.rail-foot {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 22px 0 0;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 15.5px;
+}
+
+.rail-foot a,
+.rail-print {
+    color: var(--ink-3);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.rail-foot a:hover,
+.rail-print:hover { color: var(--carbon); }
+
+.report-open {
+    margin-bottom: 8px;
+}
+
+.report-open h1 {
+    font-size: clamp(2rem, 4.2vw, 2.9rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin: 10px 0 16px;
+}
+
+.report-open-lede {
+    font-size: clamp(1.1rem, 1.7vw, 1.26rem);
+    color: var(--ink-2);
+    max-width: 62ch;
+    margin: 0;
+    text-wrap: pretty;
+}
+
+/* Each step is a chapter. The rule and the number are what make a long page
+   feel like five things rather than one endless one. */
+.step {
+    padding-top: 44px;
+    margin-top: 44px;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 84px;
+}
+
+.step-head {
+    margin-bottom: 18px;
+}
+
+.step-number {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cost);
+    margin-bottom: 8px;
+}
+
+.step-head h2 {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+.step-lede {
+    font-size: 18.5px;
+    color: var(--ink-2);
+    max-width: 68ch;
+    margin: 0 0 26px;
+    text-wrap: pretty;
+}
+
+/* Handing the reader the next question rather than leaving them at the bottom
+   of a section wondering whether that was the end. */
+.step-next {
+    display: block;
+    margin-top: 40px;
+    padding: 18px 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-color 0.2s var(--ease), background 0.2s var(--ease);
+}
+
+.step-next:hover {
+    border-color: var(--carbon-line);
+    background: var(--carbon-soft);
+}
+
+.step-next-label {
+    display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13.5px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+}
+
+.step-next-name {
+    display: block;
+    font-size: 19px;
+    margin-bottom: 3px;
+}
+
+.step-next-blurb {
+    display: block;
+    font-size: 16px;
+    color: var(--ink-3);
+}
+
+/* The four headline figures, reused at the top of step one and step five. */
+.figure-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 1px;
+    margin: 0 0 26px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.figure-row .figure {
+    padding: 16px 18px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.figure-row .figure.lit { background: var(--panel-2); }
+
+@media (max-width: 1080px) {
+    .report-layout {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    /* On a narrow screen the rail becomes a strip across the top rather than
+       a column beside nothing. */
+    .rail {
+        position: static;
+        max-height: none;
+        margin-bottom: 26px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line);
+    }
+
+    .rail ol {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        border-left: 0;
+        scrollbar-width: thin;
+    }
+
+    .rail li { flex: 0 0 auto; }
+
+    .rail a {
+        flex-direction: column;
+        gap: 2px;
+        padding: 8px 14px;
+        border-bottom: 2px solid transparent;
+    }
+
+    .rail a::before { display: none; }
+    .rail a.on { border-bottom-color: var(--cost); }
+    .rail-blurb { display: none; }
+
+    .rail-foot {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+}
+
+@media print {
+    .rail,
+    .step-next {
+        display: none;
+    }
+
+    .report-layout {
+        display: block;
+    }
+
+    /* Each step starts a page, which is what makes the printed version read
+       as a document rather than as a scroll that ran out of paper. */
+    .step {
+        break-before: page;
+        border-top: 0;
+    }
+}
+
+/* The report carries a rail, a world map and a nine column table, none of
+   which fit the measure that suits a page of prose. It gets more room, and
+   falls back to the ordinary width on a browser without :has(), where the
+   layout still works, just narrower. */
+main:has(.report-layout) {
+    max-width: 1320px;
+}
+
+/* Four figures across at the width the body column actually has, rather than
+   three and a lonely fourth. */
+.figure-row {
+    grid-template-columns: repeat(auto-fit, minmax(158px, 1fr));
+}
+
+/* ==== Reserving space for what JavaScript fills in ====
+   The map, the ranked wins and the what-if answer all arrive after the page
+   does, and until they did the page had no idea how tall it was going to be.
+   Every one of them pushed the content below it down on arrival, which is
+   what made the page feel unsettled and what made a link to a step land in
+   the wrong place. Holding the space from the start costs nothing and removes
+   both problems. */
+
+.map-holder {
+    /* The same 900 by 470 the script gives the map viewBox, so the box the
+       page reserves is exactly the box the map lands in. */
+    aspect-ratio: 900 / 470;
+    min-height: 300px;
+}
+
+.map-holder > #map {
+    height: 100%;
+}
+
+/* Room for a handful of ranked wins. Too little and the page still jumps, too
+   much and an empty list leaves a hole. */
+.wins {
+    min-height: 220px;
+}
+
+.wins:empty::before,
+#map:empty::before {
+    content: "Working it out.";
+    display: block;
+    padding: 18px;
+    color: var(--ink-3);
+    font-size: 16px;
+}

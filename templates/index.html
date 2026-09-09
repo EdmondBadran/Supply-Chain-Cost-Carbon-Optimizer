@@ -80,7 +80,7 @@
   <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
   {% endif %}
   <div class="row-actions">
-    <a class="primary" href="{{ url_for('chain_page') }}">See the value chain</a>
+    <a class="primary" href="{{ url_for('report_page') }}">Open the report</a>
     <a class="ghost-link" href="{{ url_for('findings_csv') }}">Download the findings</a>
     <form method="post" action="{{ url_for('clear') }}">
       <button class="ghost" type="submit">Clear this data</button>
