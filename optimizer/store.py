@@ -48,7 +48,12 @@ class Workspace:
         self.conn = sqlite3.connect(":memory:", check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA foreign_keys = ON")
-        self.lock = threading.Lock()
+        # Re-entrant on purpose. A request can open its own workspace more
+        # than once: the upload handler holds one while it loads the file and
+        # then renders an error page, which opens the workspace again to read
+        # what is currently loaded. With a plain lock that second acquire
+        # waits on the first and the request never finishes.
+        self.lock = threading.RLock()
         self.created = time.time()
         self.touched = self.created
         db.init(self.conn)
