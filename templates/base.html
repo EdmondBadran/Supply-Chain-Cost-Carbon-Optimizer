@@ -16,6 +16,7 @@
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="topbar">
+  <div class="topbar-inner">
   <a class="brand" href="{{ url_for('index') }}">
     <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
       <path d="M7 23 L25 9" stroke="currentColor" stroke-width="2.5" fill="none"/>
@@ -34,6 +35,7 @@
     <a href="{{ url_for(endpoint) }}"{% if endpoint == here %} aria-current="page"{% endif %}>{{ label }}</a>
     {% endfor %}
   </nav>
+  </div>
 </header>
 
 <main id="main">

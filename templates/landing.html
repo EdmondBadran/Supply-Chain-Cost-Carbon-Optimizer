@@ -18,15 +18,15 @@
   </p>
   <div class="lp-actions">
     <a class="lp-primary" href="{{ url_for('report_page') }}">
-      Open the live demo
+      Read the report
     </a>
     <a class="lp-secondary" href="{{ url_for('upload_page') }}">
-      Use your own CSV
+      Load your own CSV
     </a>
   </div>
   <p class="lp-note">
-    No sign up, and nothing you load is stored. The demo is already running
-    on a sample company.
+    No sign up, and nothing you load is stored. The report below is already
+    built on a sample company, so there is nothing to fill in first.
   </p>
 </section>
 
@@ -55,55 +55,21 @@
 </section>
 {% endif %}
 
-<section class="lp-steps" data-reveal>
-  <div class="lp-steps-intro">
-    <h2>Three steps, in order</h2>
-    <p>
-      You do not need to know what you are looking for before you start. Each
-      step hands you the question for the next one.
-    </p>
-  </div>
-  <ol>
-    <li>
-      <h3>See the chain</h3>
-      <p>
-        Every order collapses into routes, and the routes into six stages:
-        suppliers, inbound, warehousing, outbound, customers, returns. Most
-        companies have never seen all six on one page.
-      </p>
-    </li>
-    <li>
-      <h3>Find what is wrong</h3>
-      <p>
-        Each stage runs its own check. Freight on a mode that is beaten on
-        both cost and carbon. Warehouses on a dirty power grid. Destinations
-        that cost too much to reach. Routes where too much comes back.
-      </p>
-    </li>
-    <li>
-      <h3>Get the plan</h3>
-      <p>
-        A numbered list of changes. What to do, what it saves in money, what
-        it saves in carbon, and the operational catch that will decide whether
-        you can actually do it.
-      </p>
-    </li>
-  </ol>
-</section>
-
 <section class="lp-split" data-reveal>
   <div>
-    <h2>What makes it different</h2>
+    <h2>Why only some routes are flagged</h2>
     <p>
       A route being expensive is a procurement question. A route being dirty
       is a reporting question. Neither is interesting alone, and both already
-      have an owner. This only surfaces routes where one change fixes both,
-      because those are the only ones where the business case writes itself.
+      have an owner. This surfaces only routes where one change fixes both,
+      because those are the ones where the business case writes itself.
     </p>
     <p>
-      That distinction is enforced in the maths, not in the marketing. A route
-      is flagged only when a change cuts at least 25 percent of its cost
-      <em>and</em> at least 25 percent of its carbon.
+      That is enforced in the arithmetic, not in the copy. A route is flagged
+      only when a single change cuts at least 25 percent of its cost
+      <em>and</em> at least 25 percent of its carbon. On the sample above that
+      leaves {{ report.problems|length }} problems out of
+      {{ "{:,}".format(facts.routes) }} routes.
     </p>
   </div>
   <div>
@@ -111,20 +77,16 @@
     <p>
       Emission factors come from the published DEFRA and GLEC ranges, the
       method most freight carbon reporting is built on. Cost factors are
-      labelled as defaults rather than dressed up as standards. Every formula
-      is written out, along with what the tool does not account for.
+      labelled as defaults rather than dressed up as standards. There is no
+      model and no training data: it is arithmetic on your own figures, and
+      you can reproduce any number on the page by hand.
     </p>
     <p>
-      There is no model and no training data. It is arithmetic on your own
-      figures, and you can reproduce any number on the page by hand.
-      <a href="{{ url_for('method') }}">The method page shows all of it</a>.
-    </p>
-    <p>
-      The savings are quoted as a range as well as a figure, because the
-      factors underneath are published ranges rather than constants. The
-      whole ranking is re-run two thousand times with those factors redrawn
-      to work out how far the answer could move.
-      <a href="{{ url_for('report_page') + '#step-5' }}">The statistics are here</a>.
+      Because those factors are published as ranges rather than constants, the
+      whole ranking is re-run two thousand times with them redrawn, and the
+      saving is quoted as a band as well as a figure.
+      <a href="{{ url_for('method') }}">Every formula is written out</a>, along
+      with what the tool does not account for at all.
     </p>
   </div>
 </section>
@@ -175,45 +137,43 @@
   </p>
 </section>
 
-{% if summary %}
 <section class="lp-spec" data-reveal>
   <h2>How it is built</h2>
   <div class="lp-spec-grid">
     <article>
-      <strong>{{ "{:,}".format(summary.orders) }}</strong>
-      <span>orders in the sample, collapsed into {{ summary.edges }} routes</span>
-    </article>
-    <article>
-      <strong>{{ summary.countries }}</strong>
-      <span>countries, across {{ summary.customers }} customer cities</span>
+      <strong>1</strong>
+      <span>runtime dependency, and that is Flask</span>
     </article>
     <article>
       <strong>34,135</strong>
-      <span>cities in the bundled geocoding table, so it works offline</span>
+      <span>cities geocoded from a bundled table, so it runs offline</span>
     </article>
     <article>
-      <strong>1</strong>
-      <span>runtime dependency, and that is Flask</span>
+      <strong>115</strong>
+      <span>tests, standard library, no test dependency either</span>
     </article>
     <article class="lp-spec-wide">
       <strong>No build step</strong>
       <span>
         Python, SQLite and server rendered templates, with D3 for the map.
-        Haversine is registered as a SQLite function, so the distance is
-        worked out in the same query that groups the orders.
+        Haversine is registered as a SQLite function, so distance is worked
+        out in the same query that groups the orders.
       </span>
     </article>
   </div>
 </section>
-{% endif %}
 
 <section class="lp-close" data-reveal>
   <h2>See it running</h2>
   <p>
-    The demo is a sample company with a real problem in it: one route carrying
-    a fifth of the network's entire carbon footprint.
+    The report is already built on a sample company, and it found
+    {{ report.problems|length }} problems worth
+    ${{ "{:,.0f}".format(report.overview.recoverable_cost) }} and
+    {{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} tonnes of
+    CO2e a year. Five steps, start to finish, nothing behind a form.
   </p>
-  <a class="lp-primary" href="{{ url_for('report_page') }}">Open the live demo</a>
+  <a class="lp-primary" href="{{ url_for('report_page') }}">Read the report</a>
+  <a class="ghost-link" href="{{ url_for('upload_page') }}">Or load your own data</a>
 </section>
 
 {% endblock %}

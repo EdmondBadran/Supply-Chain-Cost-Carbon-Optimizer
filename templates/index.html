@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block title %}Your data{% endblock %}
+
 {% block content %}
 
 {% if error %}
@@ -15,6 +17,7 @@
   {%- if report.rows_skipped %}
   {{ report.rows_skipped }} row{{ "s" if report.rows_skipped != 1 }} skipped.
   {%- endif %}
+  <a href="{{ url_for('report_page') }}">Read the report</a>
 </div>
 {% if report.errors %}
 <details class="errors">
@@ -31,87 +34,108 @@
 {% endif %}
 {% endif %}
 
-{% if not summary %}
-<section class="hero">
+{% if summary %}
+<section class="panel loaded-now">
   <div>
-    <h1>Cost and carbon<span class="split">waste the same routes</span></h1>
-    <p>
-      Most supply chains track money in one report and emissions in another,
-      so the routes doing both kinds of damage never surface. Load your order
-      data and this works out what every lane costs to serve and what it
-      emits, then ranks where fixing one fixes the other.
+    <h2>Loaded right now</h2>
+    <p class="sub">
+      {% if loaded_sample %}
+      The {{ samples[loaded_sample].label|lower }} sample.
+      {% else %}
+      Your own file.
+      {% endif %}
+      Every figure in the report is derived from it.
     </p>
-    <div class="sample-picks">
-      {% for key, spec in samples.items() %}
-      <form method="post" action="{{ url_for('sample') }}">
-        <input type="hidden" name="sample" value="{{ key }}">
-        <button class="{{ 'primary' if loop.first else 'ghost' }}" type="submit">
-          {{ spec.label }}
-        </button>
-        <span>{{ spec.blurb }}</span>
-      </form>
-      {% endfor %}
+    <div class="stats">
+      <div class="stat lead"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></div>
+      <div class="stat"><span>Warehouses</span><strong>{{ summary.warehouses }}</strong></div>
+      <div class="stat"><span>Destinations</span><strong>{{ summary.customers }}</strong></div>
+      <div class="stat"><span>Routes</span><strong>{{ summary.edges }}</strong></div>
+      <div class="stat"><span>Countries</span><strong>{{ summary.countries }}</strong></div>
+      <div class="stat"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></div>
     </div>
+    {% if summary.first_order %}
+    <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
+    {% endif %}
   </div>
-  <dl class="hero-aside">
-    <dt>Sample network</dt>
-    <dd>1,307 orders</dd>
-    <dt>Warehouses</dt>
-    <dd>4 across 3 continents</dd>
-    <dt>Destinations</dt>
-    <dd>32 cities, 30 countries</dd>
-    <dt>Geocoding</dt>
-    <dd>34,135 cities offline</dd>
-  </dl>
-</section>
-{% else %}
-<section class="panel">
-  <h2>Loaded network</h2>
-  <p class="sub">Every figure below is derived from the orders you loaded.</p>
-  <div class="stats">
-    <div class="stat lead"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></div>
-    <div class="stat"><span>Warehouses</span><strong>{{ summary.warehouses }}</strong></div>
-    <div class="stat"><span>Destinations</span><strong>{{ summary.customers }}</strong></div>
-    <div class="stat"><span>Routes</span><strong>{{ summary.edges }}</strong></div>
-    <div class="stat"><span>Countries</span><strong>{{ summary.countries }}</strong></div>
-    <div class="stat"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></div>
-  </div>
-  {% if summary.first_order %}
-  <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
-  {% endif %}
   <div class="row-actions">
-    <a class="primary" href="{{ url_for('report_page') }}">Open the report</a>
+    <a class="primary" href="{{ url_for('report_page') }}">Read the report</a>
     <a class="ghost-link" href="{{ url_for('findings_csv') }}">Download the findings</a>
     <form method="post" action="{{ url_for('clear') }}">
       <button class="ghost" type="submit">Clear this data</button>
     </form>
   </div>
 </section>
-
-<section class="panel">
-  <h2>The two sample networks</h2>
-  <p class="sub">
-    One is small enough to check by hand, the other is where the ranking has
-    to do real work. Loading either replaces whatever you have open.
-  </p>
-  <div class="sample-picks">
-    {% for key, spec in samples.items() %}
-    <form method="post" action="{{ url_for('sample') }}">
-      <input type="hidden" name="sample" value="{{ key }}">
-      <button class="{{ 'ghost' if key == loaded_sample else 'primary' }}"
-              type="submit"{{ ' disabled' if key == loaded_sample }}>
-        {{ spec.label }}{{ ", loaded" if key == loaded_sample }}
-      </button>
-      <span>{{ spec.blurb }}</span>
-    </form>
-    {% endfor %}
-  </div>
-</section>
 {% endif %}
 
 <section class="panel">
-  <h2>Use your own data</h2>
-  <p class="sub">A CSV export of order lines. Anything it cannot read is reported by line number.</p>
+  <h2>{% if summary %}Load a different example{% else %}Start with an example{% endif %}</h2>
+  <p class="sub">
+    Two invented companies, both with real problems in them. Loading one runs
+    the whole analysis on it, which is the quickest way to see what the tool
+    does before pointing it at anything of your own. Every figure below is
+    read from the files, not typed in.
+  </p>
+
+  <div class="sample-cards">
+    {% for key, spec in samples.items() %}
+    {% set fact = facts[key] %}
+    <article class="sample-card{{ ' is-loaded' if key == loaded_sample }}">
+      <h3>{{ spec.label }}</h3>
+      <p class="sample-blurb">{{ spec.blurb }}</p>
+
+      <dl class="sample-facts">
+        <div>
+          <dt>Orders</dt>
+          <dd>{{ "{:,}".format(fact.orders) }}</dd>
+        </div>
+        <div>
+          <dt>Network</dt>
+          <dd>{{ fact.suppliers }} suppliers, {{ fact.warehouses }} warehouse{{ "s" if fact.warehouses != 1 }}, {{ fact.customers }} cities</dd>
+        </div>
+        <div>
+          <dt>Costs a year</dt>
+          <dd>${{ "{:,.0f}".format(fact.cost) }}</dd>
+        </div>
+        <div>
+          <dt>Emits a year</dt>
+          <dd>{{ "{:,.0f}".format(fact.co2e / 1000) }} t CO2e</dd>
+        </div>
+        <div>
+          <dt>Problems found</dt>
+          <dd>{{ fact.problems }}</dd>
+        </div>
+        <div>
+          <dt>Worth recovering</dt>
+          <dd class="cost-ink">${{ "{:,.0f}".format(fact.recoverable_cost) }} and {{ "{:,.0f}".format(fact.recoverable_co2e / 1000) }} t</dd>
+        </div>
+      </dl>
+
+      <form method="post" action="{{ url_for('sample') }}">
+        <input type="hidden" name="sample" value="{{ key }}">
+        <button class="{{ 'ghost' if key == loaded_sample else 'primary' }}"
+                type="submit"{{ ' disabled' if key == loaded_sample }}>
+          {% if key == loaded_sample %}
+            Loaded now
+          {% else %}
+            Run the report on this
+          {% endif %}
+        </button>
+      </form>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="panel">
+  <h2>Or load your own</h2>
+  <p class="sub">
+    A CSV export of order lines. Anything the loader cannot read is reported
+    back by line number and the rest of the file still loads, so one bad row
+    does not cost you the import.
+    <a href="{{ url_for('privacy') }}">Nothing you load is stored.</a>
+  </p>
+
   <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
     <label for="orders">Orders file, required</label>
     <input id="orders" type="file" name="orders" accept=".csv" required>
@@ -126,39 +150,41 @@
   </form>
 
   <details class="format">
-    <summary>Which columns the orders file needs</summary>
+    <summary>Which columns each file needs</summary>
     <p>
-      Required: <code>origin_name</code>, <code>origin_city</code>,
-      <code>dest_city</code>, <code>weight_kg</code>, <code>mode</code>.
+      <strong>Orders, required:</strong> <code>origin_name</code>,
+      <code>origin_city</code>, <code>dest_city</code>, <code>weight_kg</code>,
+      <code>mode</code>. Optional: <code>order_ref</code>,
+      <code>order_date</code>, <code>customer_id</code>,
+      <code>origin_country</code>, <code>dest_country</code>,
+      <code>units</code>, <code>product_category</code>,
+      <code>order_value</code>, <code>returned</code>. Add
+      <code>origin_lat</code> / <code>origin_lon</code> /
+      <code>dest_lat</code> / <code>dest_lon</code> for anywhere too small for
+      the city lookup.
     </p>
     <p>
-      Optional: <code>order_ref</code>, <code>order_date</code>,
-      <code>customer_id</code>, <code>origin_country</code>,
-      <code>dest_country</code>, <code>units</code>,
-      <code>product_category</code>, <code>order_value</code>,
-      <code>returned</code>. Add <code>origin_lat</code> /
-      <code>origin_lon</code> / <code>dest_lat</code> / <code>dest_lon</code>
-      for anywhere too small for the city lookup.
-    </p>
-    <p>
-      Transport modes: <code>road</code>, <code>rail</code>, <code>sea</code>,
-      <code>air</code>. Aliases like truck, ground, ship and plane are read
-      as the right mode.
-    </p>
-    <p>
-      The warehouse file takes <code>name</code> plus
+      <strong>Warehouses, optional:</strong> <code>name</code> plus
       <code>storage_cost_annual</code>, <code>energy_kwh_annual</code>,
-      <code>grid_intensity</code> and <code>capacity_kg</code>, all optional.
-      Give it a capacity and closing a site is checked against what the
-      remaining buildings can really hold; leave it out and a headroom
-      assumption stands in, which the answer says out loud.
+      <code>grid_intensity</code> and <code>capacity_kg</code>. Give a site a
+      capacity and closing its neighbour is checked against what it can really
+      hold; leave it out and a headroom assumption stands in, which the answer
+      says out loud.
     </p>
     <p>
-      The supplier file needs <code>name</code>, <code>city</code>,
-      <code>supplies</code> (the warehouse it feeds), <code>mode</code> and
-      <code>annual_weight_kg</code>, plus optional <code>country</code>,
-      <code>shipments_per_year</code> and <code>annual_cost</code>. Add it and
-      the chain runs end to end instead of starting at your warehouses.
+      <strong>Suppliers, optional:</strong> <code>name</code>,
+      <code>city</code>, <code>supplies</code> (the warehouse it feeds),
+      <code>mode</code> and <code>annual_weight_kg</code>, plus
+      <code>country</code>, <code>shipments_per_year</code>,
+      <code>annual_cost</code>, <code>lead_time_days</code>,
+      <code>min_order_qty</code> and <code>on_time_rate</code>. Add it and the
+      chain runs end to end instead of starting at your warehouses.
+    </p>
+    <p>
+      Transport modes are <code>road</code>, <code>rail</code>,
+      <code>sea</code> and <code>air</code>. Aliases like truck, ground, ship
+      and plane are read as the right mode. City names can be spelled properly:
+      Malmö and Jönköping resolve the same as Malmoe and Joenkoeping.
     </p>
   </details>
 </section>

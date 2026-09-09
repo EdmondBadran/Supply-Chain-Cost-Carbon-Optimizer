@@ -3749,3 +3749,123 @@ main:has(.report-layout) {
     color: var(--ink-3);
     font-size: 16px;
 }
+
+/* The bar spans the window but its contents line up with the page. Pinned to
+   the window edges instead, the brand and the navigation ended up a long way
+   from the column they belong to, which is what made the bar look detached
+   from the site under it. */
+.topbar {
+    padding: 16px 32px;
+}
+
+.topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    width: 100%;
+    /* The same measure as the page under it. The report is wider than the
+       others, so the bar widens with it rather than sitting to one side of
+       whichever page happens to be open. */
+    max-width: 1080px;
+    margin: 0 auto;
+}
+
+body:has(.report-layout) .topbar-inner {
+    max-width: 1320px;
+}
+
+.topnav {
+    gap: 26px;
+}
+
+.topnav a {
+    padding: 4px 0;
+}
+
+/* Two examples side by side, each stating what it contains before anybody
+   commits to loading it. The figures are the argument: somebody deciding
+   which to open wants to know which one has a network big enough to be
+   interesting and which one is small enough to check. */
+.sample-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 6px;
+}
+
+.sample-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+}
+
+.sample-card.is-loaded {
+    border-color: var(--carbon-line);
+    background: var(--carbon-soft);
+}
+
+.sample-card h3 {
+    margin: 0;
+    font-size: 1.2rem;
+    letter-spacing: -0.015em;
+}
+
+.sample-blurb {
+    margin: 0;
+    color: var(--ink-2);
+    text-wrap: pretty;
+    /* Three lines of room, so the figures below start at the same height in
+       both cards and can be read across. */
+    min-height: 4.6em;
+}
+
+.sample-facts {
+    display: grid;
+    gap: 1px;
+    margin: 0;
+    background: var(--line-soft);
+    border-top: 1px solid var(--line-soft);
+    border-bottom: 1px solid var(--line-soft);
+}
+
+.sample-facts > div {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    padding: 8px 0;
+    background: var(--panel-2);
+}
+
+.sample-card.is-loaded .sample-facts > div {
+    background: transparent;
+}
+
+.sample-facts dt {
+    color: var(--ink-3);
+    font-size: 16px;
+}
+
+.sample-facts dd {
+    margin: 0;
+    text-align: right;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 16px;
+    letter-spacing: -0.02em;
+}
+
+.sample-card form { margin-top: auto; }
+.sample-card button { width: 100%; }
+.sample-card button:disabled { opacity: 0.6; cursor: default; }
+
+.loaded-now .row-actions { margin-top: 18px; }
+
+.notice.ok a {
+    color: inherit;
+    margin-left: 8px;
+}

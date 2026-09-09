@@ -4,6 +4,7 @@ import os
 import secrets
 import tempfile
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 
 from flask import (
@@ -69,6 +70,50 @@ def sample_paths(key):
     folder = ROOT / "data" / spec["folder"]
     return tuple(folder / name for name in spec["files"])
 
+
+@lru_cache(maxsize=1)
+def sample_facts():
+    """What each sample actually contains, worked out by loading it.
+
+    These figures used to be typed into the template by hand, and by the time
+    anybody looked they described a version of the sample that no longer
+    existed: it advertised 1,307 orders across 4 warehouses when the default
+    sample had 182 orders and one. A page that argues the tool does honest
+    arithmetic cannot open with a number somebody remembered wrong, so the
+    numbers come from the files.
+
+    Cached, because it means loading both datasets, and they do not change
+    between requests.
+    """
+    facts = {}
+    for key in SAMPLES:
+        conn = db.connect()
+        try:
+            db.init(conn)
+            ingest.load(conn, *sample_paths(key))
+            analysis.run(conn)
+            summary = db.summary(conn)
+            totals = analysis.totals(conn)
+            report = diagnosis.build(conn)
+            facts[key] = {
+                "orders": summary["orders"],
+                "warehouses": summary["warehouses"],
+                "customers": summary["customers"],
+                "countries": summary["countries"],
+                "routes": summary["edges"],
+                "suppliers": conn.execute(
+                    "SELECT COUNT(*) FROM nodes WHERE node_type = 'supplier'"
+                ).fetchone()[0],
+                "cost": totals["cost"],
+                "co2e": totals["co2e"],
+                "recoverable_cost": report["overview"]["recoverable_cost"],
+                "recoverable_co2e": report["overview"]["recoverable_co2e"],
+                "problems": len(report["problems"]),
+            }
+        finally:
+            conn.close()
+    return facts
+
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
 # A random key when none is set means cookies from one run do not work against
@@ -118,6 +163,7 @@ def index():
             summary=db.summary(conn),
             report=diagnosis.build(conn),
             stages=chain.build(conn),
+            facts=sample_facts()[DEFAULT_SAMPLE],
         )
 
 
@@ -221,6 +267,7 @@ def upload_page():
             "index.html",
             summary=db.summary(conn),
             samples=SAMPLES,
+            facts=sample_facts(),
             loaded_sample=db.get_meta(conn, "sample"),
         )
 
@@ -440,6 +487,7 @@ def upload():
         summary=summary,
         report=report,
         samples=SAMPLES,
+        facts=sample_facts(),
         loaded_sample=None,
     )
 
@@ -500,6 +548,7 @@ def render_error(message):
             "index.html",
             summary=db.summary(conn),
             samples=SAMPLES,
+            facts=sample_facts(),
             loaded_sample=db.get_meta(conn, "sample"),
             error=message,
         )
