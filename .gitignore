@@ -13,6 +13,9 @@ venv/
 env/
 
 instance/
+
+# Regenerate with tools/make_nordic_sample.py rather than carrying it.
+data/Nordic test/
 *.db
 *.sqlite3
 
