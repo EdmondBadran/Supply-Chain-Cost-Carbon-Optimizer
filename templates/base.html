@@ -30,6 +30,7 @@
       ('chain_page', 'Value chain'),
       ('dashboard', 'Optimizer'),
       ('diagnosis_page', 'Report'),
+      ('stats_page', 'Statistics'),
       ('method', 'How it works'),
       ('upload_page', 'Data'),
     ] %}
@@ -46,6 +47,8 @@
   <span>
     Distances from GeoNames. Emission factors from DEFRA and GLEC ranges.
     <a href="{{ url_for('method') }}">Every calculation is written up here</a>.
+    Nothing you upload is stored:
+    <a href="{{ url_for('privacy') }}">what happens to your file</a>.
   </span>
 </footer>
 <script src="{{ url_for('static', filename='motion.js') }}" defer></script>

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}What happens to the file you upload{% endblock %}
+
+{% block content %}
+
+<section class="report-head">
+  <p class="eyebrow">Privacy</p>
+  <h1>What happens to the file you upload</h1>
+  <p class="truth">
+    Your order data is loaded into a database that exists only in this
+    server's memory, only for your session. It is never written to disk, never
+    shared with anyone else using the site, and it is gone when you stop using
+    it or when the server restarts.
+  </p>
+</section>
+
+<section class="panel prose">
+  <h2>Step by step</h2>
+  <ol>
+    <li>
+      The upload arrives and is written to a temporary file, because a CSV
+      parser needs something to read. That file is deleted before the request
+      finishes, whether the load worked or not.
+    </li>
+    <li>
+      The rows are turned into a graph of locations and routes in an in-memory
+      SQLite database that belongs to your browser session alone. Nothing about
+      it touches the filesystem.
+    </li>
+    <li>
+      Your browser holds one cookie: a random identifier, signed so it cannot
+      be forged, that says which workspace in memory is yours. It carries no
+      data of its own.
+    </li>
+    <li>
+      After {{ store_stats.idle_timeout_minutes }} minutes without a request,
+      your workspace is dropped. Pressing <em>clear this data</em> on the data
+      page drops it immediately. Restarting the server drops all of them.
+    </li>
+  </ol>
+
+  <h2>What leaves this machine</h2>
+  <p>
+    Your data does not. There are no analytics, no third-party scripts, no
+    outbound API calls and no accounts. The one thing the browser fetches from
+    elsewhere is a web font from Google Fonts, which is a request for a font
+    file and carries nothing about your supply chain. Geocoding runs against a
+    GeoNames extract bundled with the code, so looking up a city never asks
+    anyone anything.
+  </p>
+
+  <h2>What this does not claim</h2>
+  <p class="caveat">
+    <strong>The server can read your data while it is analysing it.</strong>
+    It has to: it is the thing doing the analysis. Anyone with access to the
+    running process could in principle read what is in its memory. Making that
+    untrue would mean encrypting the file in your browser and doing the whole
+    calculation there, which is a different and much larger piece of software.
+    Saying "not even we can see it" without having built that would be a claim
+    that falls apart the moment somebody asks how it works.
+  </p>
+  <p>
+    So the honest version is the one above: nothing is stored, nothing is
+    shared between visitors, nothing is sent anywhere, and the window in which
+    it exists at all is a few minutes of memory.
+  </p>
+
+  <h2>Limits worth knowing</h2>
+  <ul>
+    <li>Uploads are capped at {{ max_mb }} MB and must be CSV.</li>
+    <li>
+      The server holds at most {{ store_stats.limit }} sessions at once. Past
+      that the least recently used one is dropped, which costs that visitor
+      their upload and nothing else.
+    </li>
+    <li>
+      Right now it is holding {{ store_stats.live }}
+      workspace{{ "s" if store_stats.live != 1 }} in memory.
+    </li>
+  </ul>
+
+  <p class="source">
+    All of this is in <code>optimizer/store.py</code> and the upload handler in
+    <code>app.py</code>, which are about a hundred lines between them and are
+    worth reading rather than believing.
+  </p>
+</section>
+
+<section class="next-step quiet">
+  <h2>Load your own data</h2>
+  <a class="primary" href="{{ url_for('upload_page') }}">Open the data page</a>
+</section>
+
+{% endblock %}

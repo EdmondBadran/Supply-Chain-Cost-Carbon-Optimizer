@@ -8,9 +8,12 @@ warehouse it ships from.
 from . import factors
 
 
-def lane_costs(weight_kg, distance_km, mode, order_count, return_count):
+def lane_costs(weight_kg, distance_km, mode, order_count, return_count, rate=None):
+    """Cost of one lane. `rate` overrides the published cost factor for the
+    mode, which is how the uncertainty run in stats.py re-prices the network
+    without a second copy of this arithmetic."""
     tonne_km = (weight_kg / 1000.0) * distance_km
-    transport = tonne_km * factors.cost_factor(mode)
+    transport = tonne_km * (factors.cost_factor(mode) if rate is None else rate)
     packaging = order_count * factors.PACKAGING_COST_PER_ORDER
 
     returns = 0.0
@@ -24,9 +27,11 @@ def lane_costs(weight_kg, distance_km, mode, order_count, return_count):
     return {"transport": transport, "packaging": packaging, "returns": returns}
 
 
-def lane_emissions(weight_kg, distance_km, mode, order_count, return_count):
+def lane_emissions(weight_kg, distance_km, mode, order_count, return_count, rate=None):
+    """Emissions of one lane. `rate` overrides the published emission factor,
+    for the same reason as lane_costs above."""
     tonne_km = (weight_kg / 1000.0) * distance_km
-    transport = tonne_km * factors.emission_factor(mode)
+    transport = tonne_km * (factors.emission_factor(mode) if rate is None else rate)
     packaging = order_count * factors.PACKAGING_KG_CO2E_PER_ORDER
 
     returns = 0.0

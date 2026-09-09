@@ -1,8 +1,6 @@
 import sqlite3
 from pathlib import Path
 
-DEFAULT_DB = Path(__file__).resolve().parent.parent / "instance" / "supplychain.db"
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS nodes (
     id INTEGER PRIMARY KEY,
@@ -81,9 +79,13 @@ CREATE INDEX IF NOT EXISTS idx_edges_origin ON edges(origin_id);
 """
 
 
-def connect(path=DEFAULT_DB):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
+def connect(path=":memory:"):
+    """Open a database. In memory by default, because the running site never
+    writes one: see store.py for why. A path is still accepted so tests can
+    work against a real file."""
+    if path != ":memory:":
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

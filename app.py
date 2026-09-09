@@ -1,4 +1,5 @@
 import os
+import secrets
 import tempfile
 from pathlib import Path
 
@@ -11,7 +12,18 @@ from flask import (
     url_for,
 )
 
-from optimizer import analysis, chain, db, diagnosis, factors, geo, ingest, scoring
+from optimizer import (
+    analysis,
+    chain,
+    db,
+    diagnosis,
+    factors,
+    geo,
+    ingest,
+    scoring,
+    stats,
+    store,
+)
 
 ROOT = Path(__file__).resolve().parent
 SAMPLE = ROOT / "data" / "Sample B Small BB"
@@ -21,13 +33,13 @@ SAMPLE_SUPPLIERS = SAMPLE / "suppliers.csv"
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
-app.secret_key = os.environ.get("SECRET_KEY", "dev")
-
-
-def get_conn():
-    conn = db.connect()
-    db.init(conn)
-    return conn
+# A random key when none is set means cookies from one run do not work against
+# the next, which is the right way round: a restart should lose the session
+# rather than hand it to whoever still holds an old cookie.
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
+app.config["SESSION_COOKIE_HTTPONLY"] = True
+app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
 
 
 def ensure_data(conn):
@@ -44,8 +56,7 @@ def index():
     """The landing page, written for someone deciding whether this is worth
     their time. It runs on real engine output rather than claims, so the
     numbers on it are the same ones the tool would show a customer."""
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         ensure_data(conn)
         return render_template(
             "landing.html",
@@ -53,15 +64,12 @@ def index():
             report=diagnosis.build(conn),
             stages=chain.build(conn),
         )
-    finally:
-        conn.close()
 
 
 @app.route("/chain")
 def chain_page():
     """The diagnostic itself, written for whoever runs the logistics."""
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         ensure_data(conn)
         stages = chain.build(conn)
         return render_template(
@@ -74,8 +82,6 @@ def chain_page():
             stage_settings=chain.settings(conn),
             stage_error=request.args.get("stage_error"),
         )
-    finally:
-        conn.close()
 
 
 @app.post("/chain/stages")
@@ -90,41 +96,38 @@ def edit_stages():
     key = request.form.get("key")
     error = None
 
-    conn = get_conn()
-    try:
-        if action == "rename":
-            chain.rename_stage(
-                conn, key, request.form.get("name"), request.form.get("blurb")
-            )
-        elif action in ("up", "down"):
-            chain.move_stage(conn, key, action)
-        elif action == "hide":
-            chain.set_stage_hidden(conn, key, True)
-        elif action == "show":
-            chain.set_stage_hidden(conn, key, False)
-        elif action == "add":
-            chain.add_stage(conn, request.form.get("name"), request.form.get("blurb"))
-        elif action == "remove":
-            chain.remove_stage(conn, key)
-        elif action == "reset":
-            chain.reset_stages(conn)
-        else:
-            error = "unknown action"
-    except ValueError as exc:
-        error = str(exc)
-    finally:
-        conn.close()
+    with store.workspace() as conn:
+        try:
+            if action == "rename":
+                chain.rename_stage(
+                    conn, key, request.form.get("name"), request.form.get("blurb")
+                )
+            elif action in ("up", "down"):
+                chain.move_stage(conn, key, action)
+            elif action == "hide":
+                chain.set_stage_hidden(conn, key, True)
+            elif action == "show":
+                chain.set_stage_hidden(conn, key, False)
+            elif action == "add":
+                chain.add_stage(
+                    conn, request.form.get("name"), request.form.get("blurb")
+                )
+            elif action == "remove":
+                chain.remove_stage(conn, key)
+            elif action == "reset":
+                chain.reset_stages(conn)
+            else:
+                error = "unknown action"
+        except ValueError as exc:
+            error = str(exc)
 
     return redirect(url_for("chain_page", stage_error=error) + "#stage-editor")
 
 
 @app.route("/data")
 def upload_page():
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         return render_template("index.html", summary=db.summary(conn))
-    finally:
-        conn.close()
 
 
 @app.route("/method")
@@ -147,29 +150,52 @@ def method():
         lead_time_limit=chain.LEAD_TIME_LONG_DAYS,
         moq_months=chain.MOQ_MONTHS_LIMIT,
         capacity_headroom=scoring.CAPACITY_HEADROOM,
+        factor_spread=stats.FACTOR_SPREAD,
+        trials=stats.TRIALS,
     )
+
+
+@app.route("/privacy")
+def privacy():
+    """What happens to a file somebody uploads. Short, and specific enough to
+    be checked against the code rather than taken on trust."""
+    return render_template(
+        "privacy.html",
+        store_stats=store.stats(),
+        max_mb=app.config["MAX_CONTENT_LENGTH"] // (1024 * 1024),
+    )
+
+
+@app.route("/stats")
+def stats_page():
+    """The statistics behind the headline: how concentrated the network is,
+    how far the estimate could be out, and whether cost and carbon really do
+    land on the same lanes."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        return render_template(
+            "stats.html",
+            summary=db.summary(conn),
+            report=stats.build(conn),
+        )
 
 
 @app.route("/diagnosis")
 def diagnosis_page():
     """The whole chain read back as a report: the truth, what is wrong, how
     every figure was reached, and the order to fix things in."""
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         report = diagnosis.build(conn)
         if report is None:
             return redirect(url_for("chain_page"))
         return render_template(
             "diagnosis.html", report=report, summary=db.summary(conn)
         )
-    finally:
-        conn.close()
 
 
 @app.route("/dashboard")
 def dashboard():
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         summary = db.summary(conn)
         if not summary:
             return redirect(url_for("chain_page"))
@@ -181,8 +207,6 @@ def dashboard():
             regions=analysis.by_region(conn, limit=8),
             warehouses=analysis.by_warehouse(conn),
         )
-    finally:
-        conn.close()
 
 
 @app.post("/api/effort")
@@ -193,14 +217,12 @@ def api_effort():
     if not edge_id:
         return jsonify({"error": "edge_id is required"}), 400
 
-    conn = get_conn()
-    try:
-        scoring.set_effort(conn, int(edge_id), effort)
-        return jsonify({"network": network_payload(conn)})
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    finally:
-        conn.close()
+    with store.workspace() as conn:
+        try:
+            scoring.set_effort(conn, int(edge_id), effort)
+            return jsonify({"network": network_payload(conn)})
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/api/simulate")
@@ -210,19 +232,19 @@ def api_simulate():
     if not edge_id:
         return jsonify({"error": "edge_id is required"}), 400
 
-    conn = get_conn()
-    try:
-        result = scoring.simulate(
-            conn,
-            int(edge_id),
-            mode=payload.get("mode"),
-            origin_id=int(payload["origin_id"]) if payload.get("origin_id") else None,
-        )
-        return jsonify(result)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    finally:
-        conn.close()
+    with store.workspace() as conn:
+        try:
+            result = scoring.simulate(
+                conn,
+                int(edge_id),
+                mode=payload.get("mode"),
+                origin_id=(
+                    int(payload["origin_id"]) if payload.get("origin_id") else None
+                ),
+            )
+            return jsonify(result)
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/api/network")
@@ -245,13 +267,11 @@ def api_network():
             return jsonify({"error": str(exc)}), 400
         added = {"name": f"{city.title()} (new)", "lat": lat, "lon": lon}
 
-    conn = get_conn()
-    try:
-        return jsonify(scoring.simulate_network(conn, closed, added))
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    finally:
-        conn.close()
+    with store.workspace() as conn:
+        try:
+            return jsonify(scoring.simulate_network(conn, closed, added))
+        except ValueError as exc:
+            return jsonify({"error": str(exc)}), 400
 
 
 @app.post("/upload")
@@ -264,6 +284,10 @@ def upload():
 
     warehouses = request.files.get("warehouses")
     suppliers = request.files.get("suppliers")
+
+    # The upload is spooled to a temporary file only long enough to parse it,
+    # then removed in the finally below. What survives the request is the
+    # graph, in this visitor's own in-memory database. See optimizer/store.py.
     tmpdir = tempfile.mkdtemp(prefix="sco-")
     try:
         orders_path = Path(tmpdir) / "orders.csv"
@@ -283,18 +307,18 @@ def upload():
             suppliers_path = Path(tmpdir) / "suppliers.csv"
             suppliers.save(suppliers_path)
 
-        conn = get_conn()
-        try:
-            report = ingest.load(conn, orders_path, warehouses_path, suppliers_path)
-            analysis.run(conn)
-            summary = db.summary(conn)
-            db.set_meta(conn, "source", "upload")
-        except ingest.ValidationError as exc:
-            return render_error(str(exc))
-        except UnicodeDecodeError:
-            return render_error("That file is not readable as UTF-8 text.")
-        finally:
-            conn.close()
+        with store.workspace() as conn:
+            try:
+                report = ingest.load(
+                    conn, orders_path, warehouses_path, suppliers_path
+                )
+                analysis.run(conn)
+                summary = db.summary(conn)
+                db.set_meta(conn, "source", "upload")
+            except ingest.ValidationError as exc:
+                return render_error(str(exc))
+            except UnicodeDecodeError:
+                return render_error("That file is not readable as UTF-8 text.")
     finally:
         _cleanup(tmpdir)
 
@@ -303,23 +327,17 @@ def upload():
 
 @app.post("/sample")
 def sample():
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         ingest.load(conn, SAMPLE_ORDERS, SAMPLE_WAREHOUSES, SAMPLE_SUPPLIERS)
         analysis.run(conn)
         db.set_meta(conn, "source", "sample")
-    finally:
-        conn.close()
     return redirect(url_for("chain_page"))
 
 
 @app.post("/clear")
 def clear():
-    conn = get_conn()
-    try:
-        db.reset(conn)
-    finally:
-        conn.close()
+    """Drop everything this visitor loaded, workspace included."""
+    store.discard()
     return redirect(url_for("upload_page"))
 
 
@@ -357,11 +375,8 @@ def network_payload(conn):
 
 
 def render_error(message):
-    conn = get_conn()
-    try:
+    with store.workspace() as conn:
         return render_template("index.html", summary=db.summary(conn), error=message)
-    finally:
-        conn.close()
 
 
 def _cleanup(tmpdir):

@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+
+{% block title %}The statistics behind the number{% endblock %}
+
+{% block content %}
+
+{% if not report %}
+<section class="panel">
+  <h2>Nothing loaded</h2>
+  <p class="sub">Load a file or open the sample and the statistics come with it.</p>
+  <a class="primary" href="{{ url_for('upload_page') }}">Load data</a>
+</section>
+{% else %}
+
+{% set c = report.concentration %}
+{% set ov = report.overlap %}
+{% set un = report.uncertainty %}
+
+<section class="report-head">
+  <p class="eyebrow">Statistics</p>
+  <h1>How much of this should you believe</h1>
+  <p class="truth">
+    The rest of this tool tells you what to change. This page puts the same
+    numbers under the tests you would run on somebody else's analysis: is the
+    waste concentrated enough to be worth chasing, how far could the estimate
+    be out given the factors it rests on, and do cost and carbon genuinely
+    land on the same routes in your network or only in the pitch.
+  </p>
+  <p class="truth-note">
+    Worked out across {{ report.lane_count }} route{{ "s" if report.lane_count != 1 }}
+    and {{ "{:,}".format(report.order_count) }} order lines. Every method used
+    is named where it is used.
+  </p>
+</section>
+
+<section class="report-figures">
+  <div class="figure">
+    <span class="figure-label">Cost concentration</span>
+    <strong class="figure-value cost-ink">{{ "%.2f"|format(c.cost_gini) }}</strong>
+    <span class="figure-foot">Gini, 0 is even and 1 is all in one route</span>
+  </div>
+  <div class="figure">
+    <span class="figure-label">Carbon concentration</span>
+    <strong class="figure-value carbon-ink">{{ "%.2f"|format(c.co2e_gini) }}</strong>
+    <span class="figure-foot">same measure, on emissions</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Cost and carbon agreement</span>
+    <strong class="figure-value">{% if ov.rho is not none %}{{ "%.2f"|format(ov.rho) }}{% else %}n/a{% endif %}</strong>
+    <span class="figure-foot">rank correlation across routes</span>
+  </div>
+  <div class="figure lit">
+    <span class="figure-label">Recoverable, with the doubt</span>
+    <strong class="figure-value cost-ink">${{ "{:,.0f}".format(un.p10) }} to ${{ "{:,.0f}".format(un.p90) }}</strong>
+    <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
+  </div>
+</section>
+
+<section class="panel prose" id="overlap">
+  <h2>Do cost and carbon actually overlap here</h2>
+  <p class="sub">
+    This is the assumption the whole tool is built on, so it is the one worth
+    testing rather than asserting. Each dot is one route: money along the
+    bottom, emissions up the side, both on a log scale because route sizes
+    span several orders of magnitude. If the assumption holds the dots climb
+    together.
+  </p>
+
+  <div class="chart-wrap">
+    <svg class="chart scatter" viewBox="0 0 100 100" role="img"
+         aria-label="Cost against carbon for every route">
+      <g class="chart-grid">
+        {% for step in [20, 40, 60, 80] %}
+        <line x1="{{ step }}" y1="0" x2="{{ step }}" y2="100"></line>
+        <line x1="0" y1="{{ step }}" x2="100" y2="{{ step }}"></line>
+        {% endfor %}
+      </g>
+      {% for point in ov.scatter %}
+      <circle class="dot{{ ' flagged' if point.flagged }}"
+              cx="{{ "%.2f"|format(point.x) }}"
+              cy="{{ "%.2f"|format(point.y) }}" r="1.7">
+        <title>{{ point.name }} by {{ point.mode }}: ${{ "{:,.0f}".format(point.cost) }}, {{ "{:,.0f}".format(point.co2e) }} kg CO2e</title>
+      </circle>
+      {% endfor %}
+    </svg>
+    <span class="chart-x">Cost a year, log scale</span>
+    <span class="chart-y">Carbon a year, log scale</span>
+  </div>
+
+  <p class="stat-read">
+    Spearman rank correlation is
+    <strong>{% if ov.rho is not none %}{{ "%.2f"|format(ov.rho) }}{% else %}not calculable on this few routes{% endif %}</strong>,
+    which is {{ ov.verdict }}. Ranks rather than raw values, so one enormous
+    route cannot decide the answer by itself.
+  </p>
+  <p class="stat-read">
+    {{ ov.both_count }} route{{ "s" if ov.both_count != 1 }} sit in the worst
+    quarter on both measures at once. If money and emissions were unrelated
+    you would expect about {{ "%.1f"|format(ov.expected_by_chance) }} to do
+    that by chance{% if ov.lift %}, so the overlap is running
+    {{ "%.1f"|format(ov.lift) }} times what coincidence would give you{% endif %}.
+    Those routes are where one decision pays twice, and they are what the
+    ranking on the optimizer opens with.
+  </p>
+
+  <div class="split-2">
+    <div>
+      <h3>Most carbon per dollar spent</h3>
+      <table class="grid">
+        <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
+        <tbody>
+        {% for row in ov.dirtiest %}
+          <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="source">
+        A high figure here is a route where the money you spend buys an unusual
+        amount of damage. It is not the same as an expensive route, and the two
+        lists rarely match.
+      </p>
+    </div>
+    <div>
+      <h3>Least carbon per dollar spent</h3>
+      <table class="grid">
+        <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
+        <tbody>
+        {% for row in ov.cleanest %}
+          <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <p class="source">
+        These are the routes where spending more would do least harm, which is
+        the other half of the same question and the one nobody asks.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="panel prose" id="concentration">
+  <h2>How concentrated the damage is</h2>
+  <p class="sub">
+    A curve hugging the diagonal means every route costs about the same and
+    there is no shortcut. A curve pushed into the corner means a few routes
+    carry nearly all of it, and a handful of decisions move the total.
+  </p>
+
+  <div class="chart-wrap">
+    <svg class="chart lorenz" viewBox="0 0 100 100" role="img"
+         aria-label="Share of cost and carbon against share of routes">
+      <line class="chart-diagonal" x1="0" y1="100" x2="100" y2="0"></line>
+      <polyline class="curve cost" points="{{ c.cost_curve }}"></polyline>
+      <polyline class="curve carbon" points="{{ c.co2e_curve }}"></polyline>
+    </svg>
+    <span class="chart-x">Routes, smallest first</span>
+    <span class="chart-y">Share of the total</span>
+  </div>
+
+  <p class="legend chart-legend">
+    <span><i class="swatch cost-swatch"></i>Cost</span>
+    <span><i class="swatch carbon-swatch"></i>Carbon</span>
+    <span><i class="swatch even-swatch"></i>Perfectly even</span>
+  </p>
+
+  <p class="stat-read">
+    {{ c.cost_pareto.lanes }} of your {{ report.lane_count }} routes
+    ({{ "{:.0%}".format(c.cost_pareto.share_of_lanes) }}) carry
+    {{ "{:.0%}".format(c.cost_pareto.share_of_total) }} of the cost.
+    On carbon it is {{ c.co2e_pareto.lanes }} routes for
+    {{ "{:.0%}".format(c.co2e_pareto.share_of_total) }}.
+    That is the practical answer to how long the fix list needs to be.
+  </p>
+
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>Biggest routes by cost</th><th>Mode</th>
+        <th class="num">Cost</th><th class="num">Share</th>
+        <th class="num">Carbon</th><th class="num">Share</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in c.top_lanes %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td>{{ row.mode }}</td>
+        <td class="num">${{ "{:,.0f}".format(row.cost) }}</td>
+        <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
+        <td class="num">{{ "{:,.0f}".format(row.co2e) }} kg</td>
+        <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<section class="panel prose" id="uncertainty">
+  <h2>How wrong the recoverable figure could be</h2>
+  <p class="sub">
+    Every saving in this tool is the gap between two estimates built on
+    published freight and emission factors, and those are ranges, not
+    constants. So the whole ranking was re-run {{ "{:,}".format(un.trials) }}
+    times with the factors redrawn each time, up to
+    {{ "{:.0%}".format(un.spread) }} either side of the published value. This
+    is the spread of answers that came back.
+  </p>
+
+  <div class="chart-wrap">
+    <svg class="chart histogram" viewBox="0 0 100 100" role="img"
+         aria-label="Distribution of recoverable cost across the simulation runs">
+      {% for bar in un.histogram.bars %}
+      <rect class="bar"
+            x="{{ "%.2f"|format(bar.x + 0.15) }}"
+            y="{{ "%.2f"|format(100 - bar.height * 92) }}"
+            width="{{ "%.2f"|format(bar.width - 0.3) }}"
+            height="{{ "%.2f"|format(bar.height * 92) }}">
+        <title>${{ "{:,.0f}".format(bar['from']) }} to ${{ "{:,.0f}".format(bar.to) }}</title>
+      </rect>
+      {% endfor %}
+      <line class="marker" x1="{{ "%.2f"|format(un.histogram.marker) }}" y1="0"
+            x2="{{ "%.2f"|format(un.histogram.marker) }}" y2="100"></line>
+    </svg>
+    <span class="chart-x">
+      ${{ "{:,.0f}".format(un.histogram.low) }} to ${{ "{:,.0f}".format(un.histogram.high) }}
+      recoverable. The vertical line is the figure quoted everywhere else.
+    </span>
+  </div>
+
+  <div class="band">
+    <div><span>Low case, 10th percentile</span><strong class="cost-ink">${{ "{:,.0f}".format(un.p10) }}</strong></div>
+    <div><span>Middle</span><strong class="cost-ink">${{ "{:,.0f}".format(un.p50) }}</strong></div>
+    <div><span>High case, 90th percentile</span><strong class="cost-ink">${{ "{:,.0f}".format(un.p90) }}</strong></div>
+    <div><span>Quoted elsewhere</span><strong>${{ "{:,.0f}".format(un.baseline) }}</strong></div>
+  </div>
+
+  <p class="stat-read">
+    The factors are redrawn once per run and applied to every route at once,
+    not shuffled route by route. That matters: if diesel is dearer than assumed
+    it is dearer on every road route on the same day. Drawing them
+    independently would let the errors cancel out and produce a band far
+    narrower than the truth.
+  </p>
+  <p class="stat-read">
+    The number of routes worth changing held between
+    {{ un.flag_range[0] }} and {{ un.flag_range[1] }} across every run, most
+    often {{ un.typical_flagged }}. Which routes to fix is a far more stable
+    answer than how much they are worth, and it is the one to act on.
+  </p>
+
+  {% if un.always_flagged %}
+  <h3>How safe each recommendation is</h3>
+  <table class="grid">
+    <thead><tr><th>Route</th><th>Change</th><th class="num">Still worth it in</th></tr></thead>
+    <tbody>
+    {% for row in un.always_flagged %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td>{{ row.mode }} to {{ row.switch }}</td>
+        <td class="num">{{ "{:.0%}".format(row.confidence) }} of runs</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <p class="source">
+    A route at 100% is one where the recommendation does not depend on the
+    factors being right, only on the ordering being right. Start there.
+  </p>
+  {% endif %}
+</section>
+
+{% if report.outliers.cost or report.outliers.co2e %}
+<section class="panel prose" id="outliers">
+  <h2>Routes priced unlike the rest</h2>
+  <p class="sub">
+    Cost per tonne-kilometre takes size out of the comparison, so nothing
+    appears here for being big. Distance from the median is measured in median
+    absolute deviations rather than standard deviations, because with a few
+    dozen routes one genuine outlier is enough to drag an ordinary average
+    until the outlier stops looking unusual. Anything past
+    {{ report.outliers.threshold }} is listed.
+  </p>
+
+  {% if report.outliers.cost %}
+  <h3>On cost, median ${{ "%.2f"|format(report.outliers.cost_median) }} per tonne-km</h3>
+  <table class="grid">
+    <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
+    <tbody>
+    {% for row in report.outliers.cost %}
+      <tr>
+        <td>{{ row.name }}</td><td>{{ row.mode }}</td>
+        <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
+        <td class="num">${{ "%.2f"|format(row.rate) }}</td>
+        <td class="num">{{ "%.1f"|format(row.z) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  {% if report.outliers.co2e %}
+  <h3>On carbon, median {{ "%.3f"|format(report.outliers.co2e_median) }} kg CO2e per tonne-km</h3>
+  <table class="grid">
+    <thead><tr><th>Route</th><th>Mode</th><th class="num">Distance</th><th class="num">Per tonne-km</th><th class="num">Deviations out</th></tr></thead>
+    <tbody>
+    {% for row in report.outliers.co2e %}
+      <tr>
+        <td>{{ row.name }}</td><td>{{ row.mode }}</td>
+        <td class="num">{{ "{:,.0f}".format(row.distance_km) }} km</td>
+        <td class="num">{{ "%.3f"|format(row.rate) }}</td>
+        <td class="num">{{ "%.1f"|format(row.z) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+
+  <p class="caveat">
+    <strong>Read the distance column before acting on this.</strong> A very
+    short route lands here for a reason that is not a pricing problem: it
+    carries the same packaging and handling as a long one and has almost no
+    tonne-kilometres to spread that over. A long route on this list is the
+    interesting kind, and it is nearly always the mode.
+  </p>
+</section>
+{% endif %}
+
+{% if report.order_sizes %}
+{% set sz = report.order_sizes %}
+<section class="panel prose" id="orders">
+  <h2>The shape of the order book</h2>
+  <p class="sub">
+    Packaging and handling are charged per order, not per kilo, so the small
+    end of this distribution costs more than its weight suggests. On a log
+    scale, because order books bunch at the low end and a linear chart would
+    be one bar and a lot of empty paper.
+  </p>
+
+  <div class="chart-wrap">
+    <svg class="chart histogram" viewBox="0 0 100 100" role="img"
+         aria-label="Distribution of order weights">
+      {% for bar in sz.histogram.bars %}
+      <rect class="bar carbon"
+            x="{{ "%.2f"|format(bar.x + 0.15) }}"
+            y="{{ "%.2f"|format(100 - bar.height * 92) }}"
+            width="{{ "%.2f"|format(bar.width - 0.3) }}"
+            height="{{ "%.2f"|format(bar.height * 92) }}">
+        <title>{{ bar.count }} orders between {{ "%.1f"|format(bar['from']) }} and {{ "%.1f"|format(bar.to) }} kg</title>
+      </rect>
+      {% endfor %}
+    </svg>
+    <span class="chart-x">
+      Order weight, {{ "%.1f"|format(sz.histogram.low) }} kg to
+      {{ "{:,.0f}".format(sz.histogram.high) }} kg
+    </span>
+  </div>
+
+  <div class="band">
+    <div><span>Median order</span><strong>{{ "%.1f"|format(sz.median) }} kg</strong></div>
+    <div><span>Middle half</span><strong>{{ "%.1f"|format(sz.p25) }} to {{ "%.1f"|format(sz.p75) }} kg</strong></div>
+    <div><span>Top tenth starts</span><strong>{{ "%.1f"|format(sz.p90) }} kg</strong></div>
+    <div><span>Largest</span><strong>{{ "{:,.1f}".format(sz.max) }} kg</strong></div>
+  </div>
+
+  <p class="stat-read">
+    The smallest quarter of orders are
+    {{ "{:.0%}".format(sz.small_share_of_orders) }} of the count but only
+    {{ "{:.0%}".format(sz.small_share_of_weight) }} of the weight, and they
+    carry ${{ "{:,.0f}".format(sz.small_packaging_cost) }} of packaging between
+    them regardless. Mean over median is
+    {{ "%.2f"|format(sz.tail_ratio) }}: above about 1.3 the book has a heavy
+    top end, a few bulk orders sitting on a lot of small ones, and averages
+    stop describing anything real.
+  </p>
+</section>
+{% endif %}
+
+{% if report.seasonality %}
+{% set se = report.seasonality %}
+<section class="panel prose" id="seasonality">
+  <h2>Through the year</h2>
+  <p class="sub">
+    Everything else on this site is quoted as an annual figure. This is
+    whether any month actually looks like a twelfth of it.
+  </p>
+
+  <div class="chart-wrap">
+    <svg class="chart months" viewBox="0 0 100 100" preserveAspectRatio="none"
+         role="img" aria-label="Orders by month">
+      {% set step = 100 / se.months|length %}
+      {% for month in se.months %}
+      <rect class="bar"
+            x="{{ "%.2f"|format(loop.index0 * step + step * 0.15) }}"
+            y="{{ "%.2f"|format(100 - month.height * 94) }}"
+            width="{{ "%.2f"|format(step * 0.7) }}"
+            height="{{ "%.2f"|format(month.height * 94) }}">
+        <title>{{ month.label }}: {{ month.orders }} orders, {{ "{:,.0f}".format(month.weight) }} kg</title>
+      </rect>
+      {% endfor %}
+    </svg>
+    <span class="chart-x">
+      {{ se.months[0].label }} to {{ se.months[-1].label }}
+    </span>
+  </div>
+
+  <p class="stat-read">
+    {% if se.flat %}
+    Volume is close to flat: the coefficient of variation across months is
+    {{ "%.2f"|format(se.cv) }}, so the annual figures divide down into months
+    without lying to you.
+    {% else %}
+    Volume is uneven. The coefficient of variation across months is
+    {{ "%.2f"|format(se.cv) }}, with {{ se.peak.label }} running
+    {{ se.peak.orders }} orders against {{ se.trough.orders }} in
+    {{ se.trough.label }}{% if se.peak_to_trough %}, a factor of
+    {{ "%.1f"|format(se.peak_to_trough) }}{% endif %}. An annual saving spread
+    evenly across twelve months would describe none of them, and the capacity
+    the network needs is set by the peak rather than the average.
+    {% endif %}
+  </p>
+</section>
+{% endif %}
+
+{% if report.returns and report.returns.rows %}
+{% set rt = report.returns %}
+<section class="panel prose" id="returns">
+  <h2>Returns, with the uncertainty attached</h2>
+  <p class="sub">
+    A route with one return in four has a 25% return rate and has told you
+    nothing. Each rate below carries a 95% interval worked out with the Wilson
+    method, which behaves at small samples where the textbook one produces
+    bounds below zero. Routes under {{ rt.min_sample }} orders are left out
+    entirely rather than ranked on noise, which excludes
+    {{ rt.skipped }} of them.
+  </p>
+
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>Route</th><th class="num">Orders</th><th class="num">Returns</th>
+        <th class="num">Rate</th><th class="num">Could really be</th><th>Verdict</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rt.rows %}
+      <tr>
+        <td>{{ row.name }}</td>
+        <td class="num">{{ row.orders }}</td>
+        <td class="num">{{ row.returns }}</td>
+        <td class="num">{{ "{:.1%}".format(row.rate) }}</td>
+        <td class="num">{{ "{:.1%}".format(row.low) }} to {{ "{:.1%}".format(row.high) }}</td>
+        <td>{% if row.worse %}<span class="tag bad">worse than the network</span>{% else %}<span class="tag">within the noise</span>{% endif %}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="stat-read">
+    Across the whole network {{ "{:.1%}".format(rt.network_rate) }} of
+    {{ "{:,}".format(rt.network_orders) }} orders came back. Of the
+    {{ rt.tested }} routes with enough volume to judge,
+    {{ rt.worse_count }} {{ "is" if rt.worse_count == 1 else "are" }}
+    genuinely worse than that, meaning the whole interval sits above the
+    network rate rather than the point estimate happening to.
+  </p>
+</section>
+{% endif %}
+
+<section class="panel prose" id="modes">
+  <h2>What each mode actually costs you</h2>
+  <p class="sub">
+    The published factor is what a tonne-kilometre costs and emits in transit.
+    The achieved figure is what it works out at once packaging, warehousing
+    and the return leg are charged to the route as well. The gap is the part
+    of cost to serve that freight rates never show.
+  </p>
+
+  <table class="grid">
+    <thead>
+      <tr>
+        <th>Mode</th><th class="num">Routes</th><th class="num">Share of tonne-km</th>
+        <th class="num">Share of cost</th><th class="num">Share of carbon</th>
+        <th class="num">Achieved $/t-km</th><th class="num">Published</th>
+        <th class="num">Achieved kg/t-km</th><th class="num">Published</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in report.modes %}
+      <tr>
+        <td>{{ row.mode }}</td>
+        <td class="num">{{ row.lanes }}</td>
+        <td class="num">{{ "{:.0%}".format(row.tonne_km_share) }}</td>
+        <td class="num">{{ "{:.0%}".format(row.cost_share) }}</td>
+        <td class="num">{{ "{:.0%}".format(row.co2e_share) }}</td>
+        <td class="num">${{ "%.3f"|format(row.cost_rate) }}</td>
+        <td class="num muted-ink">${{ "%.3f"|format(row.published_cost) }}</td>
+        <td class="num">{{ "%.3f"|format(row.co2e_rate) }}</td>
+        <td class="num muted-ink">{{ "%.3f"|format(row.published_co2e) }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <p class="caveat">
+    <strong>A mode carrying a small share of tonne-kilometres and a large
+    share of carbon is the whole thesis in one row.</strong> That is the line
+    to take to whoever signs off the freight budget.
+  </p>
+</section>
+
+<section class="next-step">
+  <h2>Where this leads</h2>
+  <p>
+    Nothing on this page changes a recommendation. It tells you how hard to
+    lean on one.
+  </p>
+  <a class="primary" href="{{ url_for('diagnosis_page') }}">Read the diagnosis</a>
+  <a class="ghost-link" href="{{ url_for('method') }}">Or the method behind every factor</a>
+</section>
+
+{% endif %}
+
+{% endblock %}
