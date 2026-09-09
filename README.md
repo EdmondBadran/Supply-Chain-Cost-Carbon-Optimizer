@@ -236,7 +236,7 @@ static/
   dashboard.js      the map, the ranking and the what-if panel
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              81 tests: the scoring thresholds and the statistics
+tests/              96 tests: thresholds, statistics and the routes
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -282,7 +282,7 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-81 of them, stdlib unittest, no test dependency.
+96 of them, stdlib unittest, no test dependency.
 
 The scoring thresholds decide which routes get flagged and in what order, and
 they were tuned by hand. The risk was never that they are wrong, it is that
