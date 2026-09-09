@@ -2,11 +2,11 @@
    somebody else's analysis. #}
 
 <p class="step-lede">
-  Nothing here changes a recommendation. It tells you how hard to lean on one:
-  whether the waste is concentrated enough to be worth chasing, how far the
-  estimate could be out given the factors underneath it, and whether cost and
-  carbon genuinely land on the same routes in your network or only in the
-  pitch.
+  Nothing here changes a recommendation. It tells you how hard to lean on
+  one. Three questions. Is the waste concentrated enough to be worth chasing?
+  How far out could the estimate be, given the factors underneath it? And do
+  cost and carbon genuinely land on the same routes in your network, or only
+  in the pitch?
 </p>
 
 {% set c = stats.concentration %}
@@ -75,12 +75,12 @@
   </p>
   <p class="stat-read">
     {{ ov.both_count }} route{{ "s" if ov.both_count != 1 }} sit in the worst
-    quarter on both measures at once. If money and emissions were unrelated
-    you would expect about {{ "%.1f"|format(ov.expected_by_chance) }} to do
-    that by chance{% if ov.lift %}, so the overlap is running
-    {{ "%.1f"|format(ov.lift) }} times what coincidence would give you{% endif %}.
-    Those routes are where one decision pays twice, and they are what the
-    ranking on the optimizer opens with.
+    quarter on both measures at once. If money and emissions were unrelated,
+    chance alone would put about
+    {{ "%.1f"|format(ov.expected_by_chance) }} there{% if ov.lift %}. The
+    overlap is running {{ "%.1f"|format(ov.lift) }} times that{% endif %}.
+    Those routes are where one decision pays twice. They are what the ranking
+    opens with.
   </p>
 
   <div class="split-2">
@@ -100,9 +100,9 @@
         A high figure here is a route where the money you spend buys an unusual
         amount of damage. It is not the same as an expensive route, and the two
         lists rarely match. Sea routes tend to land near 1.00 for a dull
-        reason: sea happens to cost about $0.008 a tonne-kilometre and emit
-        about 0.008 kg, so the ratio comes out at one. It is a coincidence of
-        the two factors, not a calculation going wrong.
+        reason. Sea happens to cost about $0.008 a tonne-kilometre and emit
+        about 0.008 kg. The ratio comes out at one. It is a coincidence of the
+        two factors, not a calculation going wrong.
       </p>
     </div>
     <div>
@@ -236,8 +236,8 @@
     {{ un.flag_range[0] }} and {{ un.flag_range[1] }} across the runs, most
     often {{ un.typical_flagged }}.
     {% if un.flag_range[1] - un.flag_range[0] <= 2 %}
-    That is a narrow spread: which routes to fix is a far more stable answer
-    than how much they are worth, and it is the one to act on.
+    That is a narrow spread. Which routes to fix is a far more stable answer
+    than how much they are worth. It is the one to act on.
     {% else %}
     That is a wide spread, and worth being honest about. Routes near the
     threshold cross it in one direction or the other depending on the factors
@@ -274,10 +274,10 @@
   <h3>Routes priced unlike the rest</h3>
   <p class="sub">
     Cost per tonne-kilometre takes size out of the comparison, so nothing
-    appears here for being big. Distance from the median is measured in median
-    absolute deviations rather than standard deviations, because with a few
-    dozen routes one genuine outlier is enough to drag an ordinary average
-    until the outlier stops looking unusual. Anything past
+    appears here for being big. Distance from the median is counted in median
+    absolute deviations, not standard deviations. The reason is small samples.
+    With a few dozen routes, one genuine outlier drags an ordinary average far
+    enough that the outlier stops looking unusual. Anything past
     {{ stats.outliers.threshold }} is listed.
   </p>
 
@@ -338,10 +338,10 @@
   {% if stats.outliers.cost or stats.outliers.co2e %}
   <p class="caveat">
     <strong>Read the distance column before acting on this.</strong> A very
-    short route lands here for a reason that is not a pricing problem: it
-    carries the same packaging and handling as a long one and has almost no
+    short route lands here for a reason that is not a pricing problem. It
+    carries the same packaging and handling as a long one, with almost no
     tonne-kilometres to spread that over. A long route on this list is the
-    interesting kind, and it is nearly always the mode.
+    interesting kind. That one is nearly always the mode.
   </p>
   {% endif %}
 </section>
@@ -386,12 +386,11 @@
   <p class="stat-read">
     The smallest quarter of orders are
     {{ "{:.0%}".format(sz.small_share_of_orders) }} of the count but only
-    {{ "{:.0%}".format(sz.small_share_of_weight) }} of the weight, and they
+    {{ "{:.0%}".format(sz.small_share_of_weight) }} of the weight. They still
     carry ${{ "{:,.0f}".format(sz.small_packaging_cost) }} of packaging between
-    them regardless. Mean over median is
-    {{ "%.2f"|format(sz.tail_ratio) }}: above about 1.3 the book has a heavy
-    top end, a few bulk orders sitting on a lot of small ones, and averages
-    stop describing anything real.
+    them. Mean over median is {{ "%.2f"|format(sz.tail_ratio) }}. Above about
+    1.3 the book has a heavy top end: a few bulk orders sitting on a lot of
+    small ones, and averages stop describing anything real.
   </p>
 </section>
 {% endif %}
@@ -489,9 +488,9 @@
     not just the headline percentage.
     {% else %}
     None of the {{ rt.tested }} routes with enough volume to judge is
-    genuinely worse than that. Some show a higher percentage, but every one of
-    their intervals still reaches down to the network rate, which means the
-    difference is sample size rather than a problem with the route.
+    genuinely worse than that. Some show a higher percentage. But every one of
+    their intervals still reaches down to the network rate, so the difference
+    is sample size rather than a problem with the route.
     {% endif %}
   </p>
 </section>
@@ -545,9 +544,9 @@
   <p class="caveat">
     <strong>A mode carrying a small share of tonne-kilometres and a large
     share of carbon is the whole thesis in one row.</strong> Read the two
-    share columns against each other before the rates: a mode moving a few
-    percent of the weight-distance and a third of the emissions is where the
-    argument is, and it is the line to take to whoever signs off the freight
+    share columns against each other before you read the rates. A mode moving
+    a few percent of the weight-distance and a third of the emissions is where
+    the argument is. That is the line to take to whoever signs off the freight
     budget.
   </p>
 </section>

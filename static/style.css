@@ -3869,3 +3869,16 @@ body:has(.report-layout) .topbar-inner {
     color: inherit;
     margin-left: 8px;
 }
+
+/* The limits used to be four sentences joined with semicolons into one long
+   line. They are four separate things, so they get four separate lines. */
+.caveat ul {
+    margin: 8px 0 0;
+    padding-left: 20px;
+}
+
+.caveat li {
+    margin-bottom: 5px;
+}
+
+.caveat li:last-child { margin-bottom: 0; }

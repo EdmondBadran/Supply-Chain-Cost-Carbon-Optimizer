@@ -82,9 +82,13 @@
     <dd>{{ words }}</dd>
     {% endfor %}
   </dl>
-  <p class="caveat">
+  <div class="caveat">
     <strong>What this does not account for.</strong>
-    {{ report.method.limits | join("; ") }}.
-  </p>
+    <ul>
+      {% for limit in report.method.limits %}
+      <li>{{ limit }}</li>
+      {% endfor %}
+    </ul>
+  </div>
   <a class="ghost-link" href="{{ url_for('method') }}">Read the full method</a>
 </section>
