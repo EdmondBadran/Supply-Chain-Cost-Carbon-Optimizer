@@ -25,7 +25,8 @@
     </a>
   </div>
   <p class="lp-note">
-    No sign up, no upload. The demo is already running on a sample company.
+    No sign up, and nothing you load is stored. The demo is already running
+    on a sample company.
   </p>
 </section>
 
@@ -126,6 +127,52 @@
       <a href="{{ url_for('stats_page') }}">The statistics are here</a>.
     </p>
   </div>
+</section>
+
+<section class="lp-steps lp-data" id="data-handling" data-reveal>
+  <div class="lp-steps-intro">
+    <h2>What happens to your data</h2>
+    <p>
+      Order files are commercially sensitive. This one never lands on a disk,
+      and no two visitors can see each other's.
+    </p>
+  </div>
+  <ol>
+    <li>
+      <h3>It arrives and is read</h3>
+      <p>
+        Your CSV is held in a temporary file for as long as it takes to parse
+        it, which is under a second, and deleted before the request finishes.
+        That happens whether the file loaded cleanly or not.
+      </p>
+    </li>
+    <li>
+      <h3>It becomes a graph in memory</h3>
+      <p>
+        The rows turn into locations and routes inside a database that exists
+        only in the server's memory and belongs to your browser session alone.
+        Nothing about it is written to disk, and another visitor loading their
+        own file cannot reach yours or replace it.
+      </p>
+    </li>
+    <li>
+      <h3>Then it is gone</h3>
+      <p>
+        Two hours without a request and your workspace is dropped. Pressing
+        clear drops it immediately, and restarting the server drops every one
+        of them. There is no database to back up, and nothing to delete later,
+        because nothing was kept.
+      </p>
+    </li>
+  </ol>
+  <p class="lp-data-note">
+    What that does not mean is that the server cannot read your data. It has
+    to: it is the thing doing the arithmetic. Claiming otherwise would need
+    the whole calculation to run in your browser, which is a different piece
+    of software, and it is not a claim worth making unless it is true.
+    <a href="{{ url_for('privacy') }}">The full version is here</a>, and the
+    hundred lines of code behind it are worth reading rather than believing.
+  </p>
 </section>
 
 {% if summary %}
