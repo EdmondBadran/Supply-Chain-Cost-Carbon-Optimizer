@@ -616,6 +616,8 @@ function networkResult(result) {
         <td class="num">${site.tonnes_before.toLocaleString("en-US", { maximumFractionDigits: 1 })} t</td>
         <td class="num">${site.status === "closed" ? "&mdash;" : site.tonnes_after.toLocaleString("en-US", { maximumFractionDigits: 1 }) + " t"}</td>
         <td class="num">${site.status === "closed" ? "&mdash;" : site.lanes}</td>
+        <td class="num">${site.capacity_tonnes.toLocaleString("en-US", { maximumFractionDigits: 1 })} t
+          <span class="muted-ink">${site.capacity_basis}</span></td>
       </tr>`
         )
         .join("");
@@ -636,12 +638,17 @@ function networkResult(result) {
         result.over_capacity
             ? `<p class="network-warn">At least one site is over the volume it could
                  credibly take. The numbers above assume it copes anyway, so treat
-                 this shape as a question rather than an answer.</p>`
+                 this shape as a question rather than an answer.${
+                     result.stated_capacity
+                         ? " The limits marked stated came from your warehouse file."
+                         : " No capacity column was given, so every limit here is the" +
+                           " headroom assumption rather than a measured one."
+                 }</p>`
             : ""
     }
     <table class="grid network-sites">
       <thead>
-        <tr><th>Site</th><th>Status</th><th>Handles now</th><th>Would handle</th><th>Routes</th></tr>
+        <tr><th>Site</th><th>Status</th><th>Handles now</th><th>Would handle</th><th>Routes</th><th>Capacity</th></tr>
       </thead>
       <tbody>${rows}</tbody>
     </table>`;

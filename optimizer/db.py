@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS nodes (
     grid_intensity REAL,
     lead_time_days REAL,
     min_order_qty REAL,
-    on_time_rate REAL
+    on_time_rate REAL,
+    capacity_kg REAL
 );
 
 CREATE TABLE IF NOT EXISTS orders (
@@ -99,6 +100,7 @@ ADDED_NODE_COLUMNS = {
     "lead_time_days": "REAL",
     "min_order_qty": "REAL",
     "on_time_rate": "REAL",
+    "capacity_kg": "REAL",
 }
 
 

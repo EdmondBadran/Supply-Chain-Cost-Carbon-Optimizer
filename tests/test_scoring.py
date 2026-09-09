@@ -131,8 +131,8 @@ class Fixture(unittest.TestCase):
             """
             INSERT INTO nodes (name, node_type, city, country, lat, lon,
                 storage_cost_annual, energy_kwh_annual, grid_intensity,
-                lead_time_days, min_order_qty, on_time_rate)
-            VALUES (?, ?, '', '', ?, ?, ?, ?, ?, ?, ?, ?)
+                lead_time_days, min_order_qty, on_time_rate, capacity_kg)
+            VALUES (?, ?, '', '', ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 name,
@@ -145,6 +145,7 @@ class Fixture(unittest.TestCase):
                 extra.get("lead_time_days"),
                 extra.get("min_order_qty"),
                 extra.get("on_time_rate"),
+                extra.get("capacity_kg"),
             ),
         )
         return cursor.lastrowid
@@ -488,3 +489,59 @@ class StageSettings(Fixture):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Capacity(Fixture):
+    """A stated capacity has to beat the assumed one, and has to bite.
+
+    The headroom constant was the only limit for a long time, so the risk with
+    the column is not that it is read wrongly. It is that it is read and then
+    quietly ignored somewhere downstream, which would look exactly like it
+    working on a network that happens to have room.
+    """
+
+    def build(self, capacities):
+        first = self.node("A", "warehouse", 51.9, 4.5, capacity_kg=capacities[0])
+        second = self.node("B", "warehouse", 52.4, 4.9, capacity_kg=capacities[1])
+        near = self.node("Near", "customer", 52.0, 4.6)
+        far = self.node("Far", "customer", 52.5, 5.0)
+        self.edge(first, near, "road", 100_000, 40)
+        self.edge(second, far, "road", 100_000, 40)
+        analysis.run(self.conn)
+        return first, second
+
+    def test_a_stated_capacity_is_used_instead_of_the_headroom(self):
+        self.build([900_000, 900_000])
+        result = scoring.simulate_network(self.conn, [], None)
+        self.assertTrue(result["stated_capacity"])
+        for site in result["sites"]:
+            self.assertEqual(site["capacity_basis"], "stated")
+            self.assertEqual(site["capacity_tonnes"], 900.0)
+
+    def test_without_a_column_the_headroom_still_applies(self):
+        self.build([None, None])
+        result = scoring.simulate_network(self.conn, [], None)
+        self.assertFalse(result["stated_capacity"])
+        for site in result["sites"]:
+            self.assertEqual(site["capacity_basis"], "assumed")
+            self.assertAlmostEqual(
+                site["capacity_tonnes"],
+                site["tonnes_before"] * scoring.CAPACITY_HEADROOM,
+            )
+
+    def test_a_tight_stated_capacity_reports_the_strain(self):
+        """Closing a site into a neighbour with no room has to say so.
+
+        Under the headroom assumption both sites would look able to take 50%
+        more and the move would come back clean. The column is the difference
+        between an answer and a plausible-looking one.
+        """
+        _, second = self.build([110_000, 110_000])
+        result = scoring.simulate_network(self.conn, [second], None)
+        self.assertTrue(result["over_capacity"])
+
+    def test_a_generous_stated_capacity_absorbs_the_move(self):
+        _, second = self.build([500_000, 500_000])
+        result = scoring.simulate_network(self.conn, [second], None)
+        self.assertFalse(result["over_capacity"])
+        self.assertEqual(result["moved_lanes"], 1)

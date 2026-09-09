@@ -11,11 +11,16 @@ from . import analysis, factors, geo
 
 FLAG_THRESHOLD = 0.25
 
-# How much more than its current volume a site is assumed to be able to take.
-# Past this the claim that it simply absorbs the extra stops being credible,
-# and the overflow goes to the next nearest site instead. A warehouse is a
-# building, not a variable, and pretending otherwise is how network studies
-# end up recommending things that cannot physically happen.
+# What a site is assumed to be able to take when nobody has said. Past this
+# the claim that it simply absorbs the extra stops being credible, and the
+# overflow goes to the next nearest site instead. A warehouse is a building,
+# not a variable, and pretending otherwise is how network studies end up
+# recommending things that cannot physically happen.
+#
+# This is only the fallback. A warehouse file carrying a capacity_kg column
+# gets used instead, site by site, because a stated limit beats an assumed
+# one and a company that has bothered to measure its own racking should not
+# have that overwritten by a constant.
 CAPACITY_HEADROOM = 1.5
 
 # Effort has to be able to outrank size. Tagging something high effort means
@@ -232,6 +237,11 @@ def _sites(conn, closed_ids, added):
     with it, which is most of the reason closing one looks attractive. A site
     that does not exist yet has neither, so it has to be given both, and the
     only defensible source for them is what this company's own sites cost.
+
+    Capacity comes from the warehouse file where it is given and from the
+    headroom assumption where it is not, and each site says which it used, so
+    an over-capacity warning can be read as either a measured limit or a rule
+    of thumb rather than both looking the same.
     """
     # What a site handles is everything that passes through it, arriving as
     # well as leaving. Counting only what it ships out would leave the
@@ -255,6 +265,7 @@ def _sites(conn, closed_ids, added):
     for row in conn.execute("SELECT * FROM nodes WHERE node_type = 'warehouse'"):
         handled = throughput.get(row["id"], 0.0)
         grid = row["grid_intensity"]
+        stated = row["capacity_kg"] if "capacity_kg" in row.keys() else None
         sites.append(
             {
                 "id": row["id"],
@@ -267,7 +278,10 @@ def _sites(conn, closed_ids, added):
                     grid if grid is not None else factors.DEFAULT_GRID_INTENSITY
                 ),
                 "handled_kg": handled,
-                "capacity_kg": handled * CAPACITY_HEADROOM,
+                "capacity_kg": (
+                    stated if stated else handled * CAPACITY_HEADROOM
+                ),
+                "capacity_basis": "stated" if stated else "assumed",
                 "closed": row["id"] in closed_ids,
                 "added": False,
             }
@@ -311,7 +325,10 @@ def _hypothetical(sites, added):
         # dressed up as local knowledge.
         "grid_intensity": factors.DEFAULT_GRID_INTENSITY,
         "handled_kg": 0.0,
+        # A site nobody has built has no stated capacity by definition, so it
+        # is sized like a typical one of this company's own.
         "capacity_kg": typical_kg * CAPACITY_HEADROOM,
+        "capacity_basis": "assumed",
         "closed": False,
         "added": True,
     }
@@ -494,6 +511,9 @@ def simulate_network(conn, closed_ids=(), added=None):
         },
         "moved_lanes": moved,
         "over_capacity": strained,
+        "stated_capacity": any(
+            site["capacity_basis"] == "stated" for site in sites
+        ),
         "sites": [
             {
                 "id": site["id"],
@@ -506,6 +526,7 @@ def simulate_network(conn, closed_ids=(), added=None):
                 "tonnes_before": site["handled_kg"] / 1000,
                 "tonnes_after": used.get(site["id"], 0.0) / 1000,
                 "capacity_tonnes": site["capacity_kg"] / 1000,
+                "capacity_basis": site["capacity_basis"],
                 "lanes": lanes.get(site["id"], 0),
                 "full": used.get(site["id"], 0.0) > site["capacity_kg"],
             }

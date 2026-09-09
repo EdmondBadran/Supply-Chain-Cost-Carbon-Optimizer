@@ -310,6 +310,14 @@ def _apply_warehouse_details(nodes, warehouse_rows, errors):
                 factors.DEFAULT_GRID_INTENSITY,
                 field="grid_intensity",
             )
+            # What the building can actually hold in a year, if the company
+            # knows. Left as None when the column is absent, which is the
+            # signal for scoring.py to fall back to its headroom assumption
+            # rather than treat an unknown site as a site of size zero.
+            capacity = _number(row.get("capacity_kg"), None, field="capacity_kg")
+            if capacity is not None and capacity <= 0:
+                raise ValidationError("capacity_kg must be a positive number")
+            node["capacity_kg"] = capacity
         except ValidationError as exc:
             errors.append({"line": position, "problem": f"{name}: {exc}"})
 
@@ -322,8 +330,8 @@ def _write_nodes(conn, nodes):
             INSERT INTO nodes
                 (name, node_type, city, country, lat, lon,
                  storage_cost_annual, energy_kwh_annual, grid_intensity,
-                 lead_time_days, min_order_qty, on_time_rate)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 lead_time_days, min_order_qty, on_time_rate, capacity_kg)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 name,
@@ -338,6 +346,7 @@ def _write_nodes(conn, nodes):
                 node.get("lead_time_days"),
                 node.get("min_order_qty"),
                 node.get("on_time_rate"),
+                node.get("capacity_kg"),
             ),
         )
         ids[name] = cursor.lastrowid

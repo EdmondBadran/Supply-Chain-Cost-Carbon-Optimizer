@@ -117,7 +117,10 @@
       <p class="source">
         A high figure here is a route where the money you spend buys an unusual
         amount of damage. It is not the same as an expensive route, and the two
-        lists rarely match.
+        lists rarely match. Sea routes tend to land near 1.00 for a dull
+        reason: sea happens to cost about $0.008 a tonne-kilometre and emit
+        about 0.008 kg, so the ratio comes out at one. It is a coincidence of
+        the two factors, not a calculation going wrong.
       </p>
     </div>
     <div>
@@ -457,11 +460,18 @@
 
   <p class="stat-read">
     Across the whole network {{ "{:.1%}".format(rt.network_rate) }} of
-    {{ "{:,}".format(rt.network_orders) }} orders came back. Of the
-    {{ rt.tested }} routes with enough volume to judge,
+    {{ "{:,}".format(rt.network_orders) }} shipments came back.
+    {% if rt.worse_count %}
+    Of the {{ rt.tested }} routes with enough volume to judge,
     {{ rt.worse_count }} {{ "is" if rt.worse_count == 1 else "are" }}
-    genuinely worse than that, meaning the whole interval sits above the
-    network rate rather than the point estimate happening to.
+    genuinely worse than that: the whole interval sits above the network rate,
+    not just the headline percentage.
+    {% else %}
+    None of the {{ rt.tested }} routes with enough volume to judge is
+    genuinely worse than that. Some show a higher percentage, but every one of
+    their intervals still reaches down to the network rate, which means the
+    difference is sample size rather than a problem with the route.
+    {% endif %}
   </p>
 </section>
 {% endif %}
@@ -469,10 +479,18 @@
 <section class="panel prose" id="modes">
   <h2>What each mode actually costs you</h2>
   <p class="sub">
-    The published factor is what a tonne-kilometre costs and emits in transit.
-    The achieved figure is what it works out at once packaging, warehousing
-    and the return leg are charged to the route as well. The gap is the part
-    of cost to serve that freight rates never show.
+    The freight rate is what a tonne-kilometre costs and emits in transit. The
+    all-in figure adds packaging, the warehouse and the return leg, which is
+    what serving the route actually takes. The gap between the two columns is
+    the part of cost to serve that a freight quote never shows.
+  </p>
+  <p class="sub">
+    Expect the gap to be enormous on short domestic routes and almost nothing
+    on long sea ones. Packaging and warehousing do not care how far a parcel
+    travels, so on a twenty kilometre run there are barely any
+    tonne-kilometres to divide them by. That is not a pricing error, it is the
+    reason cost per tonne-kilometre is the wrong measure for short haul and
+    the right one for comparing modes.
   </p>
 
   <table class="grid">
@@ -480,8 +498,8 @@
       <tr>
         <th>Mode</th><th class="num">Routes</th><th class="num">Share of tonne-km</th>
         <th class="num">Share of cost</th><th class="num">Share of carbon</th>
-        <th class="num">Achieved $/t-km</th><th class="num">Published</th>
-        <th class="num">Achieved kg/t-km</th><th class="num">Published</th>
+        <th class="num">All in $/t-km</th><th class="num">Freight rate</th>
+        <th class="num">All in kg/t-km</th><th class="num">Freight rate</th>
       </tr>
     </thead>
     <tbody>
@@ -503,8 +521,11 @@
 
   <p class="caveat">
     <strong>A mode carrying a small share of tonne-kilometres and a large
-    share of carbon is the whole thesis in one row.</strong> That is the line
-    to take to whoever signs off the freight budget.
+    share of carbon is the whole thesis in one row.</strong> Read the two
+    share columns against each other before the rates: a mode moving a few
+    percent of the weight-distance and a third of the emissions is where the
+    argument is, and it is the line to take to whoever signs off the freight
+    budget.
   </p>
 </section>
 

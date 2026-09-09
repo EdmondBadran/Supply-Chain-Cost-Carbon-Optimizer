@@ -260,7 +260,7 @@
   </p>
   <ul>
     <li>A closed site's routes go to the nearest remaining site with room, heaviest routes first</li>
-    <li>A site is assumed to absorb up to {{ "{:.0%}".format(capacity_headroom - 1) }} more than the volume it handles today. Past that the overflow goes to the next nearest, and if nothing has room the page says the shape is over capacity rather than pretending otherwise</li>
+    <li>A site with a <code>capacity_kg</code> figure in the warehouse file is held to it. Without one, it is assumed to absorb up to {{ "{:.0%}".format(capacity_headroom - 1) }} more than the volume it handles today. Either way the overflow goes to the next nearest site, and if nothing has room the page says the shape is over capacity rather than pretending otherwise. Each site is labelled stated or assumed so the two are never read as the same thing</li>
     <li>Closing a site removes its storage cost and its electricity, which is usually most of the reason closing one looks attractive</li>
     <li>A new site is priced at the median cost and energy per tonne of your existing sites, on the world average grid intensity of {{ grid_default }} kg CO2e per kWh, because nothing in your data describes a building that does not exist yet</li>
   </ul>
@@ -271,7 +271,7 @@
   <ul>
     <li>Transit time is estimated from typical door-to-door speeds per mode, not quoted by a carrier. It is good enough to tell you a change adds weeks rather than days, and not good enough to plan against</li>
     <li>It does not model inventory. Slower shipping means more stock in transit and more working capital tied up, and that cost is not counted here</li>
-    <li>Capacity is a single headroom figure applied to every site. Real warehouses are limited by racking, doors, labour and licence, none of which is in a CSV, so treat an over-capacity warning as a prompt to check rather than a measurement</li>
+    <li>Where no capacity is given, one headroom figure stands in for racking, doors, labour and licence, none of which an orders file knows about. Treat an over-capacity warning on an assumed limit as a prompt to check rather than a measurement, and give the warehouse file a <code>capacity_kg</code> column if you want the answer to mean something</li>
     <li>It covers freight, storage, packaging and returns. It is not a full product carbon footprint and says nothing about manufacturing, raw materials or end of life</li>
     <li>Supplier terms are only as good as the terms you supply. Without a lead time, a minimum order or an on-time rate in the supplier file, none of those checks run at all, and the supplier stage falls back to freight alone</li>
   </ul>

@@ -585,6 +585,9 @@ def order_sizes(orders):
 def seasonality(orders):
     """Whether the year is flat or peaked, which decides whether the annual
     figures in the rest of the tool describe any actual month."""
+    names = (
+        "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+    )
     months = defaultdict(lambda: {"orders": 0, "weight": 0.0})
     for order in orders:
         date = order["order_date"]
@@ -608,7 +611,7 @@ def seasonality(orders):
     return {
         "months": [
             {
-                "label": label,
+                "label": _month_label(label, names),
                 "orders": data["orders"],
                 "weight": data["weight"],
                 "height": data["orders"] / top,
@@ -616,8 +619,11 @@ def seasonality(orders):
             for label, data in series
         ],
         "cv": cv,
-        "peak": {"label": peak[0], "orders": peak[1]["orders"]},
-        "trough": {"label": trough[0], "orders": trough[1]["orders"]},
+        "peak": {"label": _month_label(peak[0], names), "orders": peak[1]["orders"]},
+        "trough": {
+            "label": _month_label(trough[0], names),
+            "orders": trough[1]["orders"],
+        },
         "peak_to_trough": (
             peak[1]["orders"] / trough[1]["orders"]
             if trough[1]["orders"]
@@ -625,6 +631,15 @@ def seasonality(orders):
         ),
         "flat": cv < 0.15,
     }
+
+
+def _month_label(key, names):
+    """2025-09 reads as a product code. Sep 2025 reads as a month."""
+    try:
+        year, month = key.split("-")
+        return f"{names[int(month) - 1]} {year}"
+    except (ValueError, IndexError):
+        return key
 
 
 def returns_by_lane(lanes):

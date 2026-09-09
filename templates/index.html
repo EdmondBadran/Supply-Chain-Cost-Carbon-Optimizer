@@ -117,6 +117,14 @@
       as the right mode.
     </p>
     <p>
+      The warehouse file takes <code>name</code> plus
+      <code>storage_cost_annual</code>, <code>energy_kwh_annual</code>,
+      <code>grid_intensity</code> and <code>capacity_kg</code>, all optional.
+      Give it a capacity and closing a site is checked against what the
+      remaining buildings can really hold; leave it out and a headroom
+      assumption stands in, which the answer says out loud.
+    </p>
+    <p>
       The supplier file needs <code>name</code>, <code>city</code>,
       <code>supplies</code> (the warehouse it feeds), <code>mode</code> and
       <code>annual_weight_kg</code>, plus optional <code>country</code>,
