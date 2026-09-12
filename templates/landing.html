@@ -48,12 +48,14 @@
         <li>weight_kg</li>
         <li>mode</li>
       </ul>
-      <p class="lp-row-label">Example row</p>
-      <p class="lp-row">
-        <span>Antigua Microlots,</span> <span>Antigua,</span>
-        <span>Bristol,</span> <span>120.0,</span>
-        <span class="lp-csv-flag">air</span>
-      </p>
+      <details class="lp-example">
+        <summary>Show an example row</summary>
+        <p class="lp-row">
+          <span>Antigua Microlots,</span> <span>Antigua,</span>
+          <span>Bristol,</span> <span>120.0,</span>
+          <span class="lp-csv-flag">air</span>
+        </p>
+      </details>
     </li>
 
     <li class="lp-box-step">
@@ -141,6 +143,14 @@
 
 <section class="lp-versus" data-reveal>
   <h2>How this is different from what already exists</h2>
+  <p class="lp-versus-lede">
+    Most tools show you half the picture: what your freight costs, or what
+    it emits, never both together. Getting both normally means paying a
+    consultancy to build a model of your whole network. This tool does it
+    from a spreadsheet you already have: upload a year of orders, and in
+    seconds it shows you exactly which routes are costing you the most
+    money and carbon at once, and what switching them would save.
+  </p>
   <div class="lp-versus-grid">
     <article>
       <p class="lp-versus-who">Carbon reporting tools</p>
@@ -152,13 +162,60 @@
     </article>
     <article>
       <p class="lp-versus-who">Network design software</p>
-      <p>Does both properly with an optimisation solver, but needs a six month project and a modelling team to get there.</p>
+      <p>Does both properly with an optimisation solver, but needs the data, setup and expertise of a full modelling project to get there.</p>
     </article>
     <article class="lp-versus-us">
       <p class="lp-versus-who">This</p>
-      <p>Prices every route on cost and carbon together and ranks what to change, working from a spreadsheet export in about a second.</p>
+      <p>Turns a CSV export into a ranked list of routes where cost and carbon can both be cut, testing feasible mode switches in about a second.</p>
     </article>
   </div>
+
+  <figure class="lp-versus-table">
+    <table>
+      <thead>
+        <tr>
+          <th scope="col"></th>
+          <th scope="col">Shows cost</th>
+          <th scope="col">Shows carbon</th>
+          <th scope="col">Ranks routes by both</th>
+          <th scope="col">Time to that list</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row">Carbon reporting tools</th>
+          <td class="lp-no">&#8722;</td>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-no">&#8722;</td>
+          <td class="lp-dim">&mdash;</td>
+        </tr>
+        <tr>
+          <th scope="row">Freight spend analytics</th>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-no">&#8722;</td>
+          <td class="lp-no">&#8722;</td>
+          <td class="lp-dim">&mdash;</td>
+        </tr>
+        <tr>
+          <th scope="row">Network design software</th>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-dim">Months</td>
+        </tr>
+        <tr class="lp-versus-us-row">
+          <th scope="row">This</th>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes">Seconds</td>
+        </tr>
+      </tbody>
+    </table>
+    <figcaption>
+      The only row with a full line of checks and no wait for one.
+    </figcaption>
+  </figure>
 </section>
 
 <section class="lp-trust" data-reveal>

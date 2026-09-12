@@ -2125,13 +2125,36 @@ select:disabled {
     color: var(--ink-2);
 }
 
-.lp-row-label {
-    margin: 0 0 4px !important;
+/* The example row, closed by default so the panel leads with the columns
+   rather than a wall of monospace. */
+.lp-example {
+    margin: 0;
+}
+
+.lp-example summary {
+    cursor: pointer;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 11px !important;
+    font-size: 11px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--ink-3) !important;
+    color: var(--ink-3);
+    list-style: none;
+}
+
+.lp-example summary::-webkit-details-marker {
+    display: none;
+}
+
+.lp-example summary::before {
+    content: "+ ";
+}
+
+.lp-example[open] summary::before {
+    content: "\2212 ";
+}
+
+.lp-example[open] summary {
+    margin-bottom: 6px;
 }
 
 /* One real row, wrapping rather than truncating. */
@@ -2288,6 +2311,15 @@ select:disabled {
     font-weight: 600;
 }
 
+.lp-versus-lede {
+    margin: 0 0 26px;
+    max-width: 62ch;
+    color: var(--ink-2);
+    font-size: 16.5px;
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
 .lp-versus-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -2335,6 +2367,84 @@ select:disabled {
     .lp-versus-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* The comparison table: same four rows as the cards above it, but as a
+   grid of yes/no instead of four paragraphs to re-read and compare by hand. */
+.lp-versus-table {
+    margin: 40px 0 0;
+    padding: 20px 20px 4px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--panel);
+    overflow-x: auto;
+}
+
+.lp-versus-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.lp-versus-table th,
+.lp-versus-table td {
+    padding: 12px 10px;
+    text-align: center;
+    border-bottom: 1px solid var(--line-soft);
+    white-space: nowrap;
+}
+
+.lp-versus-table thead th {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 400;
+}
+
+.lp-versus-table tbody th {
+    text-align: left;
+    color: var(--ink);
+    font-weight: 600;
+    font-size: 15.5px;
+    white-space: normal;
+}
+
+.lp-versus-table tbody tr:last-child th,
+.lp-versus-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.lp-versus-table .lp-yes {
+    color: var(--carbon);
+    font-weight: 600;
+}
+
+.lp-versus-table .lp-no {
+    color: var(--ink-3);
+    font-size: 18px;
+}
+
+.lp-versus-table .lp-dim {
+    color: var(--ink-3);
+}
+
+.lp-versus-us-row th,
+.lp-versus-us-row td {
+    background: var(--carbon-soft);
+}
+
+.lp-versus-us-row th {
+    color: var(--carbon);
+}
+
+.lp-versus-table figcaption {
+    margin: 16px 0 0;
+    padding: 14px 0;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-3);
+    font-size: 14.5px;
+    line-height: 1.5;
 }
 
 
