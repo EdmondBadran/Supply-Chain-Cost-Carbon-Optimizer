@@ -1,4 +1,5 @@
 {# Step 2: everything wrong, ranked across stages. #}
+{% from "parts/_units.html" import co2e %}
 
 <p class="step-lede">
   {{ report.overview.concentration }}
@@ -20,7 +21,7 @@
       {% endif %}
       {% if problem.co2e_at_stake %}
       <div>
-        <strong class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t</strong>
+        <strong class="carbon-ink">{{ co2e(problem.co2e_at_stake) }}</strong>
         <span>CO2e a year</span>
       </div>
       {% endif %}
@@ -37,8 +38,9 @@
 <section class="panel prose">
   <h3>All {{ report.problems|length }} of them, in order</h3>
   <p class="sub">
-    Ranked by how much of your whole chain each one gives back, so a dirty
-    warehouse can be weighed against an expensive route honestly.
+    Ranked by how much of your total cost and carbon each one would recover.
+    That is a share rather than an amount, which is the only fair way to compare
+    a high-carbon warehouse with an expensive air route.
   </p>
 
   <ol class="findings">
@@ -55,7 +57,7 @@
           <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
           {% endif %}
           {% if problem.co2e_at_stake %}
-          <span class="carbon-ink">{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          <span class="carbon-ink">{{ co2e(problem.co2e_at_stake) }} CO2e</span>
           {% endif %}
         </div>
       </div>

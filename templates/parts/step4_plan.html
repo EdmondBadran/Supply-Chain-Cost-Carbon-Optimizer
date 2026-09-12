@@ -1,8 +1,10 @@
 {# Step 4: the findings turned into an ordered set of changes. #}
+{% from "parts/_units.html" import co2e %}
 
 <p class="step-lede">
-  Each one is a single change with the money, the carbon, and the operational
-  catch attached. Work down the list.
+  Each of these is a single change, with what it saves, what it cuts, and
+  what you should check before committing to it. They are in the order worth
+  working through.
 </p>
 
 {% if report.top_three %}
@@ -15,7 +17,7 @@
       <span class="three-stake">
         {% if problem.cost_at_stake %}${{ "{:,.0f}".format(problem.cost_at_stake) }}{% endif %}
         {% if problem.cost_at_stake and problem.co2e_at_stake %}and{% endif %}
-        {% if problem.co2e_at_stake %}{{ "{:,.0f}".format(problem.co2e_at_stake / 1000) }} t CO2e{% endif %}
+        {% if problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }} CO2e{% endif %}
         a year.
       </span>
     </li>
@@ -28,7 +30,7 @@
 <section class="panel prose">
   <h3>The full plan</h3>
   <p class="sub">
-    Every problem from step two, in the order worth doing them.
+    Every problem from step 2, in the order worth tackling them.
   </p>
 
   <ol class="plan">

@@ -8,8 +8,22 @@ override per lane rather than as ground truth.
 
 MODES = ("road", "rail", "sea", "air")
 
+# Sources, checked 2026-09-11. Air matches the GLEC v3.2 long-haul figure of
+# 0.608 almost exactly. Rail sits between the GLEC EU electric figure of 0.0108
+# and the diesel figure of 0.0307, which is what a mixed traction assumption
+# should look like. Sea is inside the GLEC bulk carrier range of 0.0031 to
+# 0.0312, though near its efficient end.
+#
+# Road was 0.062 until this date, which was about 40 percent below every
+# published figure that could be found: DEFRA 2024 puts an average laden
+# articulated HGV at roughly 0.101, and GLEC v3.2 puts articulated HDVs between
+# 0.074 and 0.107. Since the method page claims these follow the DEFRA and GLEC
+# ranges, a factor outside those ranges was a claim the tool did not meet. It
+# now uses the DEFRA average laden figure. The effect is small on both samples,
+# which are air dominated, but it raises the road to rail carbon ratio from
+# 2.8x to the 4.6x the published factors actually imply.
 EMISSION_FACTORS = {
-    "road": 0.062,
+    "road": 0.101,
     "rail": 0.022,
     "sea": 0.008,
     "air": 0.602,

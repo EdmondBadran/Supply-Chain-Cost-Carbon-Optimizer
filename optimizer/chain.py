@@ -295,15 +295,21 @@ def _suppliers_stage(suppliers, inbound):
     for lane in sorted(inbound, key=lambda l: -l["priority"]):
         if not lane["flagged"]:
             continue
+        # The saving on this lane belongs to Inbound freight, which is the
+        # stage that owns the journey. Naming the supplier here is useful,
+        # because a mode is something you negotiate with them, but carrying
+        # the money in both stages made the six "recoverable here" figures
+        # add up to more than the network can actually give back.
         problems.append(
             _problem(
                 lane["origin_name"],
                 f"Ships to {lane['dest_name']} by {lane['mode']} over "
                 f"{round(lane['distance_km']):,} km",
-                lane["switch"]["saved_cost"],
-                lane["switch"]["saved_co2e"],
+                0.0,
+                0.0,
                 lane["id"],
                 f"Move this supplier to {lane['switch']['mode']}",
+                note="Counted under Inbound freight",
             )
         )
     problems.extend(_supplier_terms_problems(suppliers, inbound))
@@ -349,8 +355,14 @@ def _freight_stage(key, name, blurb, lanes):
 
 
 def _warehousing_stage(warehouses, lanes):
+    # Packaging sits here on both sides. Its cost is already inside
+    # handling_cost, and its carbon has to be added the same way or the six
+    # stages sum to less carbon than the network total, which is the one
+    # arithmetic check a reader can run on this page without a calculator.
     handling_cost = sum(l["handling_cost"] for l in lanes)
-    warehouse_co2e = sum(l["warehouse_co2e"] for l in lanes)
+    warehouse_co2e = sum(
+        l["warehouse_co2e"] + l["packaging_co2e"] for l in lanes
+    )
 
     # Carbon per tonne handled, so a big warehouse is not flagged just for
     # being big. What this catches is a site on a dirty grid.
@@ -397,8 +409,14 @@ def _warehousing_stage(warehouses, lanes):
 
 
 def _customers_stage(customers, outbound):
+    # Only lanes that are already on a sensible mode. A lane flagged for a
+    # mode switch is expensive per tonne because of the mode, not because of
+    # where the customer is, and the fix offered here, serve it from a nearer
+    # site, would be the wrong advice as well as the same money counted twice.
     per_dest = []
     for lane in outbound:
+        if lane["flagged"]:
+            continue
         tonnes = lane["total_weight_kg"] / 1000
         if tonnes > 0:
             per_dest.append((lane, lane["cost"] / tonnes))
@@ -449,8 +467,8 @@ def _returns_stage(lanes):
         problems.append(
             _problem(
                 f"{lane['origin_name']} to {lane['dest_name']}",
-                f"{rate:.0%} of orders come back, against a "
-                f"{RETURN_RATE_LIMIT:.0%} threshold",
+                f"{rate:.1%} of orders come back, against a threshold of "
+                f"{RETURN_RATE_LIMIT:.0%}",
                 lane["returns_cost"],
                 lane["returns_co2e"],
                 lane["id"],

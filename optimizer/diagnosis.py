@@ -29,9 +29,18 @@ def money(value):
 
 
 def tonnes(kg):
-    if kg < 100:
-        return f"{kg / 1000:,.2f} tonnes"
-    return f"{kg / 1000:,.0f} tonnes"
+    """Weight or carbon in prose, in whichever unit does not round it away.
+
+    This used to print tonnes to no decimal places above 100 kg, so a route
+    carrying 900 kg a year was described as carrying "1 tonne", and 6,613 kg of
+    recoverable carbon was reported as "7 tonnes" directly underneath a figure
+    that said 6.6. Same rule as the co2e macro in templates/parts/_units.html,
+    so prose and figures agree on the same page.
+    """
+    if kg < 1000:
+        return f"{kg:,.0f} kg"
+    text = f"{kg / 1000:,.1f}" if kg < 10000 else f"{kg / 1000:,.0f}"
+    return f"{text} tonne" if text in ("1", "1.0") else f"{text} tonnes"
 
 
 def days(value):
@@ -61,8 +70,8 @@ def build(conn, limit=REPORT_LIMIT):
         "plan": [_step(n, p) for n, p in enumerate(problems, start=1)],
         "top_three": problems[:3],
         "closing": (
-            "Follow this plan and your supply chain will be cheaper, cleaner, "
-            "and finally visible."
+            "Each of these is one decision, and each one cuts cost and carbon "
+            "together rather than trading one against the other."
         ),
     }
 
@@ -100,22 +109,30 @@ def _overview(lanes, totals, problems, total_found):
         )
         top = problems[0]
         share = top["cost_at_stake"] / recoverable_cost if recoverable_cost else 0
+        # What this sentence is for is telling somebody whether they are
+        # looking at one decision or at a programme of work, because that
+        # changes who needs to be in the room. Anything that does not answer
+        # that is filler and should not be here.
+        others = len(problems) - 1
         if share >= CONCENTRATION_HIGH:
             concentration = (
-                f"Nearly half of the money on the table is on one line: "
-                f"{top['title']}. Start there and the rest is detail."
+                f"{money(top['cost_at_stake'])} of the "
+                f"{money(recoverable_cost)} on this list is on one route, "
+                f"{top['title']}, which makes this one decision rather than a "
+                f"programme of work."
             )
         elif share >= CONCENTRATION_SOME:
             concentration = (
-                f"A quarter of the money on the table is on one line: "
-                f"{top['title']}."
+                f"The largest single item is {top['title']} at "
+                f"{money(top['cost_at_stake'])}, with the remaining "
+                f"{money(recoverable_cost - top['cost_at_stake'])} spread "
+                f"across {others} other change{'' if others == 1 else 's'}."
             )
-            concentration += " It is the obvious place to start."
         else:
             concentration = (
-                "No single line dominates. The value is spread across several "
-                "changes, so this is a programme of work rather than one "
-                "decision."
+                f"No single route dominates. The {money(recoverable_cost)} is "
+                f"spread fairly evenly across {len(problems)} changes, so this "
+                f"is a programme of work rather than one decision."
             )
 
     return {
@@ -259,29 +276,30 @@ def _mode_switch_problem(lane, totals):
     before_days = analysis.lane_transit_days(lane["distance_km"], from_mode)
     after_days = analysis.lane_transit_days(lane["distance_km"], to_mode)
 
+    moved = tonnes(lane["total_weight_kg"])
     return _problem(
         stage="Inbound freight" if lane["leg"] == "inbound" else "Outbound freight",
         title=f"{lane['origin_name']} to {lane['dest_name']}",
         happening=(
-            f"{tonnes(lane['total_weight_kg'])} a year travel "
+            f"{moved} a year {'travel' if moved.endswith('tonnes') else 'travels'} "
             f"{lane['distance_km']:,.0f} km by {from_mode}."
         ),
         why=(
-            f"Per tonne carried, {from_mode} costs about "
+            f"Per tonne carried one kilometre, {from_mode} costs about "
             f"{cost_ratio:,.0f} times what {to_mode} costs and emits about "
-            f"{co2e_ratio:,.0f} times as much. Over a distance this long that "
-            f"gap turns into real money and real carbon."
+            f"{co2e_ratio:,.0f} times as much. Multiplied by the weight and "
+            f"the distance on this route, that is what the switch is worth."
         ),
         cost_at_stake=switch["saved_cost"],
         co2e_at_stake=switch["saved_co2e"],
         totals=totals,
         action=f"Move this route from {from_mode} to {to_mode}.",
         note=(
-            f"Lead time goes from {days(before_days)} to {days(after_days)}, "
-            f"so {days(after_days - before_days)} longer. Check your customers "
-            f"can wait, and that you can hold enough stock to cover the gap. "
-            f"If this freight is on {from_mode} because of a promise you made "
-            f"someone, that promise is the real cost."
+            f"Transit time goes from {days(before_days)} to {days(after_days)}, "
+            f"which is {days(after_days - before_days)} longer. Check that your "
+            f"customers can wait, and that you can hold enough stock to cover "
+            f"the gap. If this freight is on {from_mode} to meet a delivery "
+            f"promise, that promise is what the switch really costs you."
         ),
         edge_id=lane["id"],
         effort=lane["effort"],
@@ -314,9 +332,9 @@ def _problems(lanes, stages, totals):
                 why=(
                     "A missed delivery date does not stay a service problem. "
                     "Somebody expedites the shipment to protect the promise "
-                    "downstream, and expediting means flying it. The supplier "
-                    "is not paying for that. You are, twice, once in freight "
-                    "and once in carbon."
+                    "downstream, and expediting almost always means air "
+                    "freight. The supplier is not paying for that. You are, "
+                    "twice over: once in freight cost and once in carbon."
                 ),
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
@@ -342,9 +360,9 @@ def _problems(lanes, stages, totals):
                 happening=f"This site runs at {item['detail']}.",
                 why=(
                     "You are paying a carbon penalty for where this building "
-                    "draws its power, not for how well it is run. A clean site "
-                    "and a dirty site doing identical work report very "
-                    "different numbers."
+                    "draws its power, not for how well it is run. Two sites "
+                    "doing identical work report very different numbers if "
+                    "one sits on a clean grid and the other does not."
                 ),
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
@@ -583,13 +601,16 @@ def _method():
             (
                 "Distances are straight lines",
                 "Distance is measured point to point across the earth. Real "
-                "freight does not travel that way. Road runs roughly 15 to 25 "
-                "percent longer, and sea can be far longer where ships route "
-                "around land or through a canal. This means the savings shown "
-                "here are optimistic in absolute terms. The comparison between "
-                "two options on the same route is still fair, because both are "
-                "measured the same way, and that comparison is what the "
-                "ranking rests on.",
+                "freight does not travel that way, and how far it strays "
+                "depends on the mode: aircraft fly close to the straight "
+                "line, road runs about a quarter longer, rail about 40 "
+                "percent, and a ship routing around land or through a canal "
+                "can travel twice the straight-line distance. Measuring every "
+                "mode the same way therefore understates the slower modes "
+                "most, and those are the ones suggested here. Which route to "
+                "change is rarely affected, because sea and rail win by so "
+                "much per tonne carried. How much it saves is optimistic. "
+                "Read the savings as an upper bound.",
             ),
             (
                 "Only sensible mode changes are offered",
@@ -619,6 +640,11 @@ def _method():
             ),
         ],
         "limits": [
+            "Savings are an upper bound. Distance is measured as a straight "
+            "line for every mode, but a ship rounding a continent or taking a "
+            "canal can travel twice that, and rail runs further than road. "
+            "The slower modes are the ones suggested here, so their cost and "
+            "carbon are understated more than the modes they replace.",
             "Inventory is not modelled. Slower shipping ties up more working "
             "capital in stock, and that cost is not counted here.",
             "Warehouse capacity is not modelled. Moving volume to another site "

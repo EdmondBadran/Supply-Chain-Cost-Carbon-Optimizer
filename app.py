@@ -294,6 +294,8 @@ def method():
         capacity_headroom=scoring.CAPACITY_HEADROOM,
         factor_spread=stats.FACTOR_SPREAD,
         trials=stats.TRIALS,
+        transit_speed=factors.TRANSIT_KM_PER_DAY,
+        transit_fixed=factors.TRANSIT_FIXED_DAYS,
     )
 
 

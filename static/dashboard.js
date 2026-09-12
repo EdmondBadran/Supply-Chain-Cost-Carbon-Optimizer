@@ -163,7 +163,7 @@ function drawLand(world) {
 function mapUnavailable() {
     mapEl.insertAdjacentHTML(
         "beforeend",
-        '<p class="map-fallback">The world map could not load, so the lanes ' +
+        '<p class="map-fallback">The world map could not load, so the routes ' +
             "are drawn without country outlines.</p>"
     );
 }

@@ -1896,29 +1896,22 @@ select:disabled {
 }
 
 
-/* ==== Landing page. Written for someone deciding whether to keep reading. ==== */
+/* ==== Landing page ====
+   Rebuilt to answer, in order and without a paragraph: what is this, what do
+   I give it, what does it do, what do I get, why care, why not something
+   else. The old version explained the method twice before showing a single
+   result, which is the wrong way round for a reader who has not yet decided
+   the tool is worth their attention. */
 .lp-hero {
-    padding: 56px 0 44px;
-    max-width: 62ch;
-}
-
-/* On a phone the headline was running to four lines and pushing the buttons
-   off the first screen. */
-@media (max-width: 560px) {
-    .lp-hero {
-        padding: 24px 0 32px;
-    }
-
-    .lp-hero h1 {
-        font-size: 1.95rem;
-    }
+    padding: 64px 0 40px;
 }
 
 .lp-hero h1 {
     margin: 0 0 22px;
-    font-size: clamp(2.2rem, 5.4vw, 3.5rem);
+    max-width: 16ch;
+    font-size: clamp(2.3rem, 5.6vw, 3.9rem);
     line-height: 1.02;
-    letter-spacing: -0.038em;
+    letter-spacing: -0.04em;
     font-weight: 600;
 }
 
@@ -1929,10 +1922,16 @@ select:disabled {
 
 .lp-lede {
     margin: 0 0 30px;
-    font-size: clamp(1rem, 1.5vw, 1.16rem);
-    line-height: 1.6;
+    max-width: 54ch;
+    font-size: clamp(1.05rem, 1.6vw, 1.25rem);
+    line-height: 1.55;
     color: var(--ink-2);
     text-wrap: pretty;
+}
+
+.lp-lede em {
+    font-style: normal;
+    color: var(--ink);
 }
 
 .lp-actions {
@@ -1956,19 +1955,13 @@ select:disabled {
 }
 
 .lp-primary {
-    background: var(--carbon);
-    color: #08130d;
-    font-weight: 600;
-}
-
-.lp-primary:hover {
-    background: #55dc9d;
+    background: var(--ink);
+    color: var(--page);
 }
 
 .lp-secondary {
     border: 1px solid var(--line);
-    color: var(--ink-2);
-    background: var(--panel);
+    color: var(--ink);
 }
 
 .lp-primary:hover,
@@ -1977,262 +1970,457 @@ select:disabled {
 }
 
 .lp-secondary:hover {
-    border-color: var(--ink-3);
-    color: var(--ink);
+    border-color: var(--cost-line);
+    color: var(--cost);
 }
 
 .lp-primary:active,
 .lp-secondary:active {
-    transform: translateY(0) scale(0.985);
+    transform: translateY(0);
 }
 
 .lp-note {
     margin: 0;
-    font-size: 17.5px;
     color: var(--ink-3);
+    font-size: 16px;
+    max-width: 56ch;
 }
 
-.lp-proof {
-    padding: 30px 32px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
+@media (max-width: 560px) {
+    .lp-hero {
+        padding: 28px 0 30px;
+        max-width: none;
+    }
+
+    .lp-hero h1 {
+        font-size: 2.1rem;
+    }
+}
+
+
+/* ---- The black box, made literal. Give it this, it does that, you get this.
+   Three panels on a rail, so the eye reads it as a pipeline rather than as
+   three unrelated claims. ---- */
+.lp-box {
+    padding: 34px 0 10px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.lp-box-head {
+    margin: 0 0 20px;
+}
+
+.lp-box-head .eyebrow {
+    margin-bottom: 8px;
+}
+
+.lp-box-head h2 {
+    margin: 0;
+    font-size: clamp(1.3rem, 2.4vw, 1.6rem);
+    letter-spacing: -0.02em;
+    font-weight: 600;
+}
+
+.lp-box-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lp-box-step {
+    position: relative;
+    padding: 22px 22px 24px;
     background: var(--panel);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
-    margin-bottom: 26px;
 }
 
-.lp-proof-label {
-    margin: 0 0 12px;
+/* The arrow between panels. Drawn on the gap rather than inside a panel, so
+   the three read as one flow. Hidden once they stack. */
+.lp-box-step + .lp-box-step::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -18px;
+    width: 18px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--line));
+}
+
+.lp-box-step + .lp-box-step::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: -7px;
+    width: 5px;
+    height: 5px;
+    border-top: 1px solid var(--ink-3);
+    border-right: 1px solid var(--ink-3);
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.lp-box-label {
+    margin: 0 0 10px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 16.5px;
-    letter-spacing: 0.14em;
+    font-size: 12px;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--ink-3);
 }
 
-.lp-proof-truth {
-    margin: 0 0 26px;
-    font-size: 18px;
-    line-height: 1.6;
-    color: var(--ink);
-    max-width: 74ch;
+.lp-box-step h2 {
+    margin: 0 0 12px;
+    font-size: 1.28rem;
+    line-height: 1.18;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+}
+
+.lp-box-step p {
+    margin: 0 0 12px;
+    color: var(--ink-2);
+    font-size: 16.5px;
+    line-height: 1.5;
     text-wrap: pretty;
 }
 
-.lp-proof-figures {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 22px;
-    padding-top: 22px;
+.lp-box-step p:last-child {
+    margin-bottom: 0;
+}
+
+.lp-box-step strong {
+    color: var(--ink);
+    font-weight: 500;
+}
+
+.lp-box-result {
+    margin-top: 14px !important;
+    padding-top: 14px;
     border-top: 1px solid var(--line-soft);
 }
 
-.lp-proof-figures strong {
-    display: block;
-    font-size: clamp(1.3rem, 2.3vw, 1.7rem);
-    font-weight: 600;
-    letter-spacing: -0.03em;
-    font-variant-numeric: tabular-nums;
-}
-
-.lp-proof-figures span {
-    font-size: 17.5px;
-    color: var(--ink-2);
-}
-
-/* Three steps read as a sequence, so they run down the page joined by a
-   rule rather than sitting side by side as three interchangeable cards. The
-   heading holds its own column to keep the block off-centre. */
-.lp-steps {
-    display: grid;
-    grid-template-columns: minmax(0, 0.62fr) minmax(0, 1fr);
-    gap: 20px 56px;
-    align-items: start;
-    margin-bottom: 40px;
-}
-
-.lp-steps h2,
-.lp-split h2,
-.lp-spec h2,
-.lp-close h2 {
-    font-size: 1.15rem;
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    margin: 0 0 18px;
-}
-
-.lp-steps-intro h2 {
-    margin-bottom: 10px;
-}
-
-.lp-steps-intro p {
-    max-width: 32ch;
-    color: var(--ink-3);
-    font-size: 17.5px;
-}
-
-.lp-steps ol {
-    list-style: none;
-    margin: 0;
+/* The required columns, as chips rather than as a table. A five column table
+   inside a third of the page truncated every heading to "origin_", which
+   defeated the one thing the panel is there to say. */
+.lp-cols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0 0 12px;
     padding: 0;
+    list-style: none;
 }
 
-.lp-steps li {
-    position: relative;
-    padding: 0 0 22px 22px;
-    border-left: 1px solid var(--line);
-}
-
-.lp-steps li:last-child {
-    padding-bottom: 0;
-}
-
-/* A lit node on the rail marks each step without numbering it. */
-.lp-steps li::before {
-    content: "";
-    position: absolute;
-    left: -3.5px;
-    top: 7px;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--cost);
-}
-
-.lp-steps h3 {
-    margin: 0 0 6px;
-    font-size: 1rem;
-    font-weight: 600;
-    letter-spacing: -0.014em;
-}
-
-.lp-steps p {
-    margin: 0;
-    font-size: 17.5px;
+.lp-cols li {
+    padding: 4px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel-2);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px;
     color: var(--ink-2);
-    max-width: 56ch;
-    text-wrap: pretty;
 }
 
-@media (max-width: 760px) {
-    .lp-steps {
+.lp-row-label {
+    margin: 0 0 4px !important;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3) !important;
+}
+
+/* One real row, wrapping rather than truncating. */
+.lp-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 5px;
+    margin: 0 !important;
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 12px !important;
+    color: var(--ink-3) !important;
+    line-height: 1.7 !important;
+}
+
+.lp-csv-flag {
+    color: var(--cost);
+}
+
+@media (max-width: 900px) {
+    .lp-box-grid {
         grid-template-columns: 1fr;
-        gap: 20px;
+    }
+
+    .lp-box-step + .lp-box-step::before,
+    .lp-box-step + .lp-box-step::after {
+        display: none;
     }
 }
 
-.lp-split {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 22px;
+
+/* ---- The findings. The most persuasive thing on the site and it was not on
+   the page at all before: real output, from the engine, this request. ---- */
+.lp-found {
+    padding: 52px 0 10px;
+}
+
+.lp-found-head {
+    max-width: 60ch;
     margin-bottom: 26px;
 }
 
-.lp-split > div {
-    padding: 26px 28px;
+.lp-found-head h2 {
+    margin: 10px 0 12px;
+    font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+    line-height: 1.1;
+    letter-spacing: -0.032em;
+    font-weight: 600;
+}
+
+.lp-found-sub {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 17px;
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.lp-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.lp-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 22px 20px;
     background: var(--panel);
-    border: 1px solid var(--line);
+    border: 1px solid var(--line-soft);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
 }
 
-.lp-split p {
-    font-size: 17.5px;
-    color: var(--ink-2);
-    text-wrap: pretty;
-}
-
-.lp-split p:last-child {
-    margin-bottom: 0;
-}
-
-.lp-split a {
-    color: var(--carbon);
-}
-
-.lp-spec {
-    padding: 26px 28px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    background: var(--panel);
-    margin-bottom: 26px;
-}
-
-.lp-spec-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
-}
-
-.lp-spec-grid article {
-    padding: 16px 18px;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--panel-2);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.lp-spec-wide {
-    grid-column: 1 / -1;
-    background: linear-gradient(120deg, var(--carbon-soft), transparent 58%), var(--panel-2) !important;
-}
-
-.lp-spec-grid strong {
+.lp-card-rank {
+    margin: 0 0 12px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
-    font-size: 1.24rem;
-    font-weight: 500;
-    letter-spacing: -0.02em;
+    font-size: 12px;
+    color: var(--ink-3);
+}
+
+.lp-card h3 {
+    margin: 0 0 10px;
+    font-size: 1.14rem;
+    line-height: 1.22;
+    letter-spacing: -0.018em;
+    font-weight: 600;
+}
+
+.lp-card-now {
+    margin: 0 0 8px;
+    color: var(--ink-2);
+    font-size: 16px;
+    line-height: 1.45;
+}
+
+/* What to do about it. Lit, because it is the one line on the card that is a
+   decision rather than a description. */
+.lp-card-do {
+    margin: 0 0 18px;
+    padding-left: 12px;
+    border-left: 2px solid var(--carbon-line);
     color: var(--ink);
+    font-size: 16px;
+    line-height: 1.45;
+}
+
+.lp-card-saves {
+    display: flex;
+    gap: 22px;
+    margin: auto 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--line-soft);
+}
+
+.lp-card-saves dt {
+    margin: 0 0 3px;
+    color: var(--ink-3);
+    font-size: 13px;
+}
+
+.lp-card-saves dd {
+    margin: 0;
+    font-size: 1.32rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
 }
 
-.lp-spec-wide strong {
-    color: var(--carbon);
+.lp-found-more {
+    margin: 26px 0 0;
 }
 
-.lp-spec-grid span {
-    font-size: 17.5px;
-    line-height: 1.5;
-    color: var(--ink-2);
-}
-
-@media (max-width: 760px) {
-    .lp-spec-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+@media (max-width: 900px) {
+    .lp-cards {
+        grid-template-columns: 1fr;
     }
 }
 
-.lp-close {
-    padding: 40px 32px;
-    border-radius: var(--radius-lg);
-    background:
-        radial-gradient(34rem 20rem at 88% 8%, rgba(242, 145, 61, 0.22), transparent 62%),
-        radial-gradient(30rem 18rem at 4% 96%, rgba(63, 207, 142, 0.24), transparent 60%),
-        var(--panel-2);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    margin-bottom: 22px;
+
+/* ---- Why this is not already solved. Four short columns instead of the two
+   paragraphs of comparison this used to need. ---- */
+.lp-versus {
+    padding: 56px 0 10px;
 }
 
+.lp-versus h2,
+.lp-trust h2,
 .lp-close h2 {
-    color: var(--ink);
-    margin-bottom: 10px;
+    margin: 0 0 22px;
+    font-size: clamp(1.55rem, 3vw, 2.1rem);
+    line-height: 1.14;
+    letter-spacing: -0.03em;
+    font-weight: 600;
+}
+
+.lp-versus-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.lp-versus-grid article {
+    padding: 20px 18px;
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    background: var(--panel);
+}
+
+.lp-versus-grid p {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 16px;
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+.lp-versus-who {
+    margin-bottom: 8px !important;
+    color: var(--ink) !important;
+    font-weight: 600;
+    font-size: 16.5px !important;
+}
+
+.lp-versus-us {
+    border-color: var(--carbon-line) !important;
+    background: var(--carbon-soft) !important;
+}
+
+.lp-versus-us .lp-versus-who {
+    color: var(--carbon) !important;
+}
+
+@media (max-width: 900px) {
+    .lp-versus-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 560px) {
+    .lp-versus-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---- Credibility. One line each. The long version lives at /method. ---- */
+.lp-trust {
+    padding: 56px 0 10px;
+}
+
+.lp-trust-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    background: var(--line-soft);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.lp-trust-grid li {
+    padding: 20px 20px;
+    background: var(--page);
+}
+
+.lp-trust-grid strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 16.5px;
+    font-weight: 600;
+}
+
+.lp-trust-grid span {
+    color: var(--ink-2);
+    font-size: 16px;
+    line-height: 1.5;
+    text-wrap: pretty;
+}
+
+.lp-trust-grid a {
+    color: var(--ink-2);
+    text-underline-offset: 3px;
+}
+
+.lp-trust-grid a:hover {
+    color: var(--carbon);
+}
+
+@media (max-width: 720px) {
+    .lp-trust-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---- Close ---- */
+.lp-close {
+    margin: 60px 0 20px;
+    padding: 40px 34px 34px;
+    background: var(--panel);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
 }
 
 .lp-close p {
-    margin: 0 0 24px;
+    margin: 0 0 22px;
     color: var(--ink-2);
-    font-size: 18px;
-    max-width: 60ch;
+    font-size: 17px;
+    max-width: 56ch;
 }
 
-.lp-close .lp-primary {
-    background: var(--page);
-    color: var(--ink);
+.lp-built {
+    margin: 20px 0 0 !important;
+    padding-top: 18px;
+    border-top: 1px solid var(--line-soft);
+    color: var(--ink-3) !important;
+    font-size: 15px !important;
 }
 
+@media (max-width: 560px) {
+    .lp-close {
+        padding: 28px 20px 26px;
+    }
+}
 /* ==== The chain as a river. Money accumulating as goods move. ==== */
 .act-head {
     padding: 40px 0 26px;
@@ -2545,13 +2733,6 @@ select:disabled {
 /* Small screens: five nav items will not sit on one line beside the brand,
    and the stacked chain rows need two lines rather than one cramped one. */
 @media (max-width: 720px) {
-    .topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 14px 20px;
-    }
-
     .topnav {
         flex-wrap: wrap;
         gap: 8px 16px;
@@ -3367,34 +3548,6 @@ a.report-save {
     outline-offset: 4px;
 }
 
-/* The data handling section reuses the three-step rail, in green rather than
-   orange. Orange is the cost accent everywhere else on the site and this is
-   not a cost claim, it is the reassurance that sits under the upload button. */
-.lp-data li::before {
-    background: var(--carbon);
-}
-
-.lp-data-note {
-    grid-column: 1 / -1;
-    margin: 26px 0 0;
-    padding: 14px 18px;
-    border-left: 2px solid var(--line);
-    background: var(--panel);
-    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-    color: var(--ink-3);
-    font-size: 17px;
-    max-width: 82ch;
-    text-wrap: pretty;
-}
-
-.lp-data-note a {
-    color: var(--ink-2);
-}
-
-.lp-data-note a:hover {
-    color: var(--carbon);
-}
-
 /* ==== The report as one document ====
    Four pages became five steps of one page. The rail is the thing that fixes
    the confusion the split caused: it is always visible, it says which step
@@ -3773,6 +3926,23 @@ main:has(.report-layout) {
 
 body:has(.report-layout) .topbar-inner {
     max-width: 1320px;
+}
+
+/* The bar's contents live in .topbar-inner, so stacking them on a narrow
+   screen has to be applied there. Stacking .topbar does nothing, because it
+   has exactly one child, and while that rule was pointed at the wrong element
+   the brand wrapped onto three lines next to the nav. Kept next to the rule
+   it overrides, since the earlier small-screen block loses on source order. */
+@media (max-width: 720px) {
+    .topbar {
+        padding: 14px 20px;
+    }
+
+    .topbar-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }
 
 .topnav {

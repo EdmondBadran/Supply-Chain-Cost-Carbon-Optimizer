@@ -1,0 +1,17 @@
+{# Carbon, in the unit that tells the truth at that size.
+
+   Everything is stored in kg and most of the site divides by 1,000 and prints
+   tonnes to no decimal places. That reads as "0 t" for anything under half a
+   tonne, so a stage emitting 314 kg told the reader it emitted nothing. Below
+   a tonne this prints kg instead, and just over it keeps one decimal, so no
+   figure on the page rounds itself away to zero. #}
+{% macro co2e(kg) -%}
+{%- set value = kg or 0 -%}
+{%- if value < 1000 -%}
+{{ "{:,.0f}".format(value) }} kg
+{%- elif value < 10000 -%}
+{{ "{:,.1f}".format(value / 1000) }} t
+{%- else -%}
+{{ "{:,.0f}".format(value / 1000) }} t
+{%- endif -%}
+{%- endmacro %}

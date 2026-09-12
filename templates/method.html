@@ -15,15 +15,20 @@
 <section class="panel prose">
   <h2>The shape of the calculation</h2>
   <p>
-    Your CSV becomes a graph. Suppliers, warehouses and customer cities are
-    points. Every shipping route between two points is a lane. Orders going
-    the same way by the same transport mode are grouped into one lane, so a
-    year of deliveries to London becomes a single lane carrying a year of
-    weight.
+    Your CSV becomes a network. Suppliers, warehouses and customer cities are
+    points on it. Orders travelling between the same two points by the same
+    transport mode are grouped into one <strong>route</strong>, so a year of
+    deliveries to London becomes a single route carrying a year of weight.
   </p>
   <p>
-    Everything after that is worked out per lane, then added up. Nothing is
-    estimated at the company level and divided down.
+    Everything after that is worked out per route, then added up. Nothing is
+    estimated at company level and divided down.
+  </p>
+  <p class="source">
+    The freight industry calls a route between two points a <em>lane</em>, and
+    you will see that word in the code and in any carrier contract. This site
+    says "route" throughout, because it means the same thing and needs less
+    explaining.
   </p>
 </section>
 
@@ -32,17 +37,21 @@
   <p>
     City names are matched against a bundled GeoNames table of 34,135 cities
     across 244 countries, which gives a latitude and longitude for each end of
-    the lane. Distance is the great-circle distance between those two points,
+    the route. Distance is the great-circle distance between those two points,
     using the haversine formula on a 6,371 km earth radius.
   </p>
   <p class="caveat">
     <strong>What this misses:</strong> real freight does not travel in
-    straight lines. Road distance typically runs 15 to 25 percent longer than
-    great-circle, and sea routes can be far longer where they route around
-    land masses or through canals. Absolute distances here run low. The
-    comparison between two options on the same lane is unaffected, because
-    both are measured the same way, and that comparison is what the ranking
-    rests on.
+    straight lines, and how far it strays depends on the mode. Aircraft fly
+    close to great-circle. Road runs about 25 percent longer, rail about 40
+    percent, and a sea route around a land mass or through a canal can be
+    twice the straight line: Shanghai to Rotterdam is about 9,200 km direct
+    and about 19,500 km by ship. Measuring every mode as a straight line
+    therefore understates the slower modes more than the faster ones, and
+    those are the modes this tool recommends switching to. The direction of a
+    recommendation is rarely affected, because sea and rail win by so much
+    per tonne-km, but the size of the saving is optimistic. Treat the figures
+    as an upper bound on what a switch is worth.
   </p>
 </section>
 
@@ -50,9 +59,9 @@
   <h2>Emissions</h2>
   <p>
     Freight emissions are measured in kg CO2e per tonne-kilometre, which is
-    the standard unit for the job: one tonne carried one kilometre. A lane's
-    transport emissions are its annual weight in tonnes, times distance in km,
-    times the factor for its mode.
+    the standard unit for the job: one tonne carried one kilometre. A route's
+    transport emissions are its annual weight in tonnes, times its distance in
+    km, times the emission factor for its mode.
   </p>
   <table class="grid">
     <thead><tr><th>Mode</th><th>kg CO2e per tonne-km</th><th>Against sea</th></tr></thead>
@@ -75,7 +84,7 @@
   <p>
     Air is roughly 75 times sea per tonne-km. That single ratio is why air
     freight dominates the results on any chain that uses it, and why moving a
-    lane off air is almost always the largest carbon win available.
+    route off air freight is almost always the largest carbon saving available.
   </p>
 
   <h3>The other two sources of emissions</h3>
@@ -86,7 +95,7 @@
   </p>
   <p>
     <strong>Warehouse energy</strong> is each site's annual kWh times its grid
-    carbon intensity, shared across that site's lanes by weight. If you do not
+    carbon intensity, shared across that site's routes by weight. If you do not
     supply a grid intensity, {{ grid_default }} kg CO2e per kWh is assumed,
     which is roughly the world average. Supplying real figures matters here:
     the gap between a site on hydro power and one on a coal-heavy grid is
@@ -102,7 +111,7 @@
 <section class="panel prose">
   <h2>Cost to serve</h2>
   <p>
-    Cost per lane is transport, plus that lane's share of the warehouse it
+    Cost per route is its transport cost, plus its share of the warehouse it
     ships from, plus what its returns cost.
   </p>
   <table class="grid">
@@ -121,7 +130,7 @@
   </p>
   <p class="caveat">
     <strong>Treat these as a starting point.</strong> Real freight rates vary
-    enormously by contract, lane, volume and season, far more than emission
+    enormously by contract, route, volume and season, far more than emission
     factors do. If you have your own rates, they belong in
     <code>optimizer/factors.py</code> and the whole cost side of the tool gets
     sharper for it. The carbon side does not depend on them at all.
@@ -129,45 +138,85 @@
 
   <h3>How warehouse cost is shared out</h3>
   <p>
-    A site's annual storage and handling cost is divided across its lanes by
-    weight. A lane carrying a fifth of what leaves a warehouse absorbs a fifth
-    of that warehouse's cost.
+    A site's annual storage and handling cost is divided across its routes by
+    weight. A route carrying a fifth of everything that leaves a warehouse
+    absorbs a fifth of that warehouse's cost.
   </p>
   <p class="caveat">
     <strong>Why weight and not orders or revenue:</strong> splitting by order
     count under-charges heavy freight, which uses far more of a building than
     a small parcel does. Splitting by revenue mixes up cost to serve with
     margin, which are different questions. Weight is the closest honest proxy
-    for how much of a warehouse a lane actually consumes. It is still a proxy:
+    for how much of a warehouse a route actually uses. It is still a proxy:
     a pallet of something bulky and light occupies more space than its weight
     suggests.
+  </p>
+
+  <h3>Packaging</h3>
+  <p>
+    Charged per order, not per tonne-km, at
+    ${{ "%.2f"|format(packaging_cost) }} and {{ packaging_co2e }} kg CO2e each.
+    A parcel needs the same box whether it travels 20 km or 2,000, so this is
+    the one figure in the tool that distance does not touch. It is counted in
+    the warehousing stage on both the cost and the carbon side.
   </p>
 
   <h3>Returns</h3>
   <p>
     Each returned order is charged the outbound transport again at
-    {{ return_multiplier }} times, plus {{ return_handling }} USD of handling.
+    {{ return_multiplier }} times, plus
+    ${{ "%.2f"|format(return_handling) }} of handling.
+  </p>
+
+  <h3>Transit time</h3>
+  <p>
+    A mode switch is only useful if you know what it does to lead time, so
+    each route also gets a rough door-to-door estimate: distance divided by a
+    typical speed for the mode, plus a fixed allowance at each end for
+    collection, customs, terminal or port handling and final delivery.
+  </p>
+  <table class="grid">
+    <thead>
+      <tr><th>Mode</th><th class="num">km per day</th><th class="num">Fixed days</th></tr>
+    </thead>
+    <tbody>
+      {% for mode in transit_speed %}
+      <tr>
+        <td>{{ mode }}</td>
+        <td class="num">{{ "{:,}".format(transit_speed[mode]) }}</td>
+        <td class="num">{{ transit_fixed[mode] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="caveat">
+    <strong>These are planning figures, not schedules.</strong> Road is capped
+    by driver hours rather than vehicle speed, rail loses hours in terminals
+    and marshalling, and a container ship cruising at about 20 knots still
+    spends days in port at each end. They are the right order of magnitude and
+    nothing more. Use them to tell weeks from days, not to promise a date.
   </p>
 </section>
 
 <section class="panel prose">
   <h2>What counts as a problem</h2>
   <p>
-    A lane being expensive is a procurement question. A lane being dirty is a
-    reporting question. Neither is what this tool is for. It flags lanes where
-    changing the transport mode cuts <em>both</em> cost and carbon by at least
+    An expensive route is a procurement question. A high-carbon route is a
+    reporting question. Neither on its own is what this tool is for. It flags
+    only routes where changing the transport mode cuts <em>both</em> cost and
+    carbon by at least
     {{ "{:.0%}".format(flag_threshold) }} each.
   </p>
   <p>
-    Being large is not enough on its own. A lane already running the best mode
-    available to it has nothing to recover, so it never appears no matter how
-    big the number beside it is. The ranking runs on what a change would give
-    back, not on the size of the problem.
+    Being large is not enough on its own. A route already running the best mode
+    available to it has nothing to recover, so it never appears however big it
+    is. The ranking is based on what a change would save, not on the size of
+    the route.
   </p>
 
   <h3>Which mode changes are offered</h3>
   <p>
-    Without real routing data, the safe assumption is that a lane keeps
+    Without real routing data, the safe assumption is that a route keeps
     reaching its destination the way it already does.
   </p>
   <ul>
@@ -204,14 +253,22 @@
     sits, and applies a check appropriate to that stage.
   </p>
   <ul>
-    <li><strong>Suppliers and freight:</strong> lanes flagged by the mode-switch test above</li>
-    <li><strong>Warehousing:</strong> sites emitting at least 40 percent more carbon per tonne handled than the median of your other sites, which usually means a dirty grid rather than a badly run building</li>
-    <li><strong>Customers:</strong> destinations costing at least 50 percent more per tonne to serve than the median destination</li>
-    <li><strong>Returns:</strong> lanes where more than 8 percent of orders come back</li>
+    <li><strong>Inbound and outbound freight:</strong> routes flagged by the mode-switch test above</li>
+    <li><strong>Suppliers:</strong> the same flagged routes are named again here, because the mode is something you negotiate with a supplier. The money stays with the freight stage, so it is only counted once</li>
+    <li><strong>Warehousing:</strong> sites emitting at least 40 percent more carbon per tonne handled than the median of your other sites, which usually means a carbon-intensive electricity grid rather than a badly run building</li>
+    <li><strong>Customers:</strong> destinations costing at least 50 percent more per tonne to serve than the median destination. Routes already flagged for a mode switch are excluded, because there the cost is coming from the mode rather than from the distance to the customer</li>
+    <li><strong>Returns:</strong> routes where more than 8 percent of orders come back</li>
   </ul>
   <p class="caveat">
     Medians are used rather than averages throughout, so one extreme site or
     destination cannot drag the comparison line with it.
+  </p>
+  <p class="caveat">
+    <strong>A route can fail more than one check.</strong> When it does, the
+    ranked list in step 2 keeps it once, under whichever problem is worth
+    most, and offers the other as an alternative fix. The per-stage figures in
+    step 1 are not meant to be added together for that reason. The
+    de-duplicated total is the recoverable figure quoted at the top.
   </p>
 
   <h3>Supplier terms</h3>
@@ -228,7 +285,7 @@
       A missed date gets recovered by expediting, and expediting means air, so
       {{ "{:.0%}".format(expedite_share) }} of whatever runs late is assumed to
       fly. The cost and carbon shown are the difference between the lane's
-      normal mode and air for that share only. A supplier already shipping by
+      normal mode and air freight for that share only. A supplier already shipping by
       air raises nothing, because there is nothing faster to escalate to
     </li>
     <li>
@@ -285,7 +342,7 @@
     </dd>
     <dt>Spearman rank correlation</dt>
     <dd>
-      Whether the expensive routes and the dirty routes are the same routes,
+      Whether the expensive routes and the high-carbon routes are the same routes,
       which is the assumption this whole tool rests on. Ranks rather than
       Pearson on the raw values, because route sizes are heavy-tailed and one
       enormous route would otherwise decide the answer on its own.

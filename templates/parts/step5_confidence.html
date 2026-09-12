@@ -2,11 +2,11 @@
    somebody else's analysis. #}
 
 <p class="step-lede">
-  Nothing here changes a recommendation. It tells you how hard to lean on
-  one. Three questions. Is the waste concentrated enough to be worth chasing?
-  How far out could the estimate be, given the factors underneath it? And do
-  cost and carbon genuinely land on the same routes in your network, or only
-  in the pitch?
+  Nothing in this step changes a recommendation, it only tells you how much
+  weight to put on one. There are three questions worth asking: is the waste
+  concentrated enough to be worth chasing, how far out could the estimate be
+  given the factors underneath it, and do cost and carbon really land on the
+  same routes in your network?
 </p>
 
 {% set c = stats.concentration %}
@@ -30,7 +30,7 @@
     <span class="figure-foot">rank correlation across routes</span>
   </div>
   <div class="figure lit">
-    <span class="figure-label">Recoverable, with the doubt</span>
+    <span class="figure-label">Recoverable, low to high</span>
     <strong class="figure-value range cost-ink">${{ "{:,.0f}".format(un.p10) }}<span>to</span>${{ "{:,.0f}".format(un.p90) }}</strong>
     <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
   </div>
@@ -236,8 +236,9 @@
     {{ un.flag_range[0] }} and {{ un.flag_range[1] }} across the runs, most
     often {{ un.typical_flagged }}.
     {% if un.flag_range[1] - un.flag_range[0] <= 2 %}
-    That is a narrow spread. Which routes to fix is a far more stable answer
-    than how much they are worth. It is the one to act on.
+    That is a narrow spread, which tells you that the list of routes to fix is
+    a far more stable answer than the figure attached to it, and the list is
+    the part worth acting on.
     {% else %}
     That is a wide spread, and worth being honest about. Routes near the
     threshold cross it in one direction or the other depending on the factors
@@ -264,8 +265,9 @@
     </table>
   </div>
   <p class="source">
-    A route at 100% is one where the recommendation does not depend on the
-    factors being right, only on the ordering being right. Start there.
+    A route at 100% is one where the recommendation holds whatever the factors
+    turn out to be, because it depends only on the ordering rather than on the
+    numbers themselves. Those are the ones to open a conversation with.
   </p>
   {% endif %}
 </section>
@@ -275,9 +277,9 @@
   <p class="sub">
     Cost per tonne-kilometre takes size out of the comparison, so nothing
     appears here for being big. Distance from the median is counted in median
-    absolute deviations, not standard deviations. The reason is small samples.
-    With a few dozen routes, one genuine outlier drags an ordinary average far
-    enough that the outlier stops looking unusual. Anything past
+    absolute deviations rather than standard deviations, because with only a
+    few dozen routes one genuine outlier drags an ordinary average far enough
+    that the outlier itself stops looking unusual. Anything past
     {{ stats.outliers.threshold }} is listed.
   </p>
 
@@ -429,7 +431,8 @@
     {{ "%.2f"|format(se.cv) }}, so the annual figures divide down into months
     without lying to you.
     {% else %}
-    Volume is uneven. The coefficient of variation across months is
+    Volume is uneven across the year. The coefficient of variation between
+    months is
     {{ "%.2f"|format(se.cv) }}, with {{ se.peak.label }} running
     {{ se.peak.orders }} orders against {{ se.trough.orders }} in
     {{ se.trough.label }}{% if se.peak_to_trough %}, a factor of
@@ -488,9 +491,9 @@
     not just the headline percentage.
     {% else %}
     None of the {{ rt.tested }} routes with enough volume to judge is
-    genuinely worse than that. Some show a higher percentage. But every one of
-    their intervals still reaches down to the network rate, so the difference
-    is sample size rather than a problem with the route.
+    genuinely worse than that. Some do show a higher percentage, but every one
+    of their intervals still reaches down to the network rate, so what you are
+    seeing is sample size rather than a problem with the route.
     {% endif %}
   </p>
 </section>

@@ -1,9 +1,10 @@
 {# Step 1: what the chain is and what it costs. #}
+{% from "parts/_units.html" import co2e %}
 
 <p class="step-lede">
-  Every order you loaded has been collapsed into routes, and the routes into
-  stages. This is the whole chain on one page, with the money accumulating as
-  goods move through it.
+  Every order you loaded has been grouped into routes, and the routes into
+  stages. This is your whole supply chain on one page, with the cost building
+  up as goods move through it.
 </p>
 
 {% if report %}
@@ -15,7 +16,7 @@
   </div>
   <div class="figure">
     <span class="figure-label">Chain carbon a year</span>
-    <strong class="figure-value">{{ "{:,.0f}".format(report.overview.co2e / 1000) }} t</strong>
+    <strong class="figure-value">{{ co2e(report.overview.co2e) }}</strong>
     <span class="figure-foot">CO2e, all stages</span>
   </div>
   <div class="figure lit">
@@ -25,7 +26,7 @@
   </div>
   <div class="figure lit">
     <span class="figure-label">Carbon recoverable</span>
-    <strong class="figure-value carbon-ink">{{ "{:,.0f}".format(report.overview.recoverable_co2e / 1000) }} t</strong>
+    <strong class="figure-value carbon-ink">{{ co2e(report.overview.recoverable_co2e) }}</strong>
     <span class="figure-foot">{{ "{:.0%}".format(report.overview.co2e_share) }} of what you emit</span>
   </div>
 </div>
@@ -83,7 +84,7 @@
           <span class="cost-ink">${{ "{:,.0f}".format(mark.stage.cost) }}</span>
           {% endif %}
           {% if mark.stage.co2e %}
-          <span class="carbon-ink">{{ "{:,.0f}".format(mark.stage.co2e / 1000) }} t</span>
+          <span class="carbon-ink">{{ co2e(mark.stage.co2e) }}</span>
           {% endif %}
           {% if not mark.stage.cost and not mark.stage.co2e %}
           <span class="muted-ink">
@@ -108,7 +109,7 @@
         <span class="river-name">{{ flow.loop.stage.name }}</span>
         <span class="river-figures">
           <span class="cost-ink">${{ "{:,.0f}".format(flow.loop.stage.cost) }}</span>
-          <span class="carbon-ink">{{ "{:,.0f}".format(flow.loop.stage.co2e / 1000) }} t</span>
+          <span class="carbon-ink">{{ co2e(flow.loop.stage.co2e) }}</span>
         </span>
         {% if flow.loop.stage.problem_count %}
         <span class="river-flag">{{ flow.loop.stage.problem_count }} problem{{ "s" if flow.loop.stage.problem_count != 1 }}</span>
@@ -119,21 +120,22 @@
   </div>
 
   <p class="river-key">
-    The band thickens wherever cost is added. You are watching money
-    accumulate on your goods as they move. Suppliers and customers leave it
-    flat: their cost belongs to the leg either side of them, counted once. The
-    leg running backwards underneath is returns, going the wrong way and
-    paying for the trip a second time.
+    The band gets thicker wherever cost is added, so you are watching cost
+    build up on your goods as they move. Suppliers and customers leave it flat,
+    because their cost belongs to the freight leg on either side of them and is
+    counted there once. The line running backwards underneath is returns,
+    travelling the wrong way and paying for the trip a second time.
     <span class="river-hint">Pick any stage to open it.</span>
   </p>
 
   <details class="stage-editor" id="stage-editor"{{ " open" if stage_error }}>
     <summary>These are not your only options</summary>
     <p class="sub">
-      This is the chain the tool can measure, not the one you run. Rename a
-      stage to what your business calls it, move it, hide one that does not
-      apply, or add a step of your own. Hiding a stage only removes it from the
-      picture. The figures behind it are still counted in the totals.
+      These are the stages the tool can measure, which may not be the ones you
+      run. Rename any stage to what your business calls it, reorder them, hide
+      one that does not apply, or add a step of your own. Hiding a stage only
+      removes it from the picture: its figures are still counted in the
+      totals.
     </p>
 
     {% if stage_error %}
@@ -196,10 +198,10 @@
       </div>
       {% if stage.at_risk_cost or stage.at_risk_co2e %}
       <div class="at-risk">
-        <span>Recoverable here</span>
+        <span>At stake in this stage</span>
         <strong>
           {% if stage.at_risk_cost %}<span class="cost-ink">${{ "{:,.0f}".format(stage.at_risk_cost) }}</span>{% endif %}
-          {% if stage.at_risk_co2e %}<span class="carbon-ink">{{ "{:,.1f}".format(stage.at_risk_co2e / 1000) }} t</span>{% endif %}
+          {% if stage.at_risk_co2e %}<span class="carbon-ink">{{ co2e(stage.at_risk_co2e) }}</span>{% endif %}
         </strong>
       </div>
       {% endif %}
@@ -219,7 +221,7 @@
           <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
           {% endif %}
           {% if problem.co2e_at_stake %}
-          <span class="carbon-ink">{{ "{:,.1f}".format(problem.co2e_at_stake / 1000) }} t CO2e</span>
+          <span class="carbon-ink">{{ co2e(problem.co2e_at_stake) }} CO2e</span>
           {% endif %}
           {% if problem.note and not problem.cost_at_stake and not problem.co2e_at_stake %}
           <span class="problem-note">{{ problem.note }}</span>
@@ -235,7 +237,7 @@
     </ol>
     {% else %}
     <p class="empty">
-      Nothing here needs attention. Every part of this stage is already on the
+      Nothing here needs attention. Everything in this stage is already on the
       best option available to it.
     </p>
     {% endif %}

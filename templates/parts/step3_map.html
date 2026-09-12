@@ -1,9 +1,10 @@
 {# Step 3: the same findings on a map, and the what-if panels. #}
 
 <p class="step-lede">
-  The problems above, in the places they actually happen. Every line is one
-  route. Click any of them to try a different transport mode or a different
-  warehouse and watch the numbers move before you commit to anything.
+  The same problems, shown where they happen, with every line on the map
+  standing for one route. Click any of them to try a different transport mode
+  or a different warehouse and see what it does to cost and carbon before you
+  commit to anything.
 </p>
 
 <div id="finding" class="finding"></div>
@@ -13,8 +14,9 @@
     <div>
       <h3>Your chain, end to end</h3>
       <p class="sub">
-        Suppliers feed warehouses, warehouses serve customers. Every line is
-        one route. Hover to read it, click to open it, scroll to zoom.
+        Suppliers feed warehouses and warehouses serve customers, with each
+        line standing for one route. Hover over a line to read it, click to
+        open it, and scroll to zoom.
       </p>
     </div>
   </div>
@@ -52,7 +54,7 @@
   <div class="panel-head">
     <div>
       <h3>Fix these first</h3>
-      <p class="sub">Biggest saving at the top. Say how hard each one would be and the order changes to match what you can actually do.</p>
+      <p class="sub">Biggest saving at the top. Mark how hard each change would be and the list reorders itself around what you can realistically do.</p>
     </div>
   </div>
   <p id="wins-trouble" class="trouble" hidden></p>
@@ -64,10 +66,10 @@
     <div>
       <h3>What if the network were shaped differently</h3>
       <p class="sub">
-        Close a site and its work moves to whichever remaining site is
-        nearest and has room. The building stops costing you. Open one and the
-        routes closer to it move across. Every route is reassigned and
-        repriced, not estimated.
+        Close a site and its work moves to whichever remaining site is nearest
+        and has room, and you stop paying for the building. Open a new one and
+        the routes that are closer to it move across. Every affected route is
+        reassigned and repriced from scratch, not estimated.
       </p>
     </div>
   </div>
@@ -97,12 +99,13 @@
   <div id="network-result" class="network-result"></div>
 
   <p class="meta">
-    A site with a stated capacity is held to it. Without one, it is assumed
-    to absorb up to half as much again as it handles today. Every site says
-    which of the two it used. Past that, the overflow goes to the next
-    nearest, and the answer says so. A new site is priced at what your own
-    sites cost and burn per tonne, on an average grid. Nothing in your data
-    describes a building that does not exist yet.
+    A site that states a capacity in your warehouse file is held to it.
+    Without one, it is assumed to take up to 50 percent more than it handles
+    today, and each site is labelled so you can tell a measured limit from an
+    assumed one. Anything that will not fit goes to the next nearest site, and
+    the result says so. A new site is priced at the median cost and energy per
+    tonne of your existing sites, on an average grid, because nothing in your
+    data describes a building that does not exist yet.
   </p>
 </section>
 
@@ -129,7 +132,7 @@
 
   <section class="panel">
     <h3>Where the money goes</h3>
-    <p class="sub">Cost and carbon split by driver.</p>
+    <p class="sub">What is actually generating the cost and the carbon.</p>
     <div class="table-scroll">
       <table class="grid">
         <thead><tr><th>Driver</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
@@ -152,6 +155,6 @@
         </tbody>
       </table>
     </div>
-    <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} lanes.</p>
+    <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} routes.</p>
   </section>
 </div>
