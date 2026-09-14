@@ -34,7 +34,7 @@ LEGACY = {
     "/chain": "step-1",
     "/diagnosis": "step-2",
     "/dashboard": "step-3",
-    "/stats": "step-5",
+    "/stats": "step-4",
 }
 
 TINY_CSV = b"""origin_name,origin_city,origin_country,dest_city,dest_country,weight_kg,mode
@@ -111,11 +111,31 @@ class Routes(unittest.TestCase):
         self.assertIn("lane=3", location)
         self.assertTrue(location.endswith("#step-3"), location)
 
-    def test_every_step_is_on_the_page(self):
+    def test_every_part_is_on_the_page(self):
+        """The report is the short answer and four parts, and the fifth step
+        it used to have is gone rather than left behind empty."""
         body = self.client.get("/report").get_data(as_text=True)
-        for step in ("step-1", "step-2", "step-3", "step-4", "step-5"):
+        for step in ("overview", "step-1", "step-2", "step-3", "step-4"):
             with self.subTest(step=step):
                 self.assertIn('id="' + step + '"', body)
+        self.assertNotIn('id="step-5"', body)
+
+    def test_each_opportunity_is_described_once(self):
+        """Every opportunity used to appear in five forms on one page. Its
+        decision now lives only in its line in part two."""
+        body = self.client.get("/report").get_data(as_text=True)
+        self.assertEqual(body.count('class="row-decision"'), body.count('class="rec-row'))
+        self.assertNotIn("If you do only three things", body)
+        self.assertNotIn("The complete action plan", body)
+
+    def test_how_it_works_is_two_boxes_and_an_email(self):
+        body = self.client.get("/method").get_data(as_text=True)
+        self.assertEqual(body.count('class="hiw-box"'), 2)
+        self.assertIn("mailto:" + application.CONTACT_EMAIL, body)
+
+    def test_the_data_page_offers_the_upload_before_the_samples(self):
+        body = self.client.get("/data").get_data(as_text=True)
+        self.assertLess(body.index('name="orders"'), body.index('name="sample"'))
 
     def test_the_map_still_has_everything_its_script_needs(self):
         """The map moved from its own page into a section of this one. Its
@@ -144,16 +164,19 @@ class Routes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.mimetype.startswith("text/csv"))
         self.assertIn("attachment", response.headers["Content-Disposition"])
+        self.assertIn("sample", response.headers["Content-Disposition"])
+        # Excel only reads a CSV as UTF-8 when it starts with a byte order mark.
+        self.assertTrue(response.get_data().startswith(b"\xef\xbb\xbf"))
         rows = response.get_data(as_text=True).strip().split("\n")
         self.assertGreater(len(rows), 1)
         for column in (
-            "cost at stake usd per year",
-            "current mode",
-            "proposed mode",
-            "current cost usd per year",
-            "proposed cost usd per year",
-            "share of simulations",
-            "check before acting",
+            "Cost saving (USD per year)",
+            "Current mode",
+            "Proposed mode",
+            "Current cost (USD per year)",
+            "Proposed cost (USD per year)",
+            "Simulations still worth it (%)",
+            "Check before acting",
         ):
             self.assertIn(column, rows[0])
 
@@ -252,6 +275,18 @@ class Isolation(unittest.TestCase):
         self.assertIn("dest_city", body)
         report = client.get("/report").get_data(as_text=True)
         self.assertIn("1 order needs attention", report)
+
+    def test_sample_figures_say_they_are_not_real(self):
+        """Anywhere the sample's figures appear, the page says the company is
+        invented. Once a real file is loaded, it stops saying so."""
+        client = application.app.test_client()
+        for path in ("/", "/report", "/report/summary"):
+            with self.subTest(path=path):
+                self.assertIn("not a real company", client.get(path).get_data(as_text=True))
+        self.upload(client)
+        for path in ("/", "/report", "/report/summary"):
+            with self.subTest(path=path, loaded="upload"):
+                self.assertNotIn("not a real company", client.get(path).get_data(as_text=True))
 
     def test_a_non_csv_is_refused(self):
         client = application.app.test_client()

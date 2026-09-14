@@ -1,4 +1,6 @@
-{# Step 1: what the chain is and what it costs. #}
+{# Part 1: the chain as it runs today, what it costs and emits, and where.
+   What could be recovered is in the short answer, so this part is only the
+   baseline. #}
 {% from "parts/_units.html" import co2e %}
 
 {% if report %}
@@ -6,35 +8,27 @@
   Your supply chain costs <strong>${{ "{:,.0f}".format(report.overview.cost) }}</strong>
   a year and produces <strong>{{ co2e(report.overview.co2e) }}</strong> of CO2e.
 </p>
-{% if report.problems %}
-<p class="step-lede">
-  <span class="cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</span>
-  of that cost and <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }}</span>
-  of that carbon sit on {{ report.problems|length }}
-  opportunit{{ "ies" if report.problems|length != 1 else "y" }}.
-</p>
-{% endif %}
 
 <div class="figure-row">
   <div class="figure">
     <span class="figure-label">Chain cost a year</span>
     <strong class="figure-value">${{ "{:,.0f}".format(report.overview.cost) }}</strong>
-    <span class="figure-foot">across {{ "{:,}".format(report.overview.routes) }} routes</span>
+    <span class="figure-foot">all stages</span>
   </div>
   <div class="figure">
     <span class="figure-label">Chain carbon a year</span>
     <strong class="figure-value">{{ co2e(report.overview.co2e) }}</strong>
     <span class="figure-foot">CO2e, all stages</span>
   </div>
-  <div class="figure lit">
-    <span class="figure-label">Money recoverable</span>
-    <strong class="figure-value cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</strong>
-    <span class="figure-foot">{{ "{:.0%}".format(report.overview.cost_share) }} of what you spend</span>
+  <div class="figure">
+    <span class="figure-label">Routes</span>
+    <strong class="figure-value">{{ "{:,}".format(report.overview.routes) }}</strong>
+    <span class="figure-foot">from {{ "{:,}".format(summary.orders) }} orders</span>
   </div>
-  <div class="figure lit">
-    <span class="figure-label">Carbon recoverable</span>
-    <strong class="figure-value carbon-ink">{{ co2e(report.overview.recoverable_co2e) }}</strong>
-    <span class="figure-foot">{{ "{:.0%}".format(report.overview.co2e_share) }} of what you emit</span>
+  <div class="figure">
+    <span class="figure-label">Shipped a year</span>
+    <strong class="figure-value">{{ co2e(summary.weight_kg) }}</strong>
+    <span class="figure-foot">to {{ summary.customers }} destination{{ "s" if summary.customers != 1 }}</span>
   </div>
 </div>
 {% endif %}
@@ -186,6 +180,61 @@
   </div>
 </section>
 {% endfor %}
+
+{% if report %}
+<details class="panel breakdowns">
+  <summary>Cost and carbon by driver and by destination</summary>
+  <div class="split-2">
+    <section>
+      <h3>By driver</h3>
+      <p class="sub">What is actually generating the cost and the carbon.</p>
+      <div class="table-scroll" tabindex="0">
+        <table class="grid">
+          <thead><tr><th>Driver</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Transport</td>
+              <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
+              <td class="num">{{ "{:,.1f}".format(totals.transport_co2e / 1000) }} t</td>
+            </tr>
+            <tr>
+              <td>Warehouse and packaging</td>
+              <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
+              <td class="num">{{ "{:,.1f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
+            </tr>
+            <tr>
+              <td>Returns</td>
+              <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
+              <td class="num">{{ "{:,.1f}".format(totals.returns_co2e / 1000) }} t</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} routes.</p>
+    </section>
+
+    <section>
+      <h3>By destination</h3>
+      <p class="sub">Top eight by cost to serve.</p>
+      <div class="table-scroll" tabindex="0">
+        <table class="grid">
+          <thead><tr><th>Destination</th><th class="num">Orders</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
+          <tbody>
+          {% for region in regions %}
+            <tr>
+              <td>{{ region.name }}</td>
+              <td class="num">{{ "{:,}".format(region.orders) }}</td>
+              <td class="num">${{ "{:,.0f}".format(region.cost) }}</td>
+              <td class="num">{{ "{:,.1f}".format(region.co2e / 1000) }} t</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</details>
+{% endif %}
 
 {% if flow %}
 <details class="stage-editor" id="stage-editor"{{ " open" if stage_error }}>

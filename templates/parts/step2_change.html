@@ -1,4 +1,6 @@
-{# Step 2: everything wrong, ranked across stages, one line each. #}
+{# Part 2: every opportunity, ranked, and each one described once. Collapsed
+   a line is the decision; open, it says what to do, what it is worth, what
+   to check and how the figures were worked out. #}
 {% from "parts/_ui.html" import rec_row %}
 
 {% if report and report.problems %}
@@ -8,8 +10,8 @@
 
 <p class="list-key">
   Ranked by the share of your total cost and carbon each one recovers.
-  <span class="on-screen">Open any line for the evidence, the calculation and
-  what to check.</span>
+  <span class="on-screen">Open any line for what to do, what it is worth,
+  what to check and the calculation.</span>
 </p>
 
 <ol class="rec-list">
@@ -17,9 +19,11 @@
   {% if loop.index == 4 %}
   <li class="rec-divider" aria-hidden="true"><span>The rest, in order</span></li>
   {% endif %}
-  {{ rec_row(problem, loop.index, report.overview.routes) }}
+  {{ rec_row(problem, loop.index, report.overview.routes, report.plan[loop.index0]) }}
   {% endfor %}
 </ol>
+
+<p class="list-foot">{{ report.closing }}</p>
 {% else %}
 <p class="step-lede">
   Nothing in this chain is on a transport mode that a cheaper and cleaner one

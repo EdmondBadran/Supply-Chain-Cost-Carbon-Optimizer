@@ -1,5 +1,6 @@
-{# Step 5: how much weight to put on the recommendations. The answer comes
-   first in plain words; the statistics behind it are one click away. #}
+{# Part 4: how much weight the figures will take. Confidence first, in plain
+   words, then whether the file loaded completely, what the tool does not
+   account for and the factors behind it. The statistics are one click away. #}
 {% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd %}
 
 {% set c = stats.concentration %}
@@ -64,6 +65,14 @@
   {% endif %}
 </section>
 
+{% if ingest %}
+<section class="panel data-panel" id="data-check" aria-labelledby="data-title">
+  <h3 id="data-title">Was the data complete?</h3>
+  <p class="sub">Every order in the file is either used or listed with the reason it was not.</p>
+  {% include "parts/data_check.html" %}
+</section>
+{% endif %}
+
 {% if report %}
 <section class="panel limits-panel" aria-labelledby="limits-title">
   <h3 id="limits-title">What this does not account for</h3>
@@ -75,7 +84,7 @@
 </section>
 
 <details class="panel quiet-details" id="factors">
-  <summary>Factors, distances and sources</summary>
+  <summary>Factors, formulas and sources</summary>
   <div class="table-scroll" tabindex="0">
     <table class="grid">
       <thead>
@@ -102,15 +111,32 @@
       </tbody>
     </table>
   </div>
+  <h4 class="factors-sub">How each figure is worked out</h4>
+  <dl class="formulas">
+    {% for name, words in report.method.formulas %}
+    <dt>{{ name }}</dt>
+    <dd>{{ words }}</dd>
+    {% endfor %}
+  </dl>
+  <h4 class="factors-sub">Assumptions</h4>
   <dl class="formulas">
     {% for name, words in report.method.assumptions %}
     <dt>{{ name }}</dt>
     <dd>{{ words }}</dd>
     {% endfor %}
   </dl>
-  <a class="ghost-link" href="{{ url_for('method') }}">Every formula and source</a>
+  <p class="source">
+    The full method, with every source, is available from
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+  </p>
 </details>
 {% endif %}
+
+<p class="print-only source">
+  The statistics behind this confidence, from how concentrated the cost is to
+  how far the saving could move, are in the report on screen, under the full
+  uncertainty analysis in this part.
+</p>
 
 <details class="deep" id="uncertainty-detail">
 <summary>See full uncertainty analysis</summary>

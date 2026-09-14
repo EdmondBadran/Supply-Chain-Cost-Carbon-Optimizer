@@ -4,6 +4,12 @@
 
 {% block content %}
 
+{#
+  Upload first, because a visitor's own file is what they came for. The two
+  samples sit underneath as a glimpse, one line each, for anybody not ready
+  to share a file yet.
+#}
+
 {% if error %}
 <div class="notice error">{{ error }}</div>
 {% endif %}
@@ -21,119 +27,56 @@
 <div class="upload-check">{% include "parts/data_check.html" %}</div>
 {% endif %}
 
+<section class="data-head">
+  <p class="eyebrow">Your data</p>
+  <h1>Upload your orders</h1>
+  <p class="sub">
+    A CSV export of a year of order lines is all it needs. Rows that cannot be
+    read are listed by line number and the rest still loads.
+    <a href="{{ url_for('privacy') }}">Nothing you upload is stored.</a>
+  </p>
+</section>
+
 {% if summary %}
-<section class="panel loaded-now">
-  <div>
-    <h2>Loaded right now</h2>
-    <p class="sub">
-      {% if loaded_sample %}
-      The {{ samples[loaded_sample].label|lower }} sample.
-      {% else %}
-      Your own file.
-      {% endif %}
-      Every figure in the report is derived from it.
-    </p>
-    <div class="stats">
-      <div class="stat lead"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></div>
-      <div class="stat"><span>Warehouses</span><strong>{{ summary.warehouses }}</strong></div>
-      <div class="stat"><span>Destinations</span><strong>{{ summary.customers }}</strong></div>
-      <div class="stat"><span>Routes</span><strong>{{ summary.edges }}</strong></div>
-      <div class="stat"><span>Countries</span><strong>{{ summary.countries }}</strong></div>
-      <div class="stat"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></div>
-    </div>
-    {% if summary.first_order %}
-    <p class="meta">Covering {{ summary.first_order }} to {{ summary.last_order }}.</p>
-    {% endif %}
-  </div>
-  <div class="row-actions">
-    <a class="primary" href="{{ url_for('report_page') }}">Read the report</a>
-    <a class="ghost-link" href="{{ url_for('findings_csv') }}">Download the findings</a>
+<section class="loaded-bar" aria-label="Loaded right now">
+  <p class="loaded-what">
+    <span class="loaded-label">Loaded now</span>
+    {% if loaded_sample %}{{ samples[loaded_sample].label }}, sample data{% else %}Your own file{% endif %}
+  </p>
+  <p class="loaded-fact"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></p>
+  <p class="loaded-fact"><span>Routes</span><strong>{{ summary.edges }}</strong></p>
+  <p class="loaded-fact"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></p>
+  <div class="loaded-actions">
+    <a class="btn btn-small" href="{{ url_for('report_page') }}">Read the report</a>
+    <a class="btn btn-small btn-quiet" href="{{ url_for('findings_csv') }}">Download CSV</a>
     <form method="post" action="{{ url_for('clear') }}">
-      <button class="ghost" type="submit">Clear this data</button>
+      <button class="btn btn-small btn-quiet" type="submit">Clear this data</button>
     </form>
   </div>
 </section>
 {% endif %}
 
-<section class="panel">
-  <h2>{% if summary %}Load a different example{% else %}Start with an example{% endif %}</h2>
-  <p class="sub">
-    Two fictional companies, each with genuine problems built into the data.
-    Loading one runs the full analysis on it, which is the quickest way to see
-    what the tool does before you point it at anything of your own. Every
-    figure below is read from the sample files, not typed in by hand.
-  </p>
-
-  <div class="sample-cards">
-    {% for key, spec in samples.items() %}
-    {% set fact = facts[key] %}
-    <article class="sample-card{{ ' is-loaded' if key == loaded_sample }}">
-      <h3>{{ spec.label }}</h3>
-      <p class="sample-blurb">{{ spec.blurb }}</p>
-
-      <dl class="sample-facts">
-        <div>
-          <dt>Orders</dt>
-          <dd>{{ "{:,}".format(fact.orders) }}</dd>
-        </div>
-        <div>
-          <dt>Network</dt>
-          <dd>{{ fact.suppliers }} suppliers, {{ fact.warehouses }} warehouse{{ "s" if fact.warehouses != 1 }}, {{ fact.customers }} cities</dd>
-        </div>
-        <div>
-          <dt>Costs a year</dt>
-          <dd>${{ "{:,.0f}".format(fact.cost) }}</dd>
-        </div>
-        <div>
-          <dt>Emits a year</dt>
-          <dd>{{ "{:,.0f}".format(fact.co2e / 1000) }} t CO2e</dd>
-        </div>
-        <div>
-          <dt>Problems found</dt>
-          <dd>{{ fact.problems }}</dd>
-        </div>
-        <div>
-          <dt>Recoverable a year</dt>
-          <dd class="cost-ink">${{ "{:,.0f}".format(fact.recoverable_cost) }} and {{ "{:,.0f}".format(fact.recoverable_co2e / 1000) }} t</dd>
-        </div>
-      </dl>
-
-      <form method="post" action="{{ url_for('sample') }}">
-        <input type="hidden" name="sample" value="{{ key }}">
-        <button class="{{ 'ghost' if key == loaded_sample else 'primary' }}"
-                type="submit"{{ ' disabled' if key == loaded_sample }}>
-          {% if key == loaded_sample %}
-            Loaded now
-          {% else %}
-            Run the report on this
-          {% endif %}
-        </button>
-      </form>
-    </article>
-    {% endfor %}
-  </div>
-</section>
-
-<section class="panel">
-  <h2>Or load your own</h2>
-  <p class="sub">
-    A CSV export of order lines. Anything that cannot be read is reported back
-    by line number and the rest of the file still loads, so one bad row does not
-    cost you the whole import.
-    <a href="{{ url_for('privacy') }}">Nothing you load is stored.</a>
-  </p>
-
+<section class="panel upload-panel">
   <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
     <label for="orders">Orders file, required</label>
     <input id="orders" type="file" name="orders" accept=".csv" required>
 
-    <label for="warehouses">Warehouse costs, optional</label>
-    <input id="warehouses" type="file" name="warehouses" accept=".csv">
+    <p class="upload-needs">
+      <span class="upload-needs-label">Five columns are enough</span>
+      <code>origin_name</code> <code>origin_city</code> <code>dest_city</code>
+      <code>weight_kg</code> <code>mode</code>
+    </p>
 
-    <label for="suppliers">Suppliers, optional</label>
-    <input id="suppliers" type="file" name="suppliers" accept=".csv">
+    <details class="upload-more">
+      <summary>Add a warehouse or supplier file</summary>
+      <label for="warehouses">Warehouse costs, optional</label>
+      <input id="warehouses" type="file" name="warehouses" accept=".csv">
 
-    <button class="primary" type="submit">Upload and analyse</button>
+      <label for="suppliers">Suppliers, optional</label>
+      <input id="suppliers" type="file" name="suppliers" accept=".csv">
+    </details>
+
+    <button class="btn btn-strong upload-go" type="submit">Upload and analyse</button>
   </form>
 
   <details class="format">
@@ -174,6 +117,36 @@
       Malmö and Jönköping resolve the same as Malmoe and Joenkoeping.
     </p>
   </details>
+</section>
+
+<section class="sample-strip" aria-labelledby="samples-title">
+  <h2 id="samples-title">No file to hand? Try a sample</h2>
+  <p class="sub">
+    Two example companies with problems built into their data. Loading one
+    runs the full analysis on it.
+  </p>
+  <p class="sample-note">
+    <span class="sample-note-tag">Sample data</span>
+    <span>Neither company is real. Their data is generated to follow realistic patterns.</span>
+  </p>
+
+  <ul class="sample-list">
+    {% for key, spec in samples.items() %}
+    {% set fact = facts[key] %}
+    <li class="sample-item{{ ' is-loaded' if key == loaded_sample }}">
+      <p class="sample-item-text">
+        <strong>{{ spec.label }}</strong>
+        <span>{{ "{:,}".format(fact.orders) }} orders &middot; {{ fact.routes }} routes &middot; {{ fact.problems }} opportunit{{ "ies" if fact.problems != 1 else "y" }}</span>
+      </p>
+      <form method="post" action="{{ url_for('sample') }}">
+        <input type="hidden" name="sample" value="{{ key }}">
+        <button class="btn btn-small btn-quiet" type="submit"{{ ' disabled' if key == loaded_sample }}>
+          {{ "Loaded now" if key == loaded_sample else "Try this sample" }}
+        </button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
 </section>
 
 {% endblock %}

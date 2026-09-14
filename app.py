@@ -131,6 +131,22 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
 if os.environ.get("FLASK_DEBUG", "1") != "0":
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
+# Where the How it works page sends anybody who wants the full method. The
+# long write-up is a document sent on request rather than a page.
+CONTACT_EMAIL = "edmondbadran42@gmail.com"
+
+
+@app.context_processor
+def site_details():
+    """Details any page may quote about the tool itself. The figures are read
+    from the engine, so a threshold changed there is changed on every page."""
+    return {
+        "contact_email": CONTACT_EMAIL,
+        "flag_threshold": scoring.FLAG_THRESHOLD,
+        "confidence_checks": stats.CONFIDENCE_CHECKS,
+        "confidence_high": diagnosis.CONFIDENCE_HIGH,
+    }
+
 
 def ensure_data(conn):
     """Never let a page open empty. A cold start loads the sample, so the
@@ -163,8 +179,8 @@ def index():
             "landing.html",
             summary=db.summary(conn),
             report=diagnosis.build(conn),
-            stages=chain.build(conn),
-            facts=sample_facts()[DEFAULT_SAMPLE],
+            using_sample=db.get_meta(conn, "source") == "sample",
+            subject=subject_of(conn),
         )
 
 
@@ -254,6 +270,7 @@ def summary_page():
             report=report,
             uncertainty=stats.uncertainty(scoring.rank(conn)) if report else None,
             subject=subject_of(conn),
+            using_sample=db.get_meta(conn, "source") == "sample",
             generated=date.today().strftime("%d %B %Y"),
             factor_table=factor_rows(),
             flag_threshold=scoring.FLAG_THRESHOLD,
@@ -276,7 +293,7 @@ LEGACY_STEPS = {
     "/chain": "step-1",
     "/diagnosis": "step-2",
     "/dashboard": "step-3",
-    "/stats": "step-5",
+    "/stats": "step-4",
 }
 
 
@@ -357,33 +374,9 @@ def start_upload():
 
 @app.route("/method")
 def method():
-    return render_template(
-        "method.html",
-        emissions=factors.EMISSION_FACTORS,
-        costs=factors.COST_FACTORS,
-        packaging_co2e=factors.PACKAGING_KG_CO2E_PER_ORDER,
-        packaging_cost=factors.PACKAGING_COST_PER_ORDER,
-        return_multiplier=factors.RETURN_LEG_MULTIPLIER,
-        return_handling=factors.RETURN_HANDLING_COST,
-        grid_default=factors.DEFAULT_GRID_INTENSITY,
-        flag_threshold=scoring.FLAG_THRESHOLD,
-        effort_weights=scoring.EFFORT_WEIGHT,
-        sea_minimum=scoring.SEA_MINIMUM_KM,
-        surface_range=scoring.SURFACE_RANGE_KM,
-        expedite_share=factors.EXPEDITE_SHARE_OF_LATE,
-        on_time_target=chain.ON_TIME_TARGET,
-        lead_time_limit=chain.LEAD_TIME_LONG_DAYS,
-        moq_months=chain.MOQ_MONTHS_LIMIT,
-        capacity_headroom=scoring.CAPACITY_HEADROOM,
-        factor_spread=stats.FACTOR_SPREAD,
-        trials=stats.TRIALS,
-        transit_speed=factors.TRANSIT_KM_PER_DAY,
-        transit_fixed=factors.TRANSIT_FIXED_DAYS,
-        circuity=factors.CIRCUITY,
-        confidence_high=diagnosis.CONFIDENCE_HIGH,
-        confidence_moderate=diagnosis.CONFIDENCE_MODERATE,
-        confidence_checks=stats.CONFIDENCE_CHECKS,
-    )
+    """How it works, in two boxes. The full method is a document sent on
+    request, so the page stays short enough to be read."""
+    return render_template("method.html")
 
 
 @app.route("/privacy")
@@ -397,43 +390,58 @@ def privacy():
     )
 
 
+# Read left to right the way the report is: what the opportunity is, what it
+# is worth, how sure to be, what to do. The evidence behind each saving comes
+# after, current and proposed side by side. Every heading carries its unit.
 CSV_COLUMNS = [
-    "rank",
-    "type",
-    "stage",
-    "route or item",
-    "origin",
-    "destination",
-    "change",
-    "current mode",
-    "proposed mode",
-    "straight line km",
-    "current mode km",
-    "proposed mode km",
-    "weight tonnes per year",
-    "orders per year",
-    "current cost usd per year",
-    "proposed cost usd per year",
-    "cost at stake usd per year",
-    "cost reduction share",
-    "current co2e kg per year",
-    "proposed co2e kg per year",
-    "co2e at stake kg per year",
-    "co2e reduction share",
-    "current transit days",
-    "proposed transit days",
-    "confidence",
-    "share of simulations",
-    "share of chain cost",
-    "share of chain carbon",
-    "check before acting",
-    "what to do",
-    "effort",
+    "Rank",
+    "Opportunity",
+    "Type",
+    "Stage",
+    "Origin",
+    "Destination",
+    "Change",
+    "Current mode",
+    "Proposed mode",
+    "Cost saving (USD per year)",
+    "CO2e avoided (kg per year)",
+    "Cost cut on route (%)",
+    "CO2e cut on route (%)",
+    "Confidence",
+    "Simulations still worth it (%)",
+    "Current transit (days)",
+    "Proposed transit (days)",
+    "What to do",
+    "Check before acting",
+    "Current cost (USD per year)",
+    "Proposed cost (USD per year)",
+    "Current CO2e (kg per year)",
+    "Proposed CO2e (kg per year)",
+    "Weight (tonnes per year)",
+    "Orders per year",
+    "Straight-line distance (km)",
+    "Current mode distance (km)",
+    "Proposed mode distance (km)",
+    "Share of chain cost (%)",
+    "Share of chain CO2e (%)",
+    "Effort",
 ]
+
+EFFORT_LABELS = {"low": "Easy", "med": "Medium", "high": "Hard"}
 
 
 def _csv_number(value, places=2):
-    return "" if value is None else round(value, places)
+    """A bare number, so a spreadsheet can sum and sort the column without
+    anybody reformatting it first."""
+    if value is None:
+        return ""
+    return int(round(value)) if places == 0 else round(value, places)
+
+
+def _csv_percent(share, places=1):
+    """A share written as percentage points, the way a spreadsheet reader
+    expects to see one."""
+    return "" if share is None else _csv_number(share * 100, places)
 
 
 @app.route("/findings.csv")
@@ -442,15 +450,17 @@ def findings_csv():
 
     A report somebody agrees with is still a web page. This is the same
     findings in the form the next conversation actually happens in, which is
-    a spreadsheet with a column for who is doing it. Route changes carry the
-    current and proposed figures side by side, so the saving in each row can be
-    checked with a subtraction.
+    a spreadsheet with a column for who is doing it. One row per opportunity,
+    one header row, plain column names with the unit in brackets. Route
+    changes carry the current and proposed figures side by side, so the
+    saving in each row can be checked with a subtraction.
     """
     with store.workspace() as conn:
         ensure_data(conn)
         report = diagnosis.build(conn)
         if report is None:
             return redirect(url_for("report_page"))
+        sample = db.get_meta(conn, "source") == "sample"
 
         buffer = io.StringIO()
         writer = csv.writer(buffer)
@@ -462,42 +472,50 @@ def findings_csv():
             writer.writerow(
                 [
                     index,
-                    problem["kind"] or "",
-                    problem["stage"],
                     problem["title"],
+                    "Route mode change" if route else "Operational",
+                    problem["stage"],
                     route.get("origin", ""),
                     route.get("dest", ""),
-                    problem["change"] or "",
-                    now.get("mode", ""),
-                    proposed.get("mode", ""),
+                    (
+                        now["mode"].title() + " to " + proposed["mode"].title()
+                        if route
+                        else problem["change"] or ""
+                    ),
+                    now.get("mode", "").title(),
+                    proposed.get("mode", "").title(),
+                    _csv_number(problem["cost_at_stake"] or 0),
+                    _csv_number(problem["co2e_at_stake"] or 0, 1),
+                    _csv_percent(route.get("cost_pct")),
+                    _csv_percent(route.get("co2e_pct")),
+                    (problem["confidence_label"] or "not simulated").capitalize(),
+                    _csv_percent(problem["confidence"], 0),
+                    _csv_number(now.get("days"), 1),
+                    _csv_number(proposed.get("days"), 1),
+                    problem["action"],
+                    "; ".join(problem["checks"]),
+                    _csv_number(now.get("cost")),
+                    _csv_number(proposed.get("cost")),
+                    _csv_number(now.get("co2e"), 1),
+                    _csv_number(proposed.get("co2e"), 1),
+                    _csv_number(route.get("weight_t"), 3),
+                    route.get("orders", ""),
                     _csv_number(route.get("straight_km"), 0),
                     _csv_number(now.get("route_km"), 0),
                     _csv_number(proposed.get("route_km"), 0),
-                    _csv_number(route.get("weight_t"), 3),
-                    route.get("orders", ""),
-                    _csv_number(now.get("cost")),
-                    _csv_number(proposed.get("cost")),
-                    round(problem["cost_at_stake"] or 0, 2),
-                    _csv_number(route.get("cost_pct"), 4),
-                    _csv_number(now.get("co2e")),
-                    _csv_number(proposed.get("co2e")),
-                    round(problem["co2e_at_stake"] or 0, 2),
-                    _csv_number(route.get("co2e_pct"), 4),
-                    _csv_number(now.get("days"), 1),
-                    _csv_number(proposed.get("days"), 1),
-                    problem["confidence_label"] or "not simulated",
-                    _csv_number(problem["confidence"], 3),
-                    "{:.4f}".format(problem["cost_share"]),
-                    "{:.4f}".format(problem["co2e_share"]),
-                    "; ".join(problem["checks"]),
-                    problem["action"],
-                    problem["effort"] or "",
+                    _csv_percent(problem["cost_share"], 2),
+                    _csv_percent(problem["co2e_share"], 2),
+                    EFFORT_LABELS.get(problem["effort"], ""),
                 ]
             )
 
-    name = "route-opportunities-" + date.today().isoformat() + ".csv"
+    name = "overlap-{}route-opportunities-{}.csv".format(
+        "sample-" if sample else "", date.today().isoformat()
+    )
+    # The byte order mark is what makes Excel read the file as UTF-8, so a
+    # city like Malmö arrives intact rather than as two stray characters.
     return Response(
-        buffer.getvalue(),
+        "﻿" + buffer.getvalue(),
         mimetype="text/csv",
         headers={"Content-Disposition": 'attachment; filename="' + name + '"'},
     )

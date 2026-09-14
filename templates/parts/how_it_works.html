@@ -1,0 +1,46 @@
+{# How it works, in two boxes. Shared by the landing page and the How it works
+   page so the explanation is written once. The figures come from the engine
+   through the site context, never typed in. #}
+{% from "parts/_ui.html" import pct %}
+
+{% macro how_it_works(level=2) -%}
+<div class="hiw-grid">
+  <article class="hiw-box">
+    <p class="hiw-label">1 &middot; What it works out</p>
+    <h{{ level }}>A yearly cost and carbon figure for every route</h{{ level }}>
+    <p>
+      You upload a year of shipping orders. Orders that travel between the
+      same two places by the same transport mode are grouped into one route,
+      so thousands of order lines become a few dozen routes.
+    </p>
+    <p>
+      For each route, the weight shipped times the distance times a standard
+      rate for its mode gives a yearly freight cost and CO2e. Warehouse,
+      packaging and returns are added on top. Carbon rates follow DEFRA and
+      GLEC, the basis of most freight carbon reporting. Cost rates are typical
+      industry rates, not your contract prices.
+    </p>
+  </article>
+  <article class="hiw-box">
+    <p class="hiw-label">2 &middot; What it recommends</p>
+    <h{{ level }}>Only changes that cut cost and carbon together</h{{ level }}>
+    <p>
+      Each route is priced again on every realistic alternative, such as air
+      to sea on a long route or road to rail. A change is recommended only if
+      it cuts both the route's cost and its carbon by at least
+      {{ pct(flag_threshold) }}. The list is ranked by what each change saves.
+    </p>
+    <p>
+      Every rate is then varied and the check run again
+      {{ confidence_checks }} times. High confidence means a change still paid
+      off in at least {{ pct(confidence_high) }} of those runs. The figures are
+      screening estimates for deciding where to look, not quotes.
+    </p>
+  </article>
+</div>
+<p class="hiw-contact">
+  Want the full method, with every formula, factor and source? Email
+  <a href="mailto:{{ contact_email }}?subject=Overlap%20method">{{ contact_email }}</a>
+  and ask for the method document.
+</p>
+{%- endmacro %}

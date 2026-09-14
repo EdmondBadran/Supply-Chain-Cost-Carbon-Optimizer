@@ -3,7 +3,7 @@
 {% block title %}Executive summary{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import usd, usd_short, pct, days, mode, meter %}
+{% from "parts/_ui.html" import usd, usd_short, pct, days, mode, meter, sample_note %}
 
 {% block content %}
 
@@ -132,7 +132,7 @@
   <section class="es-sheet es-page-one" aria-label="The decision">
     <header class="es-head">
       <div class="es-head-top">
-        <p class="es-eyebrow">Cost &amp; carbon screener &middot; Executive summary</p>
+        <p class="es-eyebrow">Overlap &middot; Executive summary</p>
         <p class="es-status"><span class="es-dot" aria-hidden="true"></span>Screening complete</p>
       </div>
       {% if count %}
@@ -149,6 +149,7 @@
         {{ subject }} &middot; {{ "{:,}".format(summary.orders) }} orders &middot;
         {{ summary.edges }} routes &middot; Generated {{ generated }}
       </p>
+      {% if using_sample %}{{ sample_note(subject) }}{% endif %}
     </header>
 
     {% if count %}
@@ -294,7 +295,7 @@
         <li>Transit times are planning estimates.</li>
         <li>Inventory cost, carrier capacity and customer service levels are not modelled.</li>
       </ul>
-      <p class="es-assume-more">Factor values and sources are in the full report, step 5, and on the method page.</p>
+      <p class="es-assume-more">Factor values and sources are in the full report, under How sure to be. The full method is available from {{ contact_email }}.</p>
     </section>
 
     <footer class="es-foot">
@@ -315,7 +316,7 @@
         Every figure is from the full report, where each change can be
         investigated, tested and traced to its calculation.<br>
         <span>Report</span> {{ url_for('report_page', _external=True) }}<br>
-        <span>Method</span> {{ url_for('method', _external=True) }}
+        <span>Contact</span> {{ contact_email }}
       </p>
     </footer>
   </section>

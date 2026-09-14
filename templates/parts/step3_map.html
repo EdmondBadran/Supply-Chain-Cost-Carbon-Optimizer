@@ -1,5 +1,6 @@
-{# Step 3: the ranked routes first, the map beside them, then the network
-   what-if and the two breakdowns. #}
+{# Part 3: where the routes run. The map comes first, the list of routes
+   worth changing follows it, and the network what-if is folded away until
+   somebody asks for it. #}
 {% from "parts/_ui.html" import mode_glyph %}
 
 <p class="step-lede">
@@ -9,17 +10,6 @@
 </p>
 
 <div id="finding" class="finding"></div>
-
-<section class="panel routes-panel">
-  <div class="panel-head">
-    <div>
-      <h3>Routes worth changing</h3>
-      <p class="sub">Biggest saving first. <span class="on-screen">Mark how hard each change would be and the list reorders around what you can realistically do.</span></p>
-    </div>
-  </div>
-  <p id="wins-trouble" class="trouble" role="alert" hidden></p>
-  <div class="wins" id="wins"></div>
-</section>
 
 <section class="panel map-panel">
   <div class="panel-head">
@@ -53,7 +43,7 @@
 
   <div class="map-wrap">
     <div class="map-holder">
-      <div id="map" role="img" aria-label="World map of the supply chain. Routes worth changing are drawn bright, and every route is listed with its figures in the ranked list above."></div>
+      <div id="map" role="img" aria-label="World map of the supply chain. Routes worth changing are drawn bright, and every route is listed with its figures in part two."></div>
       <div id="tip" class="tip" hidden></div>
       <div class="zoom-controls">
         <button id="zoom-in" type="button" aria-label="Zoom in">+</button>
@@ -65,17 +55,24 @@
   </div>
 </section>
 
-<section class="panel network-panel">
+<section class="panel routes-panel">
   <div class="panel-head">
     <div>
-      <h3>What if the network were shaped differently</h3>
-      <p class="sub">
-        Close a site and its routes move to the nearest site with room. Open a
-        new one and the routes closer to it move across. Every affected route
-        is repriced, and nothing here changes your data.
-      </p>
+      <h3>Routes worth changing</h3>
+      <p class="sub">Biggest saving first. <span class="on-screen">Mark how hard each change would be and the list reorders around what you can realistically do.</span></p>
     </div>
   </div>
+  <p id="wins-trouble" class="trouble" role="alert" hidden></p>
+  <div class="wins" id="wins"></div>
+</section>
+
+<details class="panel network-panel">
+  <summary>What if the network were shaped differently</summary>
+  <p class="sub">
+    Close a site and its routes move to the nearest site with room. Open a
+    new one and the routes closer to it move across. Every affected route is
+    repriced, and nothing here changes your data.
+  </p>
 
   <div class="network-controls">
     <ul class="site-toggles" id="site-toggles">
@@ -113,54 +110,4 @@
       energy per tonne of your existing sites, on an average grid.
     </p>
   </details>
-</section>
-
-<div class="split-2">
-  <section class="panel">
-    <h3>Cost by destination</h3>
-    <p class="sub">Top eight by cost to serve.</p>
-    <div class="table-scroll" tabindex="0">
-      <table class="grid">
-        <thead><tr><th>Destination</th><th class="num">Orders</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
-        <tbody>
-        {% for region in regions %}
-          <tr>
-            <td>{{ region.name }}</td>
-            <td class="num">{{ "{:,}".format(region.orders) }}</td>
-            <td class="num">${{ "{:,.0f}".format(region.cost) }}</td>
-            <td class="num">{{ "{:,.1f}".format(region.co2e / 1000) }} t</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <section class="panel">
-    <h3>Cost by driver</h3>
-    <p class="sub">What is actually generating the cost and the carbon.</p>
-    <div class="table-scroll" tabindex="0">
-      <table class="grid">
-        <thead><tr><th>Driver</th><th class="num">Cost</th><th class="num">CO2e</th></tr></thead>
-        <tbody>
-          <tr>
-            <td>Transport</td>
-            <td class="num">${{ "{:,.0f}".format(totals.transport_cost) }}</td>
-            <td class="num">{{ "{:,.1f}".format(totals.transport_co2e / 1000) }} t</td>
-          </tr>
-          <tr>
-            <td>Warehouse and packaging</td>
-            <td class="num">${{ "{:,.0f}".format(totals.handling_cost) }}</td>
-            <td class="num">{{ "{:,.1f}".format((totals.warehouse_co2e + totals.packaging_co2e) / 1000) }} t</td>
-          </tr>
-          <tr>
-            <td>Returns</td>
-            <td class="num">${{ "{:,.0f}".format(totals.returns_cost) }}</td>
-            <td class="num">{{ "{:,.1f}".format(totals.returns_co2e / 1000) }} t</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <p class="meta">{{ "{:,.0f}".format(totals.tonne_km) }} tonne-km moved across {{ summary.edges }} routes.</p>
-  </section>
-</div>
+</details>

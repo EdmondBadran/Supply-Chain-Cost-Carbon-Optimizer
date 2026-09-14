@@ -56,6 +56,12 @@ ${{ "{:,.0f}".format(value or 0) }}
 <span class="meter meter-{{ label or 'none' }}" aria-hidden="true"><i></i><i></i><i></i></span>
 {%- endmacro %}
 
+{# Said the same way everywhere sample figures appear: the samples are
+   invented, and their data only follows realistic patterns. #}
+{% macro sample_note(subject=None) -%}
+<p class="sample-note"><span class="sample-note-tag">Sample data</span><span>{{ subject ~ " is" if subject else "This is" }} not a real company. Its data is generated to follow realistic patterns.</span></p>
+{%- endmacro %}
+
 {% macro confidence(problem, short=False) -%}
 {%- if problem.confidence_label -%}
 <span class="conf conf-{{ problem.confidence_label }}">{{ meter(problem.confidence_label) }}<span>{{ problem.confidence_label|title }} confidence{% if not short %}<span class="conf-share">, {{ pct(problem.confidence) }} of simulations</span>{% endif %}</span></span>
@@ -174,16 +180,17 @@ ${{ "{:,.0f}".format(value or 0) }}
     </p>
     <p class="audit-note">
       Figures are rounded for display. Distance multipliers are screening
-      assumptions, not measured routes. Sources for every factor are on the
-      method page.
+      assumptions, not measured routes. Every factor and its source is listed
+      under How sure to be.
     </p>
   </div>
 </details>
 {%- endmacro %}
 
-{# One line in the ranked list: collapsed it is the decision, open it is the
-   evidence. #}
-{% macro rec_row(problem, rank, route_count) -%}
+{# One line in the ranked list. Collapsed it is the decision. Open, the two
+   questions anyone opens it for come first, what to do and what it is worth,
+   then the context, the checks and the working. #}
+{% macro rec_row(problem, rank, route_count, step=None) -%}
 {%- set route = problem.route -%}
 <li class="rec-row{{ ' is-top' if rank <= 3 }}">
   <details>
@@ -200,16 +207,32 @@ ${{ "{:,.0f}".format(value or 0) }}
       <span class="row-conf">{{ confidence(problem, short=True) }}</span>
     </summary>
     <div class="row-body">
+      <div class="row-grid">
+        <div>
+          <p class="row-label">What to do</p>
+          <p class="row-decision">{{ problem.action }}</p>
+          {% if problem.alternatives %}
+          <p class="row-alt"><strong>If that is not possible:</strong> {% for alt in problem.alternatives %}{{ alt }} {% endfor %}</p>
+          {% endif %}
+        </div>
+        <div>
+          <p class="row-label">What it is worth</p>
+          {% if step %}
+          <p class="row-worth">{{ step.cost_line }}</p>
+          <p class="row-worth">{{ step.co2e_line }}</p>
+          {% endif %}
+          {% if route %}
+          <dl class="row-facts">
+            <div><dt>Transit</dt><dd>{{ days(route.now.days) }} &rarr; {{ days(route.proposed.days) }}</dd></div>
+            <div><dt>Cost</dt><dd>&minus;{{ pct(route.cost_pct) }}</dd></div>
+            <div><dt>Carbon</dt><dd>&minus;{{ pct(route.co2e_pct) }}</dd></div>
+            <div><dt>Confidence</dt><dd>{% if route.confidence is not none %}{{ pct(route.confidence) }} of simulations{% else %}Not simulated{% endif %}</dd></div>
+          </dl>
+          {% endif %}
+        </div>
+      </div>
       <p class="row-stage">{{ problem.stage }}. {{ problem.happening }}</p>
       <p class="row-why"><strong>Why it matters.</strong> {{ problem.why }}</p>
-      {% if route %}
-      <dl class="row-facts">
-        <div><dt>Transit</dt><dd>{{ days(route.now.days) }} &rarr; {{ days(route.proposed.days) }}</dd></div>
-        <div><dt>Cost</dt><dd>&minus;{{ pct(route.cost_pct) }}</dd></div>
-        <div><dt>Carbon</dt><dd>&minus;{{ pct(route.co2e_pct) }}</dd></div>
-        <div><dt>Confidence</dt><dd>{% if route.confidence is not none %}{{ pct(route.confidence) }} of simulations{% else %}Not simulated{% endif %}</dd></div>
-      </dl>
-      {% endif %}
       {{ checks(problem.checks) }}
       {% if route %}
       {{ why_route(route, route_count) }}

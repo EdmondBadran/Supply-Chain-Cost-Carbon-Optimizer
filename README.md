@@ -1,4 +1,6 @@
-# Supply chain cost and carbon screener
+# Overlap
+
+A supply chain cost and carbon screener.
 
 Most companies track logistics cost in one report and emissions in another,
 and the two never get looked at together. That is a problem, because the
@@ -6,27 +8,28 @@ routes doing the most financial damage are very often the same routes doing
 the most environmental damage, and nobody notices because the numbers live in
 different spreadsheets.
 
-This tool answers one question: which shipping routes should I investigate
-if I want to cut both cost and carbon? Load a year of orders and it ranks the
+Overlap answers one question: which shipping routes should I investigate if
+I want to cut both cost and carbon? Load a year of orders and it ranks the
 routes where changing transport mode would reduce both, lets you investigate
 and test each one, and exports the result. It is a screen, not a network
-optimiser.
+optimiser. The name is the idea: it looks for the routes where wasted cost
+and wasted carbon overlap.
 
 ## How it reads
 
-**The report** opens on the decisions. The biggest opportunities come first:
-how many, what they are worth in money and in carbon, how sure to be, and a
-data check saying how many orders were loaded, how many were excluded and
-why. Then the top recommendations as cards, each with the route, the mode
-change, the saving, the transit impact, confidence and what to check before
-acting.
+**The report** opens on the short answer: how many opportunities there are,
+what they are worth in money and in carbon, how sure to be, the top three as
+cards, and one line saying whether every order in the file was used.
 
-Below that, five steps back it up. What you spend, with the chain drawn as a
-river whose band thickens wherever cost is added. What is wrong, as a ranked
-list where each line opens to the evidence and the calculation. Where it is,
-with the ranked routes and a world map. What to do, as three decisions and
-then the full plan. How sure to be, with the plain answer first and the
-statistics one click away.
+Below that come four parts, each opening on the one question it answers.
+Your network today is the baseline: what the chain costs and emits, drawn as
+a river whose band thickens wherever cost is added. What to change is the
+ranked list, and each line opens to what to do, what it is worth, what to
+check and the calculation. Each opportunity is described there and nowhere
+else. On the map shows where the routes run, with the what-if for closing or
+opening a warehouse folded away underneath. How sure to be gives the plain
+answer first, then the data check, the limits, and the factors and formulas,
+with the statistics one click further.
 
 **Investigate and test** happen in a side panel that leaves the report where
 it was. Investigate shows current against proposed, why the route was
@@ -35,13 +38,15 @@ changes the mode or the serving warehouse and recalculates on the server,
 clearly marked as a scenario, and a few alternatives can be pinned side by
 side. The map follows whichever route is open.
 
-**Exports** are an executive summary of one or two pages, the full report as
-a PDF from the browser, and a CSV of every recommendation with current and
-proposed figures side by side.
+**Exports** are a two page executive summary, the full report as a PDF laid
+out for presenting (a cover, the short answer, then a page per part), and a
+CSV with one row per opportunity, plain column names with units, and current
+and proposed figures side by side.
 
-**The method page** shows the working. Every formula, every factor with its
-source, every assumption, and a section on what the tool does not account for
-at all. You should not have to take any number here on faith.
+**How it works** is two boxes: what the tool works out, and how it decides
+what to recommend. The full method, with every formula and source, is a
+document sent on request. The factors, formulas and assumptions behind a
+report are also in its fourth part, so no number has to be taken on faith.
 
 ## What it does
 
@@ -75,19 +80,20 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open http://localhost:5000. The sample dataset loads itself, so you land
-on a working value chain rather than an upload form.
+Then open http://localhost:5000. A sample dataset loads itself, so no page
+opens empty. Both sample companies are invented: their data is generated to
+follow realistic patterns, and every page showing their figures says so.
 
-    /                 the landing page, with live results on the sample
-    /report           the report: overview, five steps, route panel, exports
+    /                 the landing page, with live results on the loaded data
+    /report           the report: the short answer, four parts, route panel, exports
     /report/summary   the executive summary, ready to print
-    /findings.csv     every recommendation as a spreadsheet
-    /method           how every number is worked out
-    /data             load your own CSV
+    /findings.csv     every opportunity as a spreadsheet
+    /method           how it works, in two boxes
+    /data             upload your own CSV, or try a sample
     /privacy          what happens to a file you upload
 
 The old `/chain`, `/dashboard`, `/diagnosis` and `/stats` addresses redirect
-to the matching step of the report.
+to the matching part of the report.
 
 ## Your own data
 
@@ -176,7 +182,7 @@ and those lanes are left alone.
 Every saving here is the gap between two estimates built on published freight
 and emission factors, and those are ranges rather than constants. Quoting a
 figure to the dollar off inputs like that implies a precision they do not
-have, so the statistics page does five things about it.
+have, so part four of the report does five things about it.
 
 **The uncertainty band.** The whole ranking is re-run two thousand times with
 every cost and emission factor redrawn from a triangular distribution up to a
@@ -241,7 +247,7 @@ static/
   workspace.js      the route panel, scenarios and comparison
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              157 tests: loading, thresholds, statistics and the routes
+tests/              161 tests: loading, thresholds, statistics and the routes
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -287,7 +293,7 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-157 of them, stdlib unittest, no test dependency.
+161 of them, stdlib unittest, no test dependency.
 
 `tests/test_ingest.py` and `tests/test_recommendations.py` exist because
 routes from different origins into one city were once merged into one. They
@@ -335,4 +341,4 @@ chain and one of the map, and there is not one here yet.
 cost is not counted anywhere. Transit time itself is now estimated, from
 typical door-to-door speeds per mode, so the report can tell you a mode switch
 adds weeks rather than days. Those are planning figures, not carrier
-schedules, and the method page says so rather than hiding it.
+schedules, and the report says so rather than hiding it.

@@ -3,25 +3,26 @@
 {% block title %}Find the routes where cost and carbon can both be cut{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import rec_card, usd %}
+{% from "parts/_ui.html" import rec_card, usd, sample_note %}
+{% from "parts/how_it_works.html" import how_it_works with context %}
 
 {% block content %}
 
 <section class="lp-hero">
   <h1>
     Find the routes where you can
-    <span class="lp-accent">cut cost and carbon at the same time.</span>
+    <span class="lp-accent">cut <span class="cost-ink">cost</span> and <span class="carbon-ink">carbon</span> at the same time.</span>
   </h1>
   <p class="lp-lede">
-    Upload a year of shipping orders and get a ranked list of routes where
+    Overlap reads a year of shipping orders and ranks the routes where
     changing transport mode could reduce both cost and CO2e.
   </p>
   <div class="lp-actions">
-    <a class="lp-primary" href="{{ url_for('report_page') }}">
-      See it on sample data
-    </a>
-    <a class="lp-secondary" href="{{ url_for('start_upload') }}">
+    <a class="lp-primary" href="{{ url_for('start_upload') }}">
       Upload my orders
+    </a>
+    <a class="lp-secondary" href="{{ url_for('report_page') }}">
+      See a sample report first
     </a>
   </div>
   <p class="lp-note">
@@ -32,7 +33,7 @@
 {% if report and report.problems %}
 <section class="lp-found" data-reveal>
   <div class="lp-found-head">
-    <p class="eyebrow">Live result on the sample: a Bristol coffee roastery</p>
+    <p class="eyebrow">{% if using_sample %}Live result on sample data{% else %}Live result on your data{% endif %}</p>
     <h2>
       {{ report.problems|length }} opportunities worth
       <span class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</span>
@@ -43,6 +44,7 @@
     <p class="lp-found-sub">
       Produced just now by the same engine your file would go through.
     </p>
+    {% if using_sample %}{{ sample_note(subject) }}{% endif %}
   </div>
 
   <div class="rec-grid">
@@ -69,55 +71,7 @@
     <p class="eyebrow">How it works</p>
     <h2>From a spreadsheet to a decision</h2>
   </div>
-  <ol class="lp-box-grid">
-
-    <li class="lp-box-step">
-      <p class="lp-box-label">You give it</p>
-      <h2>A CSV of your orders</h2>
-      <p>Five columns are required. Everything else is optional.</p>
-      <ul class="lp-cols">
-        <li>origin_name</li>
-        <li>origin_city</li>
-        <li>dest_city</li>
-        <li>weight_kg</li>
-        <li>mode</li>
-      </ul>
-      <details class="lp-example">
-        <summary>Show an example row</summary>
-        <p class="lp-row">
-          <span>Antigua Microlots,</span> <span>Antigua,</span>
-          <span>Bristol,</span> <span>120.0,</span>
-          <span class="lp-csv-flag">air</span>
-        </p>
-      </details>
-    </li>
-
-    <li class="lp-box-step">
-      <p class="lp-box-label">It works out</p>
-      <h2>Cost and carbon for every route</h2>
-      <p>
-        Orders from the same origin to the same destination by the same mode
-        become one route. Each route gets a cost and a carbon figure from the
-        same weight, distance and mode, then the same two figures for every
-        realistic alternative mode.
-      </p>
-    </li>
-
-    <li class="lp-box-step">
-      <p class="lp-box-label">You get back</p>
-      <h2>Only changes that cut both</h2>
-      <p>
-        A route is flagged only if switching cuts <strong>both</strong> its
-        cost and its carbon by at least a quarter. You can investigate each
-        one, test other modes and warehouses, and export the result.
-      </p>
-      <p class="lp-box-result">
-        On the sample, <strong>{{ facts.routes }} routes come down to
-        {{ report.problems|length if report else 0 }} decisions</strong>.
-      </p>
-    </li>
-
-  </ol>
+  {{ how_it_works(level=3) }}
 </section>
 
 <section class="lp-versus" data-reveal>
@@ -207,7 +161,7 @@
     </li>
     <li>
       <strong>Every calculation shown</strong>
-      <span>Open any route to see the arithmetic behind it. <a href="{{ url_for('method') }}">The full method</a> lists every source and what it does not cover.</span>
+      <span>Open any route to see the arithmetic behind it. The report lists every factor with its source, and the full method is <a href="{{ url_for('method') }}">available on request</a>.</span>
     </li>
     <li>
       <strong>Nothing lost, nothing kept</strong>
@@ -217,13 +171,14 @@
 </section>
 
 <section class="lp-close" data-reveal>
-  <h2>Try it on the sample first</h2>
+  <h2>Run it on your own orders</h2>
   <p>
-    Look at the whole analysis first, then load your own file.
+    A CSV export of a year of orders is enough. Not ready to share one? Look
+    at a sample report first.
   </p>
   <div class="lp-actions">
-    <a class="lp-primary" href="{{ url_for('report_page') }}">See the result</a>
-    <a class="lp-secondary" href="{{ url_for('start_upload') }}">Upload my orders</a>
+    <a class="lp-primary" href="{{ url_for('start_upload') }}">Upload my orders</a>
+    <a class="lp-secondary" href="{{ url_for('report_page') }}">See a sample report</a>
   </div>
   <p class="lp-built">
     One runtime dependency, no build step, {{ "{:,}".format(34135) }} bundled
