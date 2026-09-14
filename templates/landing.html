@@ -1,46 +1,80 @@
 {% extends "base.html" %}
 
-{% block title %}Find freight that is on the wrong transport mode{% endblock %}
+{% block title %}Find the routes where cost and carbon can both be cut{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
+{% from "parts/_ui.html" import rec_card, usd %}
 
 {% block content %}
 
 <section class="lp-hero">
   <h1>
-    Some of your freight is on the
-    <span class="lp-accent">wrong transport mode.</span>
+    Find the routes where you can
+    <span class="lp-accent">cut cost and carbon at the same time.</span>
   </h1>
   <p class="lp-lede">
-    Upload a year of orders and it works out which of your routes would be
-    cheaper <em>and</em> lower-carbon by sea, rail or road instead, along with
-    what each switch would save you a year.
+    Upload a year of shipping orders and get a ranked list of routes where
+    changing transport mode could reduce both cost and CO2e.
   </p>
   <div class="lp-actions">
     <a class="lp-primary" href="{{ url_for('report_page') }}">
       See it on sample data
     </a>
-    <a class="lp-secondary" href="{{ url_for('upload_page') }}">
-      Upload my orders CSV
+    <a class="lp-secondary" href="{{ url_for('start_upload') }}">
+      Upload my orders
     </a>
   </div>
   <p class="lp-note">
-    No sign up, and nothing you upload is stored. The sample below is already
-    loaded, so there is nothing to fill in before you can see it working.
+    No sign up. Nothing you upload is stored.
   </p>
 </section>
+
+{% if report and report.problems %}
+<section class="lp-found" data-reveal>
+  <div class="lp-found-head">
+    <p class="eyebrow">Live result on the sample: a Bristol coffee roastery</p>
+    <h2>
+      {{ report.problems|length }} opportunities worth
+      <span class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</span>
+      and
+      <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO2e</span>
+      a year
+    </h2>
+    <p class="lp-found-sub">
+      Produced just now by the same engine your file would go through.
+    </p>
+  </div>
+
+  <div class="rec-grid">
+    {% for problem in report.problems[:3] %}
+    {{ rec_card(
+      problem,
+      loop.index,
+      with_actions=False,
+      link=(url_for('report_page') ~ '?investigate=' ~ problem.edge_id) if problem.route else url_for('report_page') ~ '#step-2'
+    ) }}
+    {% endfor %}
+  </div>
+
+  <p class="lp-found-more">
+    <a class="lp-primary" href="{{ url_for('report_page') }}">
+      Open the full report
+    </a>
+  </p>
+</section>
+{% endif %}
 
 <section class="lp-box" data-reveal>
   <div class="lp-box-head">
     <p class="eyebrow">How it works</p>
-    <h2>Three steps, from a spreadsheet to a decision</h2>
+    <h2>From a spreadsheet to a decision</h2>
   </div>
   <ol class="lp-box-grid">
 
     <li class="lp-box-step">
-      <p class="lp-box-label">You give the tool</p>
-      <h2>A CSV file of your company's orders</h2>
-      <p>These five columns are required, and everything else is optional.</p>
+      <p class="lp-box-label">You give it</p>
+      <h2>A CSV of your orders</h2>
+      <p>Five columns are required. Everything else is optional.</p>
       <ul class="lp-cols">
         <li>origin_name</li>
         <li>origin_city</li>
@@ -59,114 +93,56 @@
     </li>
 
     <li class="lp-box-step">
-      <p class="lp-box-label">The tool works out</p>
-      <h2>What each route really costs you</h2>
+      <p class="lp-box-label">It works out</p>
+      <h2>Cost and carbon for every route</h2>
       <p>
-        Orders going the same way, by the same transport mode, are added
-        together into one route. For that route, the tool works out two
-        numbers side by side: what it costs in dollars, and how much carbon
-        it produces, based on the same facts each time, how much was
-        shipped, how far, and how it travelled.
-      </p>
-      <p>
-        The tool then checks what would happen if that route used a
-        different mode instead, for example switching an air route to sea,
-        rail or road.
+        Orders from the same origin to the same destination by the same mode
+        become one route. Each route gets a cost and a carbon figure from the
+        same weight, distance and mode, then the same two figures for every
+        realistic alternative mode.
       </p>
     </li>
 
     <li class="lp-box-step">
       <p class="lp-box-label">You get back</p>
-      <h2>Only the changes actually worth making</h2>
+      <h2>Only changes that cut both</h2>
       <p>
-        A route is only flagged if switching its mode would cut
-        <strong>both</strong> its cost and its carbon by at least a quarter.
-        A change that saves money but adds carbon does not count, and
-        neither does the reverse.
+        A route is flagged only if switching cuts <strong>both</strong> its
+        cost and its carbon by at least a quarter. You can investigate each
+        one, test other modes and warehouses, and export the result.
       </p>
       <p class="lp-box-result">
-        On the sample below, <strong>{{ facts.routes }} routes come down to
-        {{ report.problems|length }} decisions</strong>.
+        On the sample, <strong>{{ facts.routes }} routes come down to
+        {{ report.problems|length if report else 0 }} decisions</strong>.
       </p>
     </li>
 
   </ol>
 </section>
 
-{% if report and report.problems %}
-<section class="lp-found" data-reveal>
-  <div class="lp-found-head">
-    <p class="eyebrow">Live output, sample company: a Bristol coffee roastery</p>
-    <h2>
-      {{ report.problems|length }} changes worth
-      <span class="cost-ink">${{ "{:,.0f}".format(report.overview.recoverable_cost) }}</span>
-      and
-      <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }}</span>
-      a year
-    </h2>
-    <p class="lp-found-sub">
-      Most of these are transport mode switches, and the rest come out of the
-      same run, which also checks supplier reliability, warehouse energy and
-      return rates. Nothing here is mocked up: it is produced live by the same
-      engine your own file would go through.
-    </p>
-  </div>
-
-  <div class="lp-cards">
-    {% for problem in report.problems[:3] %}
-    <article class="lp-card">
-      <p class="lp-card-rank">{{ loop.index }}</p>
-      <h3>{{ problem.title }}</h3>
-      <p class="lp-card-now">{{ problem.happening }}</p>
-      <p class="lp-card-do">{{ problem.action }}</p>
-      <dl class="lp-card-saves">
-        <div>
-          <dt>Saves a year</dt>
-          <dd class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake or 0) }}</dd>
-        </div>
-        <div>
-          <dt>And cuts</dt>
-          <dd class="carbon-ink">{{ co2e(problem.co2e_at_stake or 0) }}</dd>
-        </div>
-      </dl>
-    </article>
-    {% endfor %}
-  </div>
-
-  <p class="lp-found-more">
-    <a class="lp-primary" href="{{ url_for('report_page') }}">
-      See all {{ report.problems|length }}, on the map and in full
-    </a>
-  </p>
-</section>
-{% endif %}
-
 <section class="lp-versus" data-reveal>
   <h2>How this is different from what already exists</h2>
   <p class="lp-versus-lede">
-    Most tools show you half the picture: what your freight costs, or what
-    it emits, never both together. Getting both normally means paying a
-    consultancy to build a model of your whole network. This tool does it
-    from a spreadsheet you already have: upload a year of orders, and in
-    seconds it shows you exactly which routes are costing you the most
-    money and carbon at once, and what switching them would save.
+    Most tools show what freight costs or what it emits, not both. Getting
+    both normally means a network modelling project. This screens a
+    spreadsheet you already have and ranks the routes worth a closer look.
   </p>
   <div class="lp-versus-grid">
     <article>
       <p class="lp-versus-who">Carbon reporting tools</p>
-      <p>They tell you what a route emits but never what it costs, so they cannot tell you which one is worth fixing first.</p>
+      <p>Show what a route emits, not what it costs, so they cannot say which is worth fixing first.</p>
     </article>
     <article>
       <p class="lp-versus-who">Freight spend analytics</p>
-      <p>They tell you what a route costs, using your real invoices rather than an estimate, but they ignore carbon entirely.</p>
+      <p>Show what a route costs from real invoices, and leave carbon out.</p>
     </article>
     <article>
       <p class="lp-versus-who">Network design software</p>
-      <p>Does both properly with an optimisation solver, but needs the data, setup and expertise of a full modelling project to get there.</p>
+      <p>Does both with an optimisation solver, but needs the data, setup and expertise of a full modelling project.</p>
     </article>
     <article class="lp-versus-us">
       <p class="lp-versus-who">This</p>
-      <p>Turns a CSV export into a ranked list of routes where cost and carbon can both be cut, testing feasible mode switches in about a second.</p>
+      <p>Screens a CSV export and ranks routes where cost and carbon can both be cut, in about a second.</p>
     </article>
   </div>
 
@@ -184,36 +160,36 @@
       <tbody>
         <tr>
           <th scope="row">Carbon reporting tools</th>
-          <td class="lp-no">&#8722;</td>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-no">&#8722;</td>
-          <td class="lp-dim">&mdash;</td>
+          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
+          <td class="lp-dim">Not applicable</td>
         </tr>
         <tr>
           <th scope="row">Freight spend analytics</th>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-no">&#8722;</td>
-          <td class="lp-no">&#8722;</td>
-          <td class="lp-dim">&mdash;</td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
+          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
+          <td class="lp-dim">Not applicable</td>
         </tr>
         <tr>
           <th scope="row">Network design software</th>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
           <td class="lp-dim">Months</td>
         </tr>
         <tr class="lp-versus-us-row">
           <th scope="row">This</th>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-yes">&#10003;</td>
-          <td class="lp-yes">&#10003;</td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
+          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
           <td class="lp-yes">Seconds</td>
         </tr>
       </tbody>
     </table>
     <figcaption>
-      The only row with a full line of checks and no wait for one.
+      A screen, not an optimiser: it tells you which routes to look at, fast.
     </figcaption>
   </figure>
 </section>
@@ -226,16 +202,16 @@
       <span>Emissions per tonne-km come from the DEFRA and GLEC ranges, the basis of most freight carbon reporting.</span>
     </li>
     <li>
-      <strong>Error bars, not a single number</strong>
-      <span>Those factors are published as ranges rather than fixed values, so the whole ranking is re-run 2,000 times and the saving is quoted as a range.</span>
+      <strong>Confidence on every change</strong>
+      <span>Every factor is redrawn thousands of times, and each recommendation says how often it still held.</span>
     </li>
     <li>
-      <strong>No model, no training data</strong>
-      <span>It is arithmetic on your own figures. <a href="{{ url_for('method') }}">Every formula is written out</a>, with its source and what it does not account for.</span>
+      <strong>Every calculation shown</strong>
+      <span>Open any route to see the arithmetic behind it. <a href="{{ url_for('method') }}">The full method</a> lists every source and what it does not cover.</span>
     </li>
     <li>
-      <strong>Your file never lands on a disk</strong>
-      <span>It is read in memory and dropped as soon as the analysis is done. <a href="{{ url_for('privacy') }}">What happens to your file</a>.</span>
+      <strong>Nothing lost, nothing kept</strong>
+      <span>Every row is either processed or listed with the reason it was not, and the file is dropped after the analysis. <a href="{{ url_for('privacy') }}">What happens to your file</a>.</span>
     </li>
   </ul>
 </section>
@@ -243,17 +219,15 @@
 <section class="lp-close" data-reveal>
   <h2>Try it on the sample first</h2>
   <p>
-    Nothing is behind a form, so you can look at the whole analysis first and
-    load your own file afterwards.
+    Look at the whole analysis first, then load your own file.
   </p>
   <div class="lp-actions">
     <a class="lp-primary" href="{{ url_for('report_page') }}">See the result</a>
-    <a class="lp-secondary" href="{{ url_for('upload_page') }}">Upload my orders CSV</a>
+    <a class="lp-secondary" href="{{ url_for('start_upload') }}">Upload my orders</a>
   </div>
   <p class="lp-built">
-    Built on a single runtime dependency with no build step, bundling
-    {{ "{:,}".format(34135) }} geocoded cities so it runs offline, and covered
-    by 115 tests.
+    One runtime dependency, no build step, {{ "{:,}".format(34135) }} bundled
+    cities so it runs offline, and automated tests on the arithmetic.
   </p>
 </section>
 

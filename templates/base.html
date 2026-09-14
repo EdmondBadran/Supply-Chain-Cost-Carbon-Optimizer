@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Supply chain cost and carbon optimizer{% endblock %}</title>
-<meta name="description" content="Find the routes in your supply chain that waste money and emit carbon in the same place, then fix the overlap first.">
+<title>{% block title %}Supply chain cost and carbon screener{% endblock %}</title>
+<meta name="description" content="Upload a year of shipping orders and get a ranked list of routes where changing transport mode could cut both cost and CO2e.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='7' cy='23' r='4' fill='%231a6b4f'/><circle cx='25' cy='9' r='4' fill='%23c2703a'/><path d='M7 23 L25 9' stroke='%231a6b4f' stroke-width='2.5' fill='none'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,7 @@
       <circle cx="7" cy="23" r="4" fill="currentColor"/>
       <circle cx="25" cy="9" r="4" fill="var(--cost)"/>
     </svg>
-    <span>Cost <em>and</em> carbon optimizer</span>
+    <span>Cost <em>and</em> carbon screener</span>
   </a>
   <nav class="topnav">
     {% set here = request.endpoint %}

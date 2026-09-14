@@ -1,78 +1,28 @@
-{# Step 2: everything wrong, ranked across stages. #}
-{% from "parts/_units.html" import co2e %}
+{# Step 2: everything wrong, ranked across stages, one line each. #}
+{% from "parts/_ui.html" import rec_row %}
 
+{% if report and report.problems %}
 <p class="step-lede">
   {{ report.overview.concentration }}
 </p>
 
-{% if report.top_three %}
-<section class="worst">
-  {% for problem in report.top_three %}
-  <article class="worst-card">
-    <span class="finding-stage">{{ problem.stage }}</span>
-    <h3>{{ problem.title }}</h3>
-    <p class="worst-what">{{ problem.happening }}</p>
-    <div class="worst-stake">
-      {% if problem.cost_at_stake %}
-      <div>
-        <strong class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</strong>
-        <span>a year</span>
-      </div>
-      {% endif %}
-      {% if problem.co2e_at_stake %}
-      <div>
-        <strong class="carbon-ink">{{ co2e(problem.co2e_at_stake) }}</strong>
-        <span>CO2e a year</span>
-      </div>
-      {% endif %}
-    </div>
-    <details class="worst-why">
-      <summary>Why this matters</summary>
-      <p>{{ problem.why }}</p>
-    </details>
-  </article>
+<p class="list-key">
+  Ranked by the share of your total cost and carbon each one recovers.
+  <span class="on-screen">Open any line for the evidence, the calculation and
+  what to check.</span>
+</p>
+
+<ol class="rec-list">
+  {% for problem in report.problems %}
+  {% if loop.index == 4 %}
+  <li class="rec-divider" aria-hidden="true"><span>The rest, in order</span></li>
+  {% endif %}
+  {{ rec_row(problem, loop.index, report.overview.routes) }}
   {% endfor %}
-</section>
+</ol>
+{% else %}
+<p class="step-lede">
+  Nothing in this chain is on a transport mode that a cheaper and cleaner one
+  could replace.
+</p>
 {% endif %}
-
-<section class="panel prose">
-  <h3>All {{ report.problems|length }} of them, in order</h3>
-  <p class="sub">
-    Ranked by how much of your total cost and carbon each one would recover.
-    That is a share rather than an amount, which is the only fair way to compare
-    a high-carbon warehouse with an expensive air route.
-  </p>
-
-  <ol class="findings">
-    {% for problem in report.problems %}
-    <li class="finding">
-      <div class="finding-head">
-        <span class="finding-rank">{{ "%02d"|format(loop.index) }}</span>
-        <div>
-          <span class="finding-stage">{{ problem.stage }}</span>
-          <h4>{{ problem.title }}</h4>
-        </div>
-        <div class="finding-stake">
-          {% if problem.cost_at_stake %}
-          <span class="cost-ink">${{ "{:,.0f}".format(problem.cost_at_stake) }}</span>
-          {% endif %}
-          {% if problem.co2e_at_stake %}
-          <span class="carbon-ink">{{ co2e(problem.co2e_at_stake) }} CO2e</span>
-          {% endif %}
-        </div>
-      </div>
-      <dl class="finding-body">
-        <dt>What is happening</dt>
-        <dd>{{ problem.happening }}</dd>
-        <dt>Why it matters</dt>
-        <dd>{{ problem.why }}</dd>
-      </dl>
-      {% if problem.edge_id %}
-      <a class="problem-link" href="{{ url_for('report_page') }}?lane={{ problem.edge_id }}#step-3">
-        Open on the map
-      </a>
-      {% endif %}
-    </li>
-    {% endfor %}
-  </ol>
-</section>

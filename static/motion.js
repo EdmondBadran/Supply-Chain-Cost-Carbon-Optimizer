@@ -44,3 +44,20 @@ if (!REDUCED) {
 document
     .querySelectorAll("[data-print]")
     .forEach((button) => button.addEventListener("click", () => window.print()));
+
+
+// A disclosure that is shut on screen is shut on paper too, and the reasoning
+// behind each finding lives inside those. A printed report that says "why this
+// matters" and then does not say it is worse than not offering it, so they are
+// all opened for the print and put back exactly as they were afterwards.
+let reopened = [];
+
+addEventListener("beforeprint", () => {
+    reopened = [...document.querySelectorAll("details:not([open])")];
+    reopened.forEach((panel) => (panel.open = true));
+});
+
+addEventListener("afterprint", () => {
+    reopened.forEach((panel) => (panel.open = false));
+    reopened = [];
+});

@@ -1,0 +1,78 @@
+{# What the loaded file turned into, and anything that did not make it. Shown
+   near the top of the report and after an upload, because a figure nobody can
+   reconcile with their own file is a figure nobody acts on. #}
+{% if ingest %}
+{% set excluded = ingest.rows_skipped %}
+{% set other = ingest.error_count - excluded %}
+{% set troubled = excluded or other or ingest.warnings %}
+<section class="datacheck{{ ' has-issues' if troubled }}" aria-labelledby="datacheck-title">
+  <p class="datacheck-title" id="datacheck-title">
+    {% if excluded %}
+    <span class="checks-icon" aria-hidden="true">&#9888;</span>
+    {{ excluded }} order{{ "s" if excluded != 1 }} need{{ "s" if excluded == 1 }} attention
+    {% else %}
+    Data check
+    {% endif %}
+  </p>
+
+  <dl class="datacheck-counts">
+    <div><dt>Orders uploaded</dt><dd>{{ "{:,}".format(ingest.rows_in_file) }}</dd></div>
+    <div><dt>Processed</dt><dd>{{ "{:,}".format(ingest.orders_loaded) }}</dd></div>
+    <div><dt>Excluded</dt><dd>{{ "{:,}".format(excluded) }}</dd></div>
+    <div><dt>Routes identified</dt><dd>{{ "{:,}".format(ingest.edges) }}</dd></div>
+  </dl>
+
+  <ul class="datacheck-list">
+    <li class="ok"><span aria-hidden="true">&#10003;</span> Required columns present</li>
+    {% for key, label in [
+      ("weights_readable", "Weights readable"),
+      ("modes_recognised", "Transport modes recognised"),
+      ("origins_found", "Origins geocoded"),
+      ("destinations_found", "Destinations geocoded"),
+    ] %}
+    {% set good = ingest.checks[key] %}
+    <li class="{{ 'ok' if good else 'bad' }}">
+      <span aria-hidden="true">{{ "&#10003;"|safe if good else "&#9888;"|safe }}</span>
+      {{ label }}{% if not good %}<span class="visually-hidden">: some rows failed</span>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+
+  <p class="datacheck-weight">
+    {{ "{:,.0f}".format(ingest.weight_loaded_kg) }} kg processed of
+    {{ "{:,.0f}".format(ingest.weight_in_file_kg) }} kg readable in the file{% if ingest.weight_excluded_kg > 0.5 %},
+    {{ "{:,.0f}".format(ingest.weight_excluded_kg) }} kg excluded{% endif %}.
+    {% if ingest.suppliers %}{{ ingest.lanes }} routes from orders, {{ ingest.suppliers }} from suppliers.{% endif %}
+  </p>
+
+  {% for warning in ingest.warnings %}
+  <p class="datacheck-warn"><span class="checks-icon" aria-hidden="true">&#9888;</span> {{ warning.message }}
+    {% if warning.lines %}Lines {% for item in warning.lines %}{{ item.line }}{% if item.same_as %} (same as {{ item.same_as }}){% endif %}{{ ", " if not loop.last }}{% endfor %}{% if warning.count > warning.lines|length %} and more{% endif %}.{% endif %}
+  </p>
+  {% endfor %}
+
+  {% if ingest.errors %}
+  <details class="datacheck-issues"{{ " open" if open_issues }}>
+    <summary>Review issues ({{ ingest.error_count }})</summary>
+    <div class="table-scroll" tabindex="0">
+      <table class="grid">
+        <thead><tr><th>File</th><th class="num">Line</th><th>Field</th><th>Why it was excluded</th></tr></thead>
+        <tbody>
+        {% for item in ingest.errors %}
+          <tr>
+            <td>{{ item.file or "orders" }}</td>
+            <td class="num">{{ item.line }}</td>
+            <td>{{ item.field or "" }}</td>
+            <td>{{ item.problem }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if ingest.error_count > ingest.errors|length %}
+    <p class="meta">The first {{ ingest.errors|length }} of {{ ingest.error_count }} are listed.</p>
+    {% endif %}
+  </details>
+  {% endif %}
+</section>
+{% endif %}

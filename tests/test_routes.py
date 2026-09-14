@@ -146,7 +146,51 @@ class Routes(unittest.TestCase):
         self.assertIn("attachment", response.headers["Content-Disposition"])
         rows = response.get_data(as_text=True).strip().split("\n")
         self.assertGreater(len(rows), 1)
-        self.assertIn("cost at stake usd per year", rows[0])
+        for column in (
+            "cost at stake usd per year",
+            "current mode",
+            "proposed mode",
+            "current cost usd per year",
+            "proposed cost usd per year",
+            "share of simulations",
+            "check before acting",
+        ):
+            self.assertIn(column, rows[0])
+
+    def test_the_executive_summary_opens(self):
+        response = self.client.get("/report/summary")
+        self.assertEqual(response.status_code, 200)
+        body = response.get_data(as_text=True)
+        for text in ("Executive summary", "Top recommendations", "Check before acting",
+                     "How sure to be", "Major assumptions"):
+            with self.subTest(text=text):
+                self.assertIn(text, body)
+
+    def test_the_report_carries_the_workspace(self):
+        body = self.client.get("/report").get_data(as_text=True)
+        for text in ('id="overview"', 'id="drawer"', 'id="recs-data"', 'id="export"',
+                     "Data check", "Investigate route", "Test scenario",
+                     "Edit report structure", "See full uncertainty analysis"):
+            with self.subTest(text=text):
+                self.assertIn(text, body)
+
+    def test_a_scenario_answers_with_both_sides(self):
+        import json
+
+        body = self.client.get("/report").get_data(as_text=True)
+        recs = json.loads(
+            re.search(r'<script id="recs-data" type="application/json">(.*?)</script>', body, re.S).group(1)
+        )
+        edge_id, rec = next(iter(recs.items()))
+        response = self.client.post(
+            "/api/simulate", json={"edge_id": int(edge_id), "mode": rec["route"]["proposed"]["mode"]}
+        )
+        self.assertEqual(response.status_code, 200)
+        result = response.get_json()
+        self.assertAlmostEqual(result["saved"]["cost"], rec["cost_at_stake"], places=4)
+        for side in ("before", "after"):
+            for key in ("cost", "co2e", "days", "route_km", "mode"):
+                self.assertIn(key, result[side])
 
 
 class Isolation(unittest.TestCase):
@@ -197,6 +241,18 @@ class Isolation(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(b"missing required columns", response.data)
 
+    def test_an_upload_with_bad_rows_says_what_was_excluded(self):
+        client = application.app.test_client()
+        response = self.upload(
+            client,
+            TINY_CSV + b"Depot,Leeds,GB,Atlantis Qqq,XX,50,road\n",
+        )
+        body = response.get_data(as_text=True)
+        self.assertIn("1 order needs attention", body)
+        self.assertIn("dest_city", body)
+        report = client.get("/report").get_data(as_text=True)
+        self.assertIn("1 order needs attention", report)
+
     def test_a_non_csv_is_refused(self):
         client = application.app.test_client()
         response = client.post(
@@ -228,7 +284,7 @@ class Samples(unittest.TestCase):
                     "/sample", data={"sample": key}, follow_redirects=True
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertIn(b"start to finish", response.data)
+                self.assertIn(b"worth investigating", response.data)
 
     def test_an_unknown_sample_is_refused(self):
         response = self.client.post("/sample", data={"sample": "nope"})

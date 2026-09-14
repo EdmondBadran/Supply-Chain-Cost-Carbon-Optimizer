@@ -22,6 +22,7 @@ from optimizer import (
     chain,
     db,
     diagnosis,
+    distance,
     factors,
     geo,
     ingest,
@@ -167,6 +168,42 @@ def index():
         )
 
 
+def subject_of(conn):
+    sample_key = db.get_meta(conn, "sample")
+    return SAMPLES[sample_key]["label"] if sample_key in SAMPLES else "Your own order data"
+
+
+def factor_rows():
+    """Every per-mode assumption in one table, for the report and the method."""
+    return [
+        {
+            "mode": mode,
+            "cost": factors.COST_FACTORS[mode],
+            "emission": factors.EMISSION_FACTORS[mode],
+            "circuity": factors.CIRCUITY[mode],
+            "speed": factors.TRANSIT_KM_PER_DAY[mode],
+            "fixed_days": factors.TRANSIT_FIXED_DAYS[mode],
+        }
+        for mode in factors.MODES
+    ]
+
+
+def recommendation_payload(report):
+    """What the route panel needs for each recommendation, keyed by route id.
+    Every figure is the engine's own, so the panel does no arithmetic."""
+    if not report:
+        return {}
+    keep = (
+        "title stage kind change checks why action cost_at_stake co2e_at_stake "
+        "confidence confidence_label route"
+    ).split()
+    return {
+        str(problem["edge_id"]): {key: problem[key] for key in keep}
+        for problem in report["problems"]
+        if problem["route"]
+    }
+
+
 @app.route("/report")
 def report_page():
     """The whole analysis as one document.
@@ -179,21 +216,57 @@ def report_page():
     with store.workspace() as conn:
         ensure_data(conn)
         stages = chain.build(conn)
+        report = diagnosis.build(conn)
         return render_template(
             "report.html",
             summary=db.summary(conn),
+            ingest=db.ingest_report(conn),
             stages=stages,
             flow=chain.flow_layout(stages),
-            report=diagnosis.build(conn),
+            report=report,
+            recommendations=recommendation_payload(report),
             stats=stats.build(conn),
             totals=analysis.totals(conn),
             network=network_payload(conn),
             regions=analysis.by_region(conn, limit=8),
             warehouses=analysis.by_warehouse(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
+            subject=subject_of(conn),
+            generated=date.today().strftime("%d %B %Y"),
             stage_settings=chain.settings(conn),
             stage_error=request.args.get("stage_error"),
+            factor_table=factor_rows(),
+            confidence_checks=stats.CONFIDENCE_CHECKS,
         )
+
+
+@app.route("/report/summary")
+def summary_page():
+    """The executive summary: one or two printed pages for somebody who will
+    read the headline, the top changes and the catch, and nothing else."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        return render_template(
+            "summary.html",
+            summary=db.summary(conn),
+            ingest=db.ingest_report(conn),
+            report=report,
+            uncertainty=stats.uncertainty(scoring.rank(conn)) if report else None,
+            subject=subject_of(conn),
+            generated=date.today().strftime("%d %B %Y"),
+            factor_table=factor_rows(),
+            flag_threshold=scoring.FLAG_THRESHOLD,
+            confidence_checks=stats.CONFIDENCE_CHECKS,
+            expedite_share=factors.EXPEDITE_SHARE_OF_LATE,
+            transit_material_days=TRANSIT_MATERIAL_DAYS,
+        )
+
+
+# How many extra days of transit the summary calls out as a trade-off to check.
+# A presentation rule only: it decides what is highlighted, not what is
+# recommended.
+TRANSIT_MATERIAL_DAYS = 2
 
 
 # The addresses these pages used to live at. Kept so a link already sent to
@@ -272,6 +345,16 @@ def upload_page():
         )
 
 
+@app.route("/data/start")
+def start_upload():
+    """Where 'Upload my orders CSV' goes. The landing page always loads the
+    sample so it never opens empty, but someone who followed this link came
+    to upload their own file and should not land on a page that says the
+    sample is already loaded."""
+    store.discard()
+    return redirect(url_for("upload_page"))
+
+
 @app.route("/method")
 def method():
     return render_template(
@@ -296,6 +379,10 @@ def method():
         trials=stats.TRIALS,
         transit_speed=factors.TRANSIT_KM_PER_DAY,
         transit_fixed=factors.TRANSIT_FIXED_DAYS,
+        circuity=factors.CIRCUITY,
+        confidence_high=diagnosis.CONFIDENCE_HIGH,
+        confidence_moderate=diagnosis.CONFIDENCE_MODERATE,
+        confidence_checks=stats.CONFIDENCE_CHECKS,
     )
 
 
@@ -310,13 +397,54 @@ def privacy():
     )
 
 
+CSV_COLUMNS = [
+    "rank",
+    "type",
+    "stage",
+    "route or item",
+    "origin",
+    "destination",
+    "change",
+    "current mode",
+    "proposed mode",
+    "straight line km",
+    "current mode km",
+    "proposed mode km",
+    "weight tonnes per year",
+    "orders per year",
+    "current cost usd per year",
+    "proposed cost usd per year",
+    "cost at stake usd per year",
+    "cost reduction share",
+    "current co2e kg per year",
+    "proposed co2e kg per year",
+    "co2e at stake kg per year",
+    "co2e reduction share",
+    "current transit days",
+    "proposed transit days",
+    "confidence",
+    "share of simulations",
+    "share of chain cost",
+    "share of chain carbon",
+    "check before acting",
+    "what to do",
+    "effort",
+]
+
+
+def _csv_number(value, places=2):
+    return "" if value is None else round(value, places)
+
+
 @app.route("/findings.csv")
 def findings_csv():
-    """The ranked findings as a spreadsheet.
+    """The route opportunities as a spreadsheet.
 
     A report somebody agrees with is still a web page. This is the same
     findings in the form the next conversation actually happens in, which is
-    a spreadsheet with a column for who is doing it.
+    a spreadsheet with a column for who is doing it. Route changes carry the
+    current and proposed figures side by side, so the saving in each row can be
+    checked with a subtraction.
     """
     with store.workspace() as conn:
         ensure_data(conn)
@@ -326,43 +454,48 @@ def findings_csv():
 
         buffer = io.StringIO()
         writer = csv.writer(buffer)
-        writer.writerow(
-            [
-                "rank",
-                "stage",
-                "problem",
-                "what is happening",
-                "why it matters",
-                "what to do",
-                "the catch",
-                "cost at stake usd per year",
-                "share of chain cost",
-                "co2e at stake kg per year",
-                "share of chain carbon",
-                "effort",
-            ]
-        )
+        writer.writerow(CSV_COLUMNS)
         for index, problem in enumerate(report["problems"], start=1):
-            cost_share = "{:.4f}".format(problem["cost_share"])
-            co2e_share = "{:.4f}".format(problem["co2e_share"])
+            route = problem["route"] or {}
+            now = route.get("now") or {}
+            proposed = route.get("proposed") or {}
             writer.writerow(
                 [
                     index,
+                    problem["kind"] or "",
                     problem["stage"],
                     problem["title"],
-                    problem["happening"],
-                    problem["why"],
-                    problem["action"],
-                    problem["note"],
+                    route.get("origin", ""),
+                    route.get("dest", ""),
+                    problem["change"] or "",
+                    now.get("mode", ""),
+                    proposed.get("mode", ""),
+                    _csv_number(route.get("straight_km"), 0),
+                    _csv_number(now.get("route_km"), 0),
+                    _csv_number(proposed.get("route_km"), 0),
+                    _csv_number(route.get("weight_t"), 3),
+                    route.get("orders", ""),
+                    _csv_number(now.get("cost")),
+                    _csv_number(proposed.get("cost")),
                     round(problem["cost_at_stake"] or 0, 2),
-                    cost_share,
+                    _csv_number(route.get("cost_pct"), 4),
+                    _csv_number(now.get("co2e")),
+                    _csv_number(proposed.get("co2e")),
                     round(problem["co2e_at_stake"] or 0, 2),
-                    co2e_share,
+                    _csv_number(route.get("co2e_pct"), 4),
+                    _csv_number(now.get("days"), 1),
+                    _csv_number(proposed.get("days"), 1),
+                    problem["confidence_label"] or "not simulated",
+                    _csv_number(problem["confidence"], 3),
+                    "{:.4f}".format(problem["cost_share"]),
+                    "{:.4f}".format(problem["co2e_share"]),
+                    "; ".join(problem["checks"]),
+                    problem["action"],
                     problem["effort"] or "",
                 ]
             )
 
-    name = "findings-" + date.today().isoformat() + ".csv"
+    name = "route-opportunities-" + date.today().isoformat() + ".csv"
     return Response(
         buffer.getvalue(),
         mimetype="text/csv",
@@ -530,6 +663,7 @@ def network_payload(conn):
         )
     ]
     lanes = scoring.rank(conn)
+    held = {row["edge_id"]: row["confidence"] for row in stats.confidence(lanes)}
     keep = (
         "id origin_id dest_id origin_name dest_name mode distance_km order_count leg "
         "total_weight_kg return_count cost co2e overlap flagged opportunity "
@@ -537,10 +671,19 @@ def network_payload(conn):
         "network_co2e_pct switch transport_cost handling_cost returns_cost "
         "transport_co2e packaging_co2e warehouse_co2e returns_co2e"
     ).split()
+    payload = []
+    for lane in lanes:
+        row = {key: lane.get(key) for key in keep}
+        row["route_km"] = distance.by_mode(lane["distance_km"], lane["mode"])
+        row["days"] = analysis.lane_transit_days(lane["distance_km"], lane["mode"])
+        row["confidence"] = held.get(lane["id"])
+        row["confidence_label"] = diagnosis.confidence_label(held.get(lane["id"]))
+        payload.append(row)
     return {
         "nodes": nodes,
-        "lanes": [{key: lane.get(key) for key in keep} for lane in lanes],
+        "lanes": payload,
         "warehouses": [n for n in nodes if n["node_type"] == "warehouse"],
+        "threshold": scoring.FLAG_THRESHOLD,
     }
 
 

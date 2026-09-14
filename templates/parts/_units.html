@@ -9,7 +9,7 @@
 {%- set value = kg or 0 -%}
 {%- if value < 1000 -%}
 {{ "{:,.0f}".format(value) }} kg
-{%- elif value < 10000 -%}
+{%- elif value < 1000000 -%}
 {{ "{:,.1f}".format(value / 1000) }} t
 {%- else -%}
 {{ "{:,.0f}".format(value / 1000) }} t

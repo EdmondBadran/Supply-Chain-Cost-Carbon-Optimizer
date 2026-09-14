@@ -10,28 +10,15 @@
 
 {% if report %}
 <div class="notice ok">
-  {{ "{:,}".format(report.orders_loaded) }}
-  order{{ "s" if report.orders_loaded != 1 }} across
-  {{ report.nodes }} location{{ "s" if report.nodes != 1 }} and
+  {{ "{:,}".format(report.orders_loaded) }} of
+  {{ "{:,}".format(report.rows_in_file) }}
+  order{{ "s" if report.rows_in_file != 1 }} processed into
   {{ report.edges }} route{{ "s" if report.edges != 1 }}.
-  {%- if report.rows_skipped %}
-  {{ report.rows_skipped }} row{{ "s" if report.rows_skipped != 1 }} skipped.
-  {%- endif %}
   <a href="{{ url_for('report_page') }}">Read the report</a>
 </div>
-{% if report.errors %}
-<details class="errors">
-  <summary>Show the {{ report.errors|length }} row{{ "s" if report.errors|length != 1 }} that did not load</summary>
-  <table>
-    <thead><tr><th>Line</th><th>Problem</th></tr></thead>
-    <tbody>
-    {% for item in report.errors %}
-      <tr><td>{{ item.line }}</td><td>{{ item.problem }}</td></tr>
-    {% endfor %}
-    </tbody>
-  </table>
-</details>
-{% endif %}
+{% set ingest = report %}
+{% set open_issues = True %}
+<div class="upload-check">{% include "parts/data_check.html" %}</div>
 {% endif %}
 
 {% if summary %}

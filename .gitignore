@@ -22,3 +22,5 @@ data/Nordic test/
 
 .env
 .DS_Store
+
+TECHNICAL_VERIFICATION.md

@@ -37,21 +37,33 @@
   <p>
     City names are matched against a bundled GeoNames table of 34,135 cities
     across 244 countries, which gives a latitude and longitude for each end of
-    the route. Distance is the great-circle distance between those two points,
-    using the haversine formula on a 6,371 km earth radius.
+    the route. The straight-line distance between them is the great-circle
+    distance, using the haversine formula on a 6,371 km earth radius. It
+    belongs to that origin and destination and nothing else.
   </p>
+  <p>
+    Freight does not travel in straight lines, and how far it strays depends
+    on the mode. So the distance each mode covers is the straight line times a
+    <strong>screening multiplier</strong> for that mode. A route and every
+    alternative tested on it are each measured this way, from the route's own
+    two ends, with their own multiplier.
+  </p>
+  <table class="grid">
+    <thead><tr><th>Mode</th><th class="num">Distance multiplier</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td>air</td><td class="num">{{ "%.2f"|format(circuity.air) }}</td><td>Flat allowance for routing and approach. GLEC adds 95 km to the airport great circle instead.</td></tr>
+      <tr><td>road</td><td class="num">{{ "%.2f"|format(circuity.road) }}</td><td>European median, range about 1.15 to 1.77 (Heinold and Makowski, 2026).</td></tr>
+      <tr><td>rail</td><td class="num">{{ "%.2f"|format(circuity.rail) }}</td><td>European median, range about 1.13 to 2.07 (same study).</td></tr>
+      <tr><td>sea</td><td class="num">{{ "%.2f"|format(circuity.sea) }}</td><td>A middle value. Real sea routes measured on the samples ran from about 0.9 to 2.8.</td></tr>
+    </tbody>
+  </table>
   <p class="caveat">
-    <strong>What this misses:</strong> real freight does not travel in
-    straight lines, and how far it strays depends on the mode. Aircraft fly
-    close to great-circle. Road runs about 25 percent longer, rail about 40
-    percent, and a sea route around a land mass or through a canal can be
-    twice the straight line: Shanghai to Rotterdam is about 9,200 km direct
-    and about 19,500 km by ship. Measuring every mode as a straight line
-    therefore understates the slower modes more than the faster ones, and
-    those are the modes this tool recommends switching to. The direction of a
-    recommendation is rarely affected, because sea and rail win by so much
-    per tonne-km, but the size of the saving is optimistic. Treat the figures
-    as an upper bound on what a switch is worth.
+    <strong>These are screening assumptions, not measured routes.</strong>
+    Sea is the weakest: a short crossing like Helsinki to Stockholm is close to
+    the straight line, while Shanghai to Stockholm by ship is nearly three
+    times it. The distance gates on which mode changes are offered, and the
+    transit estimates, use the same figures. Real road, rail and sea routing
+    can replace the multipliers without changing anything else.
   </p>
 </section>
 

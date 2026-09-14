@@ -1,17 +1,124 @@
-{# Step 5: the same numbers, put under the tests you would run on
-   somebody else's analysis. #}
-
-<p class="step-lede">
-  Nothing in this step changes a recommendation, it only tells you how much
-  weight to put on one. There are three questions worth asking: is the waste
-  concentrated enough to be worth chasing, how far out could the estimate be
-  given the factors underneath it, and do cost and carbon really land on the
-  same routes in your network?
-</p>
+{# Step 5: how much weight to put on the recommendations. The answer comes
+   first in plain words; the statistics behind it are one click away. #}
+{% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd %}
 
 {% set c = stats.concentration %}
 {% set ov = stats.overlap %}
 {% set un = stats.uncertainty %}
+{% set sure = report.confidence if report else None %}
+
+<section class="panel confidence-lead" aria-labelledby="confidence-title">
+  <p class="eyebrow" id="confidence-title">How confident are we?</p>
+  {% if sure and sure.tested %}
+  <p class="confidence-level">{{ meter(sure.level) }}{{ sure.level|upper }}</p>
+  <p class="confidence-read">
+    {% if sure.high == sure.tested and sure.lowest >= 1 %}
+    All {{ sure.tested }} route recommendation{{ "s" if sure.tested != 1 }}
+    stayed worth doing in 100% of {{ confidence_checks }} simulations.
+    {% elif sure.high == sure.tested %}
+    All {{ sure.tested }} route recommendation{{ "s" if sure.tested != 1 }}
+    stayed worth doing in at least {{ pct(sure.lowest) }} of
+    {{ confidence_checks }} simulations.
+    {% else %}
+    {{ sure.high }} of {{ sure.tested }} route recommendations stayed worth doing
+    in at least 90% of simulations. The weakest held in {{ pct(sure.lowest) }}.
+    {% endif %}
+    The exact dollar value varies because freight and emission factors are
+    estimates: across {{ "{:,}".format(un.trials) }} runs, 80% put the
+    recoverable route saving between {{ usd(un.p10) }} and {{ usd(un.p90) }}.
+  </p>
+  {% else %}
+  <p class="confidence-level">{{ meter(None) }}NOT TESTED</p>
+  <p class="confidence-read">There are no route mode changes here to test.</p>
+  {% endif %}
+  {% if sure and sure.untested %}
+  <p class="confidence-read muted-ink">
+    {{ sure.untested }} of the opportunities {{ "is not a route change" if sure.untested == 1 else "are not route changes" }}
+    and {{ "was" if sure.untested == 1 else "were" }} not simulated. Each rests
+    on the assumptions listed with it.
+  </p>
+  {% endif %}
+
+  {% if report and report.confidence.tested %}
+  <div class="table-scroll" tabindex="0">
+    <table class="grid">
+      <thead><tr><th>Route</th><th>Change</th><th>Confidence</th></tr></thead>
+      <tbody>
+      {% for problem in report.problems if problem.route %}
+        <tr>
+          <td>{{ route_name(problem) }}</td>
+          <td>{{ change(problem) }}</td>
+          <td>{{ confidence(problem) }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="source">
+    Each simulation redraws every cost and emission factor up to
+    {{ "{:.0%}".format(un.spread) }} either side of its published value. A
+    route counts as still worth doing when switching cuts both its cost and
+    its carbon by at least 25%. High means at least 90% of simulations,
+    moderate at least 60%.
+  </p>
+  {% endif %}
+</section>
+
+{% if report %}
+<section class="panel limits-panel" aria-labelledby="limits-title">
+  <h3 id="limits-title">What this does not account for</h3>
+  <ul class="limits">
+    {% for limit in report.method.limits %}
+    <li>{{ limit }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<details class="panel quiet-details" id="factors">
+  <summary>Factors, distances and sources</summary>
+  <div class="table-scroll" tabindex="0">
+    <table class="grid">
+      <thead>
+        <tr>
+          <th>Mode</th>
+          <th class="num">USD per t-km</th>
+          <th class="num">kg CO2e per t-km</th>
+          <th class="num">Distance multiplier</th>
+          <th class="num">km per day</th>
+          <th class="num">Fixed days</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in factor_table %}
+        <tr>
+          <td>{{ row.mode|title }}</td>
+          <td class="num">{{ row.cost }}</td>
+          <td class="num">{{ row.emission }}</td>
+          <td class="num">{{ "%.2f"|format(row.circuity) }}</td>
+          <td class="num">{{ "{:,}".format(row.speed) }}</td>
+          <td class="num">{{ row.fixed_days }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <dl class="formulas">
+    {% for name, words in report.method.assumptions %}
+    <dt>{{ name }}</dt>
+    <dd>{{ words }}</dd>
+    {% endfor %}
+  </dl>
+  <a class="ghost-link" href="{{ url_for('method') }}">Every formula and source</a>
+</details>
+{% endif %}
+
+<details class="deep" id="uncertainty-detail">
+<summary>See full uncertainty analysis</summary>
+<p class="step-lede">
+  For analysts. Nothing here changes a recommendation. It answers three
+  questions: how concentrated the waste is, how far out the estimate could
+  be, and whether cost and carbon really land on the same routes.
+</p>
 
 <div class="figure-row">
   <div class="figure">
@@ -553,3 +660,4 @@
     budget.
   </p>
 </section>
+</details>

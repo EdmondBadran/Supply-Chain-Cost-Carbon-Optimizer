@@ -1,4 +1,4 @@
-# Supply chain cost and carbon optimizer
+# Supply chain cost and carbon screener
 
 Most companies track logistics cost in one report and emissions in another,
 and the two never get looked at together. That is a problem, because the
@@ -6,44 +6,38 @@ routes doing the most financial damage are very often the same routes doing
 the most environmental damage, and nobody notices because the numbers live in
 different spreadsheets.
 
-This tool loads your order data, works out what every route costs to serve and
-what it emits, and ranks the places where one change fixes both.
+This tool answers one question: which shipping routes should I investigate
+if I want to cut both cost and carbon? Load a year of orders and it ranks the
+routes where changing transport mode would reduce both, lets you investigate
+and test each one, and exports the result. It is a screen, not a network
+optimiser.
 
-## The six views
+## How it reads
 
-**The landing page** is where it opens, and it explains the problem before
-showing a single number. The demo is already loaded and one click away, so
-nothing is hidden behind a form.
+**The report** opens on the decisions. The biggest opportunities come first:
+how many, what they are worth in money and in carbon, how sure to be, and a
+data check saying how many orders were loaded, how many were excluded and
+why. Then the top recommendations as cards, each with the route, the mode
+change, the saving, the transit impact, confidence and what to check before
+acting.
 
-**The value chain** is the diagnostic itself, drawn as one river of money.
-The band thickens at every stage that adds cost, so you can see where the
-spend accumulates without reading a legend, and returns runs backwards
-underneath it. Three steps down the page: this is your chain, this is what is
-wrong, this is what to do. Six stages, suppliers through to
-returns, each showing what it costs, what it emits, and what is wrong inside
-it. Warehousing gets checked for carbon per tonne handled, customers for cost
-per tonne to serve, returns for return rate, freight for whether a different
-transport mode would be better. Click a stage to see its problems, click a
-problem to land on that exact route on the map.
+Below that, five steps back it up. What you spend, with the chain drawn as a
+river whose band thickens wherever cost is added. What is wrong, as a ranked
+list where each line opens to the evidence and the calculation. Where it is,
+with the ranked routes and a world map. What to do, as three decisions and
+then the full plan. How sure to be, with the plain answer first and the
+statistics one click away.
 
-**The optimizer** is the world map. Every route drawn and scored, the ones
-worth changing flagged, and a panel where you can try a different transport
-mode or a different warehouse and watch cost and carbon move before you commit
-to anything.
+**Investigate and test** happen in a side panel that leaves the report where
+it was. Investigate shows current against proposed, why the route was
+flagged, the warnings, the factors and the full arithmetic. Test scenario
+changes the mode or the serving warehouse and recalculates on the server,
+clearly marked as a scenario, and a few alternatives can be pinned side by
+side. The map follows whichever route is open.
 
-**The report** writes the whole thing up the way a consultant would hand it
-over. The truth about your chain in one paragraph, every stage walked through
-in plain language, the problems ranked across stages, how each figure was
-reached, and a numbered plan with the money, the carbon and the operational
-catch on every step. It ends with the three things to do if you only do three.
-Every sentence is built from your own data.
-
-**The statistics page** turns the tool's own output back on itself. How
-concentrated cost and carbon are across routes, whether the two actually land
-on the same routes in your network or only in the pitch, how far the
-recoverable figure moves when the factors are redrawn inside their published
-ranges, and which recommendations survive that unchanged. It is the page that
-tells you how hard to lean on the rest of them.
+**Exports** are an executive summary of one or two pages, the full report as
+a PDF from the browser, and a CSV of every recommendation with current and
+proposed figures side by side.
 
 **The method page** shows the working. Every formula, every factor with its
 source, every assumption, and a section on what the tool does not account for
@@ -69,11 +63,10 @@ Then it looks for lanes where a different transport mode would cut both, and
 ranks those by how much of the network's total they recover. You can tag how
 hard each one is to actually do, and the ranking reorders around that.
 
-The page opens by telling you what it found, in a sentence, before any chart.
-The map is zoomable and every route and location explains itself on hover.
-Pick any route and you can try a different transport mode, or serve it from a
-different warehouse, and it tells you what that does to cost and carbon
-before you commit to anything.
+Every order ends up either loaded or listed with its line, field and reason.
+After grouping, the loader checks the routes still add up to the orders: same
+count, same weight, one route per origin, destination and mode. If they do
+not, no report is produced.
 
 ## Running it
 
@@ -85,14 +78,16 @@ python app.py
 Then open http://localhost:5000. The sample dataset loads itself, so you land
 on a working value chain rather than an upload form.
 
-    /           the landing page
-    /chain      the value chain and the diagnosis
-    /dashboard  the optimizer, map and what-if
-    /diagnosis  the written report and the plan
-    /stats      how much of it to believe
-    /method     how every number is worked out
-    /data       load your own CSV
-    /privacy    what happens to a file you upload
+    /                 the landing page, with live results on the sample
+    /report           the report: overview, five steps, route panel, exports
+    /report/summary   the executive summary, ready to print
+    /findings.csv     every recommendation as a spreadsheet
+    /method           how every number is worked out
+    /data             load your own CSV
+    /privacy          what happens to a file you upload
+
+The old `/chain`, `/dashboard`, `/diagnosis` and `/stats` addresses redirect
+to the matching step of the report.
 
 ## Your own data
 
@@ -138,7 +133,7 @@ the file still loads. One bad row does not cost you the import.
 ## The numbers behind it
 
 Emission factors are kg CO2e per tonne-km in the ranges published by DEFRA
-and the GLEC framework: road 0.062, rail 0.022, sea 0.008, air 0.602. Air
+and the GLEC framework: road 0.101, rail 0.022, sea 0.008, air 0.602. Air
 against sea is a 75 times gap, which is why air freight dominates the results
 on almost any dataset that uses it.
 
@@ -148,9 +143,17 @@ These vary far more in the real world than the emission factors do, so treat
 them as a starting point, not gospel. They live in `optimizer/factors.py` and
 are meant to be edited.
 
-Distances are great-circle between city coordinates. Real routed distance is
-longer, so the absolute numbers run slightly low, but the comparison between
-two options on the same lane holds up, which is what the ranking depends on.
+Distances start as great-circle between city coordinates, and each mode then
+gets a screening multiplier for how far freight really travels: air 1.05,
+road 1.25, rail 1.42, sea 1.60. These are assumptions, not routed distances,
+and sea in particular varies a lot from route to route. They are applied in
+one function, `optimizer/distance.py`, which is where real road, rail or sea
+routing would go. A candidate mode is always measured from the route's own
+two ends with its own multiplier.
+
+Confidence on each recommendation comes from redrawing every factor 200
+times: high means it still cut both cost and carbon by a quarter in at least
+90% of draws, moderate at least 60%.
 
 ## How it decides what is a quick win
 
@@ -220,9 +223,10 @@ No build step, no frontend framework, no API keys. It runs offline.
 ## Layout
 
 ```
-app.py              routes and the JSON endpoints the map calls
+app.py              routes, JSON endpoints, the CSV and the summary
 optimizer/
   geo.py            city lookup and great-circle distance
+  distance.py       distance by transport mode
   factors.py        cost and emission factors per mode
   db.py             schema
   ingest.py         CSV validation and loading
@@ -233,10 +237,11 @@ optimizer/
   stats.py          concentration, correlation and the uncertainty band
   store.py          one in-memory workspace per visitor
 static/
-  dashboard.js      the map, the ranking and the what-if panel
+  dashboard.js      the map and the ranked routes
+  workspace.js      the route panel, scenarios and comparison
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              96 tests: thresholds, statistics and the routes
+tests/              157 tests: loading, thresholds, statistics and the routes
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -282,7 +287,14 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-96 of them, stdlib unittest, no test dependency.
+157 of them, stdlib unittest, no test dependency.
+
+`tests/test_ingest.py` and `tests/test_recommendations.py` exist because
+routes from different origins into one city were once merged into one. They
+check every row is loaded or explained, routes stay separate by origin, each
+route and each candidate mode is measured over its own distance, nothing is
+recommended unless cost and carbon both fall by a quarter, and every saving
+on a card equals current minus proposed.
 
 The scoring thresholds decide which routes get flagged and in what order, and
 they were tuned by hand. The risk was never that they are wrong, it is that
