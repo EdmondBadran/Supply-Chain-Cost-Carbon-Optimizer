@@ -131,8 +131,9 @@ app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
 if os.environ.get("FLASK_DEBUG", "1") != "0":
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
 
-# Where the How it works page sends anybody who wants the full method. The
-# long write-up is a document sent on request rather than a page.
+# The address of the person who built Overlap. Every page that gives it says
+# so, and it is where anybody wanting the full method is sent: the long
+# write-up is a document sent on request rather than a page.
 CONTACT_EMAIL = "edmondbadran42@gmail.com"
 
 

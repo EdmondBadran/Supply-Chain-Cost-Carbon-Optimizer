@@ -473,7 +473,10 @@ details th {
     font-weight: 400;
 }
 
-details td:first-child {
+/* The first column of the upload errors table is a file name. Scoped to that
+   table, because written for every table inside a disclosure it squeezed the
+   route names in the statistics to a word per line. */
+.datacheck-issues td:first-child {
     width: 64px;
     font-family: "IBM Plex Mono", ui-monospace, monospace;
     color: var(--ink-3);
@@ -2753,8 +2756,7 @@ select:disabled {
 
 /* The report's cover is printed matter. It sits in the markup on every visit
    and is only ever shown to a printer. */
-.print-cover,
-.print-only {
+.print-cover {
     display: none;
 }
 
@@ -5916,11 +5918,71 @@ body.drawer-open .oppbar { left: calc((100vw - min(480px, 100vw)) / 2); }
     .map-panel,
     .confidence-lead { break-inside: avoid; }
 
-    /* ---- The analyst statistics stay on screen ----
-       Ten pages of charts turned a presentation into a workbook. The PDF
-       says where they are instead. */
-    .deep { display: none !important; }
-    .print-only { display: block; }
+    /* ---- The statistics, as an appendix ----
+       Last, on sheets of their own, with every chart sized for a page rather
+       than a screen. Tables run the full width, because two side by side
+       squeezed every route name onto four lines, and no chart or table is
+       split across a sheet. */
+    .deep { break-before: page; margin-top: 0; padding-top: 0; border-top: 0; }
+
+    .deep > summary {
+        margin: 0 0 6mm;
+        padding: 0 0 4mm;
+        border-bottom: 2px solid var(--ink);
+        font-size: 0;
+    }
+
+    .deep > summary::before {
+        content: "Appendix";
+        display: block;
+        margin-bottom: 2mm;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 8.5pt;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--ink-3);
+    }
+
+    .deep > summary::after {
+        content: "The statistics behind the confidence";
+        display: block;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 24pt;
+        font-weight: 600;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        text-transform: none;
+        color: var(--ink);
+    }
+
+    .deep > .step-lede { font-size: 10.5pt; }
+    .deep .figure-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .deep .panel { padding: 4mm 5mm; }
+    .deep .panel h3 { font-size: 13pt; break-after: avoid; }
+    .deep .panel h4 { margin: 4mm 0 2mm; font-size: 10.5pt; break-after: avoid; }
+    .deep .panel > .sub { margin-bottom: 3mm; font-size: 9.5pt; }
+
+    .deep .stat-read,
+    .deep .source,
+    .deep .caveat { font-size: 9.5pt; }
+
+    .deep .chart-wrap { margin: 3mm 0; break-inside: avoid; }
+    .deep .chart { height: 52mm; }
+    .deep .chart.scatter,
+    .deep .chart.lorenz { width: 72mm; height: auto; }
+    .deep .chart-x,
+    .deep .chart-y { font-size: 7.5pt; }
+    .deep .chart-legend { margin: 0 0 3mm; font-size: 8.5pt; }
+
+    .deep .split-2 { grid-template-columns: minmax(0, 1fr); gap: 3mm; }
+    .deep .band { grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 3mm 0; }
+    .deep .band div { padding: 2mm 3mm; }
+    .deep .band span { margin-bottom: 1mm; font-size: 7pt; }
+    .deep .band strong { font-size: 11pt; }
+
+    .deep .table-scroll,
+    .deep .band,
+    .deep .figure-row { break-inside: avoid; }
 }
 
 /* The executive summary prints dark, full bleed, as two designed sheets.

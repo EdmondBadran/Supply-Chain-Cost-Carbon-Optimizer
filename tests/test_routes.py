@@ -132,6 +132,7 @@ class Routes(unittest.TestCase):
         body = self.client.get("/method").get_data(as_text=True)
         self.assertEqual(body.count('class="hiw-box"'), 2)
         self.assertIn("mailto:" + application.CONTACT_EMAIL, body)
+        self.assertIn("Overlap's creator", body)
 
     def test_the_data_page_offers_the_upload_before_the_samples(self):
         body = self.client.get("/data").get_data(as_text=True)
