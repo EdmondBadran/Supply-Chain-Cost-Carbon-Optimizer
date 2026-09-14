@@ -47,7 +47,7 @@
 
   {% for warning in ingest.warnings %}
   <p class="datacheck-warn"><span class="checks-icon" aria-hidden="true">&#9888;</span> {{ warning.message }}
-    {% if warning.lines %}Lines {% for item in warning.lines %}{{ item.line }}{% if item.same_as %} (same as {{ item.same_as }}){% endif %}{{ ", " if not loop.last }}{% endfor %}{% if warning.count > warning.lines|length %} and more{% endif %}.{% endif %}
+    {% if warning.lines %}Lines {% for item in warning.lines %}{{ item.line }}{% if item.same_as %} (same as {{ item.same_as }}){% endif %}{% if item.km %} ({{ "{:,}".format(item.km) }} km){% endif %}{{ ", " if not loop.last }}{% endfor %}{% if warning.count > warning.lines|length %} and more{% endif %}.{% endif %}
   </p>
   {% endfor %}
 

@@ -15,6 +15,17 @@ TRUTHY = {"1", "true", "yes", "y", "returned", "t"}
 
 MAX_REPORTED_ERRORS = 50
 
+# Order references go by more than one name in real exports, and a repeated
+# reference is only noticed if its column is read under the name it has.
+ORDER_REF_COLUMNS = ("order_ref", "order_id", "order_number")
+
+# Straight-line distances past which a road or rail order is far more likely
+# to be a city matched to the wrong place than a real service. A city given
+# without a country resolves to the largest place with that name, so London,
+# Ontario arrives as London, England. Rail is allowed much further because
+# China to Europe rail freight runs past 10,000 km in a straight line.
+SURFACE_LIMIT_KM = {"road": 5000, "rail": 11000}
+
 
 class ValidationError(Exception):
     pass
@@ -47,6 +58,15 @@ def _rate(value, field):
     if not 0.0 <= number <= 1.0:
         raise ValidationError(f"{field} must be between 0 and 100 percent")
     return number
+
+
+def _order_ref(row):
+    """The order's reference, under whichever of the usual names it has."""
+    for name in ORDER_REF_COLUMNS:
+        ref = _clean(row.get(name))
+        if ref:
+            return ref
+    return ""
 
 
 def _resolve_point(city, country, lat, lon):
@@ -127,6 +147,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
     weight_in_file = 0.0
     first_seen = {}
     repeats = []
+    far = []
 
     def register(label, node_type, city, country, point):
         """Record a place and return the key that identifies it.
@@ -203,7 +224,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
 
             orders.append(
                 {
-                    "order_ref": _clean(row.get("order_ref")) or None,
+                    "order_ref": _order_ref(row) or None,
                     "order_date": _clean(row.get("order_date")) or None,
                     "customer_id": _clean(row.get("customer_id")) or None,
                     "origin": origin_key,
@@ -223,7 +244,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
         # A repeated row is kept, because two identical orders are entirely
         # possible, but it is pointed out, because an export run twice is
         # more likely still.
-        ref = _clean(row.get("order_ref"))
+        ref = _order_ref(row)
         key = ("ref", ref) if ref else tuple(
             sorted((name, _clean(value)) for name, value in row.items() if name)
         )
@@ -232,6 +253,14 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
         else:
             first_seen[key] = position
 
+        # Kept, because it could be real, and pointed out, because it is far
+        # more often a city that matched the wrong place.
+        limit = SURFACE_LIMIT_KM.get(mode)
+        if limit:
+            straight = geo.distance_km(*origin_point, *dest_point)
+            if straight > limit:
+                far.append({"line": position, "km": round(straight)})
+
     order_errors = len(errors)
 
     if not orders:
@@ -239,15 +268,41 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
         raise ValidationError(f"no usable rows. First problem: {first}")
 
     if repeats:
+        many = len(repeats) != 1
         warnings.append(
             {
                 "kind": "duplicates",
                 "count": len(repeats),
                 "lines": repeats[:10],
                 "message": (
-                    f"{len(repeats)} row{'s' if len(repeats) != 1 else ''} "
-                    "repeat an earlier row or order_ref. They were counted as "
-                    "separate orders. Remove them if they are duplicates."
+                    f"{len(repeats)} row{'s repeat' if many else ' repeats'} an "
+                    "earlier row or order reference. "
+                    + (
+                        "They were counted as separate orders. Remove them if "
+                        "they are duplicates."
+                        if many
+                        else "It was counted as a separate order. Remove it if it "
+                        "is a duplicate."
+                    )
+                ),
+            }
+        )
+
+    if far:
+        many = len(far) != 1
+        warnings.append(
+            {
+                "kind": "distance",
+                "count": len(far),
+                "lines": far[:10],
+                "message": (
+                    f"{len(far)} road or rail order{'s run' if many else ' runs'} "
+                    "further than any regular road or rail service. A city given "
+                    "without a country is matched to the largest place with that "
+                    "name, which may not be the one meant. "
+                    + ("They were" if many else "It was")
+                    + " counted as given. Check the cities, or add origin_country "
+                    "and dest_country."
                 ),
             }
         )

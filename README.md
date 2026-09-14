@@ -73,6 +73,10 @@ After grouping, the loader checks the routes still add up to the orders: same
 count, same weight, one route per origin, destination and mode. If they do
 not, no report is produced.
 
+Two kinds of row load but are flagged: one that repeats an earlier row or
+order reference, and a road or rail order that runs further than any regular
+service, which nearly always means a city matched the wrong place.
+
 ## Running it
 
 ```
@@ -108,8 +112,8 @@ The orders file needs these columns:
 | `mode` | road, rail, sea or air |
 
 These are optional and make the results better: `origin_country`,
-`dest_country`, `order_ref`, `order_date`, `customer_id`, `units`,
-`product_category`, `order_value`, `returned`.
+`dest_country`, `order_ref` (or `order_id`), `order_date`, `customer_id`,
+`units`, `product_category`, `order_value`, `returned`.
 
 Cities are resolved against a bundled GeoNames table, 34,135 cities across
 244 countries, so it works anywhere and does not call out to a geocoding API.

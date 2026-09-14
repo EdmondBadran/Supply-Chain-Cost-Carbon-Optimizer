@@ -220,5 +220,46 @@ class NamesPeopleActuallyType(unittest.TestCase):
                 self.assertEqual(geo.locate(typed), geo.locate(expected_city))
 
 
+class RowsThatLoadButAreWorthALook(unittest.TestCase):
+    """Rows kept, because they may be right, and pointed out, because they are
+    more often a mistake. Both came from a test file written to catch exactly
+    these, and both loaded without a word."""
+
+    def warnings(self, report, kind):
+        return [warning for warning in report["warnings"] if warning["kind"] == kind]
+
+    def test_a_repeated_order_id_is_pointed_out(self):
+        conn, report = load(
+            "order_id,origin_name,origin_city,dest_city,weight_kg,mode\n"
+            "A-1,Depot,Stockholm,Oslo,1000,road\n"
+            "A-2,Depot,Stockholm,Oslo,1500,road\n"
+            "A-2,Other Depot,Stockholm,Oslo,500,road\n"
+        )
+        self.assertEqual(report["orders_loaded"], 3)
+        repeats = self.warnings(report, "duplicates")
+        self.assertEqual(len(repeats), 1)
+        self.assertEqual(repeats[0]["lines"], [{"line": 4, "same_as": 3}])
+
+    def test_a_road_order_too_long_to_be_real_is_pointed_out(self):
+        """Atlantis is a real town, in South Africa, so the name matches."""
+        conn, report = load(
+            "origin_name,origin_city,dest_city,weight_kg,mode\n"
+            "Depot,Stockholm,Oslo,1000,road\n"
+            "Far Depot,Atlantis,Stockholm,1000,road\n"
+        )
+        self.assertEqual(report["orders_loaded"], 2)
+        far = self.warnings(report, "distance")
+        self.assertEqual(len(far), 1)
+        self.assertEqual([item["line"] for item in far[0]["lines"]], [3])
+
+    def test_the_longest_real_rail_freight_is_not_flagged(self):
+        """Yiwu to Madrid is a scheduled rail service."""
+        conn, report = load(
+            "origin_name,origin_city,dest_city,weight_kg,mode\n"
+            "Depot,Yiwu,Madrid,1000,rail\n"
+        )
+        self.assertEqual(self.warnings(report, "distance"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
