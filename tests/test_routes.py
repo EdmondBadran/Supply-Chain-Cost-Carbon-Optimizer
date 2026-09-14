@@ -31,16 +31,22 @@ PAGES = ("/", "/report", "/method", "/privacy", "/data")
 # The four addresses the report used to be split across. Kept as redirects so
 # a link somebody has already sent still lands on the right part of it.
 LEGACY = {
-    "/chain": "step-1",
-    "/diagnosis": "step-2",
-    "/dashboard": "step-3",
-    "/stats": "step-4",
+    "/chain": "network",
+    "/diagnosis": "recommendations",
+    "/dashboard": "network",
+    "/stats": "data",
 }
 
 TINY_CSV = b"""origin_name,origin_city,origin_country,dest_city,dest_country,weight_kg,mode
 Depot,Leeds,GB,Paris,FR,120,road
 Depot,Leeds,GB,Madrid,ES,300,road
 Depot,Leeds,GB,Sydney,AU,80,air
+"""
+
+# One sea route into one city: nothing to switch to, nothing to compare.
+NOTHING_CSV = b"""origin_name,origin_city,origin_country,dest_city,dest_country,weight_kg,mode
+Harbour Co,Rotterdam,NL,Stockholm,SE,9000,sea
+Harbour Co,Rotterdam,NL,Stockholm,SE,8000,sea
 """
 
 
@@ -109,24 +115,42 @@ class Routes(unittest.TestCase):
         response = self.client.get("/dashboard?lane=3")
         location = response.headers["Location"]
         self.assertIn("lane=3", location)
-        self.assertTrue(location.endswith("#step-3"), location)
+        self.assertTrue(location.endswith("#network"), location)
 
-    def test_every_part_is_on_the_page(self):
-        """The report is the short answer and four parts, and the fifth step
-        it used to have is gone rather than left behind empty."""
+    def test_every_section_is_on_the_page(self):
+        """The results are an overview and four sections, each named in the
+        section navigation, and the old numbered parts are gone."""
         body = self.client.get("/report").get_data(as_text=True)
-        for step in ("overview", "step-1", "step-2", "step-3", "step-4"):
-            with self.subTest(step=step):
-                self.assertIn('id="' + step + '"', body)
-        self.assertNotIn('id="step-5"', body)
+        for section in ("overview", "recommendations", "network", "data", "export"):
+            with self.subTest(section=section):
+                self.assertIn('id="' + section + '"', body)
+                self.assertIn('data-rail="' + section + '"', body)
+        self.assertNotIn('id="step-1"', body)
 
-    def test_each_opportunity_is_described_once(self):
-        """Every opportunity used to appear in five forms on one page. Its
-        decision now lives only in its line in part two."""
+    def test_the_overview_leads_with_the_decision(self):
+        """The first thing on the results is how many changes were found, what
+        they are worth, and one button into the top one."""
         body = self.client.get("/report").get_data(as_text=True)
-        self.assertEqual(body.count('class="row-decision"'), body.count('class="rec-row'))
-        self.assertNotIn("If you do only three things", body)
-        self.assertNotIn("The complete action plan", body)
+        overview = body[body.index('id="overview"'):body.index('id="recommendations"')]
+        self.assertIn("We found 5 changes worth reviewing", overview)
+        self.assertIn("$2,297", overview)
+        self.assertIn("7.0 t CO₂e", overview)
+        self.assertIn("Review the top recommendation", overview)
+        self.assertEqual(overview.count("btn-primary"), 1)
+        for label in ("Potential annual cost saving", "Potential annual CO₂e reduction", "Recommended changes"):
+            with self.subTest(label=label):
+                self.assertIn(label, overview)
+
+    def test_every_change_has_one_card_and_one_decision_view(self):
+        """Each change is written up once as a card in the list and once as
+        the decision view its card opens, and nowhere else."""
+        body = self.client.get("/report").get_data(as_text=True)
+        cards = body.count('class="rec-card')
+        self.assertGreater(cards, 0)
+        self.assertEqual(cards, body.count('<template id="change-detail-'))
+        self.assertEqual(cards, body.count("Why this is recommended"))
+        self.assertEqual(cards, body.count('data-open-change="') - 1)
+        self.assertNotIn("Not simulated", body)
 
     def test_how_it_works_is_two_boxes_and_an_email(self):
         body = self.client.get("/method").get_data(as_text=True)
@@ -171,32 +195,127 @@ class Routes(unittest.TestCase):
         rows = response.get_data(as_text=True).strip().split("\n")
         self.assertGreater(len(rows), 1)
         for column in (
-            "Cost saving (USD per year)",
+            "Cost saving (USD a year)",
             "Current mode",
             "Proposed mode",
-            "Current cost (USD per year)",
-            "Proposed cost (USD per year)",
-            "Simulations still worth it (%)",
+            "Current cost (USD a year)",
+            "Proposed cost (USD a year)",
+            "Simulations where it still paid (%)",
             "Check before acting",
         ):
             self.assertIn(column, rows[0])
+
+    def test_the_findings_download_as_a_workbook(self):
+        """The workbook is a real one: a zip with the sheets the summary
+        lists, and every formula written with the value it comes to, so a
+        previewer that does not calculate still shows the figure."""
+        import zipfile
+
+        response = self.client.get("/findings.xlsx")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.mimetype, application.xlsx.MIMETYPE)
+        self.assertIn("sample", response.headers["Content-Disposition"])
+        with zipfile.ZipFile(io.BytesIO(response.data)) as archive:
+            self.assertIsNone(archive.testzip())
+            sheets = re.findall(
+                r'<sheet name="([^"]+)"', archive.read("xl/workbook.xml").decode()
+            )
+            self.assertEqual(
+                sheets, ["Summary", "Opportunities", "Routes", "Data check", "Assumptions"]
+            )
+            formulas = 0
+            for number in range(1, len(sheets) + 1):
+                xml = archive.read(f"xl/worksheets/sheet{number}.xml").decode()
+                for cell in re.findall(r"<f>.*?</f>(?:<v>.*?</v>)?", xml):
+                    formulas += 1
+                    self.assertIn("<v>", cell)
+            self.assertGreater(formulas, 0)
 
     def test_the_executive_summary_opens(self):
         response = self.client.get("/report/summary")
         self.assertEqual(response.status_code, 200)
         body = response.get_data(as_text=True)
-        for text in ("Executive summary", "Biggest opportunities", "Check before acting",
-                     "How confident", "Important assumptions", "Data health"):
+        for text in ("Executive summary", "Top changes to review", "What to check before acting",
+                     "How confident we are", "Important assumptions", "Data check"):
             with self.subTest(text=text):
                 self.assertIn(text, body)
+        self.assertNotIn("Not simulated", body)
 
     def test_the_report_carries_the_workspace(self):
         body = self.client.get("/report").get_data(as_text=True)
         for text in ('id="overview"', 'id="drawer"', 'id="recs-data"', 'id="export"',
-                     "Data check", "Investigate route", "Test scenario",
-                     "Edit report structure", "See full uncertainty analysis"):
+                     "Data check", "Review change", "Mark for review",
+                     "Export this recommendation", "Back to all changes",
+                     "See calculation details", "Try a different transport mode or warehouse",
+                     "Rename or reorder your supply chain stages", "Full uncertainty analysis",
+                     "Recommended now", "Needs more data to confirm"):
             with self.subTest(text=text):
                 self.assertIn(text, body)
+
+    def test_the_trust_questions_are_answered(self):
+        body = self.client.get("/report").get_data(as_text=True)
+        for question in ("How much of your data was usable?",
+                         "How reliable are the recommendations?",
+                         "Which assumptions affect the estimates?",
+                         "What does this analysis not include?"):
+            with self.subTest(question=question):
+                self.assertIn(question, body)
+        self.assertIn("182 of 182", body)
+        self.assertIn("these are planning estimates", body)
+
+    def test_the_groups_follow_confidence_and_never_reorder(self):
+        """Grouping is presentation only. A stress-tested change goes by its
+        confidence label, one that was not goes by what its figure rests on,
+        and every change keeps the rank the engine gave it."""
+        from optimizer import analysis, db, ingest
+
+        conn = db.connect()
+        try:
+            db.init(conn)
+            ingest.load(conn, *application.sample_paths(application.DEFAULT_SAMPLE))
+            analysis.run(conn)
+            report = application.diagnosis.build(conn)
+        finally:
+            conn.close()
+        before = [(p["title"], p["cost_at_stake"], p["co2e_at_stake"]) for p in report["problems"]]
+        groups = application.decision_groups(report)
+        self.assertEqual(before, [(p["title"], p["cost_at_stake"], p["co2e_at_stake"]) for p in report["problems"]])
+        self.assertEqual(sorted(groups["by_rank"]), list(range(1, len(report["problems"]) + 1)))
+        for rank, problem in enumerate(report["problems"], start=1):
+            group = groups["by_rank"][rank]
+            with self.subTest(rank=rank):
+                if problem["confidence_label"] == "high":
+                    self.assertEqual(group["key"], "now")
+                    self.assertIsNone(group["basis"])
+                elif problem["confidence_label"] is None:
+                    self.assertNotEqual(group["key"], "now")
+                    self.assertTrue(group["basis"])
+        ranks = [rank for g in groups["groups"] for rank in g["ranks"]]
+        self.assertEqual(sorted(ranks), list(range(1, len(report["problems"]) + 1)))
+
+    def test_the_required_columns_guide_matches_the_loader(self):
+        from optimizer import ingest
+
+        self.assertEqual(
+            {name for name, _, _ in application.REQUIRED_FIELDS}, ingest.REQUIRED_COLUMNS
+        )
+
+    def test_the_example_orders_download(self):
+        response = self.client.get("/data/example-orders.csv")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("sample", response.headers["Content-Disposition"])
+        header = response.get_data(as_text=True).splitlines()[0]
+        for name, _, _ in application.REQUIRED_FIELDS:
+            self.assertIn(name, header)
+
+    def test_a_change_brief_opens_and_a_missing_one_goes_back(self):
+        response = self.client.get("/report/change/1")
+        self.assertEqual(response.status_code, 200)
+        body = response.get_data(as_text=True)
+        self.assertIn("Recommendation brief", body)
+        self.assertIn("What to check before acting", body)
+        self.assertIn("not a real company", body)
+        self.assertEqual(self.client.get("/report/change/99").status_code, 302)
 
     def test_a_scenario_answers_with_both_sides(self):
         import json
@@ -263,7 +382,12 @@ class Isolation(unittest.TestCase):
         client = application.app.test_client()
         response = self.upload(client, b"nothing,useful\n1,2\n")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"missing required columns", response.data)
+        body = response.get_data(as_text=True)
+        self.assertIn("missing required columns", body)
+        # Said as a person would say it, with each missing column explained.
+        self.assertIn("Your file is missing 5 required columns", body)
+        self.assertIn("<code>dest_city</code>", body)
+        self.assertIn("the city it was delivered to", body)
 
     def test_an_upload_with_bad_rows_says_what_was_excluded(self):
         client = application.app.test_client()
@@ -272,10 +396,11 @@ class Isolation(unittest.TestCase):
             TINY_CSV + b"Depot,Leeds,GB,Atlantis Qqq,XX,50,road\n",
         )
         body = response.get_data(as_text=True)
-        self.assertIn("1 order needs attention", body)
+        self.assertIn("Your analysis is ready", body)
+        self.assertIn("1 order could not be used", body)
         self.assertIn("dest_city", body)
         report = client.get("/report").get_data(as_text=True)
-        self.assertIn("1 order needs attention", report)
+        self.assertIn("1 order could not be used", report)
 
     def test_sample_figures_say_they_are_not_real(self):
         """Anywhere the sample's figures appear, the page says the company is
@@ -288,6 +413,40 @@ class Isolation(unittest.TestCase):
         for path in ("/", "/report", "/report/summary"):
             with self.subTest(path=path, loaded="upload"):
                 self.assertNotIn("not a real company", client.get(path).get_data(as_text=True))
+
+    def test_a_network_with_nothing_to_change_leaves_that_part_out(self):
+        """With nothing to change, the report says so, and the part, the CSV
+        and the workbook sheet that would have been empty are left out."""
+        import zipfile
+
+        client = application.app.test_client()
+        self.upload(client, NOTHING_CSV)
+        body = client.get("/report").get_data(as_text=True)
+        self.assertIn("We found no changes that cut both cost and carbon", body)
+        self.assertNotIn('id="recommendations"', body)
+        self.assertIn('id="network"', body)
+        self.assertNotIn('href="/findings.csv"', body)
+        self.assertNotIn("1 routes", body)
+        self.assertNotIn("data-open-change", body)
+
+        book = client.get("/findings.xlsx")
+        self.assertEqual(book.status_code, 200)
+        with zipfile.ZipFile(io.BytesIO(book.data)) as archive:
+            sheets = re.findall(
+                r'<sheet name="([^"]+)"', archive.read("xl/workbook.xml").decode()
+            )
+        self.assertEqual(sheets, ["Summary", "Routes", "Data check", "Assumptions"])
+
+    def test_stages_without_data_are_not_drawn(self):
+        """An orders file on its own has no suppliers, no inbound freight and
+        here no returns, so the chain picture does not draw them as zeros."""
+        client = application.app.test_client()
+        self.upload(client)
+        body = client.get("/report").get_data(as_text=True)
+        for missing in ("suppliers", "inbound", "returns"):
+            with self.subTest(stage=missing):
+                self.assertNotIn(f'data-stage="{missing}"', body)
+        self.assertIn('data-stage="outbound"', body)
 
     def test_a_non_csv_is_refused(self):
         client = application.app.test_client()
@@ -320,7 +479,7 @@ class Samples(unittest.TestCase):
                     "/sample", data={"sample": key}, follow_redirects=True
                 )
                 self.assertEqual(response.status_code, 200)
-                self.assertIn(b"worth investigating", response.data)
+                self.assertIn("changes worth reviewing", response.get_data(as_text=True))
 
     def test_an_unknown_sample_is_refused(self):
         response = self.client.post("/sample", data={"sample": "nope"})

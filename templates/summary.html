@@ -3,22 +3,22 @@
 {% block title %}Executive summary{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import usd, usd_short, pct, days, mode, meter, sample_note %}
+{% from "parts/_ui.html" import usd, usd_short, pct, days, mode, meter, icon, sample_note, confidence_summary with context %}
 
 {% block content %}
 
 {#
-  The decision page. It answers, in order: how big the problem is, what can
-  be recovered, which changes matter, what they are worth, what they cost in
-  transit, what to check, and how sure to be. Everything is read from the
-  same report the full analysis shows; nothing here is recalculated.
-  Page one is the decision, page two is the evidence behind it.
+  The decision page, for leadership. It answers, in order: what was found,
+  what it is worth, which changes matter, what they cost in transit, what to
+  check, and how sure to be. Everything is read from the same report the full
+  results show; nothing here is recalculated. Page one is the decision, page
+  two is the evidence behind it.
 #}
 
 {% set problems = report.problems if report else [] %}
 {% set count = problems|length %}
 
-{# One line per item saying what management has to verify. Wording only:
+{# One line per change saying what management has to verify. Wording only:
    every figure in it comes from the report. #}
 {% macro verify(problem) -%}
 {%- set route = problem.route -%}
@@ -32,11 +32,11 @@
   {%- endif %}
   Confirm {{ "supplier capability" if route.leg == "inbound" else "customer delivery promises" }} and inventory coverage.
 {%- elif problem.kind == "supplier_on_time" -%}
-  Depends on the assumption that {{ pct(expedite_share) }} of late deliveries are flown in. Validate against actual expedite records.
+  Depends on the assumption that {{ pct(expedite_share) }} of late deliveries are flown in. Check against actual expedite records.
 {%- elif problem.kind == "warehouse_grid" -%}
   Price a renewable tariff at this site before moving any volume.
 {%- elif problem.kind == "cost_to_serve" -%}
-  Confirm the nearer site has space and stock. The carbon change is not estimated.
+  Confirm the nearer site has space and stock. The CO₂e change is not estimated.
 {%- elif problem.kind == "returns" -%}
   Find out why goods come back before changing the freight.
 {%- else -%}
@@ -55,16 +55,17 @@
 
 {% macro opportunity_card(problem, rank) -%}
 {%- set route = problem.route -%}
+{%- set group = groups.by_rank[rank] -%}
 <article class="es-card{{ ' is-simulated' if route else ' is-operational' }}" aria-labelledby="es-card-{{ rank }}">
   <div class="es-card-rank">{{ "%02d"|format(rank) }}</div>
 
   <div class="es-card-main">
     <header class="es-card-head">
-      <p class="es-type">{{ "Simulated route change" if route else "Operational opportunity" }}</p>
+      <p class="es-type">{{ group.label }}</p>
       {% if problem.confidence_label %}
-      <p class="es-conf">{{ meter(problem.confidence_label) }}{{ problem.confidence_label }} confidence &middot; {{ pct(problem.confidence) }}</p>
+      <p class="es-conf">{{ meter(problem.confidence_label) }}{{ problem.confidence_label|capitalize }} confidence &middot; held in {{ pct(problem.confidence) }} of re-runs</p>
       {% else %}
-      <p class="es-conf es-conf-none">Not simulated</p>
+      <p class="es-conf es-conf-none">Not stress-tested</p>
       {% endif %}
     </header>
 
@@ -80,17 +81,17 @@
 
     <dl class="es-card-figs">
       <div class="es-fig">
-        <dt>Cost saving / year</dt>
+        <dt>Cost saving a year</dt>
         <dd class="cost-ink">{% if problem.cost_at_stake %}{{ usd(problem.cost_at_stake) }}{% else %}<span class="es-none">None</span>{% endif %}</dd>
       </div>
       <div class="es-fig">
-        <dt>CO2e avoided / year</dt>
-        <dd class="carbon-ink">{% if problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }}{% else %}<span class="es-none">Not estimated</span>{% endif %}</dd>
+        <dt>CO₂e reduction a year</dt>
+        <dd class="carbon-ink">{% if problem.co2e_line %}<span class="es-none">Not estimated</span>{% elif problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }}{% else %}<span class="es-none">None</span>{% endif %}</dd>
       </div>
       {% if route %}
       <div class="es-fig es-fig-cut">
-        <dt>Reduction on this route</dt>
-        <dd><span>&minus;{{ pct(route.cost_pct) }} cost</span><span>&minus;{{ pct(route.co2e_pct) }} CO2e</span></dd>
+        <dt>Cut on this route</dt>
+        <dd><span>&minus;{{ pct(route.cost_pct) }} cost</span><span>&minus;{{ pct(route.co2e_pct) }} CO₂e</span></dd>
       </div>
       {% endif %}
     </dl>
@@ -101,7 +102,7 @@
     {% set added = new_days - now_days %}
     <div class="es-transit{{ ' is-material' if added >= transit_material_days }}">
       <p class="es-transit-label">Transit</p>
-      <p class="es-transit-side"><strong>{{ days(route.now.days) }}</strong><span>Current</span></p>
+      <p class="es-transit-side"><strong>{{ days(route.now.days) }}</strong><span>Today</span></p>
       <p class="es-arrow" aria-hidden="true">&rarr;</p>
       <p class="es-transit-side"><strong>{{ days(route.proposed.days) }}</strong><span>Proposed</span></p>
       {% if added >= transit_material_days %}
@@ -109,23 +110,21 @@
       {% endif %}
     </div>
     {% else %}
-    <p class="es-assumption"><span class="es-assumption-label">Rests on</span> {{ problem.checks[0] if problem.checks else problem.note }}</p>
+    <p class="es-assumption"><span class="es-assumption-label">Depends on</span> {{ group.basis or (problem.checks[0] if problem.checks else problem.note) }}</p>
     {% endif %}
 
-    {% if problem.edge_id %}
     <p class="es-card-actions">
-      <a class="btn btn-small" href="{{ url_for('report_page') }}?investigate={{ problem.edge_id }}">Investigate route</a>
-      {% if route %}<a class="btn btn-small btn-quiet" href="{{ url_for('report_page') }}?scenario={{ problem.edge_id }}">Test scenario</a>{% endif %}
+      <a class="btn btn-secondary btn-small" href="{{ url_for('report_page', open=rank) }}">Review change{{ icon("arrow-right") }}</a>
     </p>
-    {% endif %}
   </div>
 </article>
 {%- endmacro %}
 
 <article class="es">
   <nav class="es-tools" aria-label="Summary actions">
-    <a class="btn btn-quiet" href="{{ url_for('report_page') }}">Open the full report</a>
-    <button type="button" class="btn btn-strong" data-print>Print or save as PDF</button>
+    <a class="btn btn-ghost" href="{{ url_for('report_page') }}">{{ icon("arrow-left") }}Back to results</a>
+    <a class="btn btn-secondary" href="{{ url_for('findings_xlsx') }}">{{ icon("download") }}Download workbook</a>
+    <button type="button" class="btn btn-primary" data-print>{{ icon("print") }}Print or save as PDF</button>
   </nav>
 
   {# ---------------------------------------------------------- page one #}
@@ -137,70 +136,70 @@
       </div>
       {% if count %}
       <h1>
-        {{ count }} opportunit{{ "ies" if count != 1 else "y" }} worth
+        {{ count }} change{{ "s" if count != 1 }} worth an estimated
         <span class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</span>
-        and <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO2e</span>
+        and <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO₂e</span>
         a year
       </h1>
       {% else %}
       <h1>No changes found that cut both cost and carbon</h1>
       {% endif %}
       <p class="es-meta">
-        {{ subject }} &middot; {{ "{:,}".format(summary.orders) }} orders &middot;
-        {{ summary.edges }} routes &middot; Generated {{ generated }}
+        {{ subject }} &middot; {{ "{:,}".format(summary.orders) }} order{{ "s" if summary.orders != 1 }} &middot;
+        {{ summary.edges }} route{{ "s" if summary.edges != 1 }} &middot; Generated {{ generated }}
       </p>
       {% if using_sample %}{{ sample_note(subject) }}{% endif %}
     </header>
 
     {% if count %}
     {% set ov = report.overview %}
-    <section class="es-metrics" aria-label="Footprint and opportunity">
+    <section class="es-metrics" aria-label="Today and the potential saving">
       <div class="es-metric">
-        <p class="es-label"><span class="cost-ink">Cost</span> Chain cost</p>
+        <p class="es-label">Annual cost today</p>
         <p class="es-value">{{ usd(ov.cost) }}</p>
-        <p class="es-unit">per year</p>
+        <p class="es-unit">a year</p>
       </div>
       <div class="es-metric">
-        <p class="es-label"><span class="carbon-ink">Carbon</span> Chain CO2e</p>
+        <p class="es-label">Annual CO₂e today</p>
         <p class="es-value">{{ co2e(ov.co2e) }}</p>
-        <p class="es-unit">per year</p>
+        <p class="es-unit">a year</p>
       </div>
       <div class="es-metric is-gain is-cost">
-        <p class="es-label">Cost opportunity</p>
+        <p class="es-label">Potential cost saving</p>
         <p class="es-value cost-ink">{{ usd(ov.recoverable_cost) }}</p>
-        <p class="es-unit">per year &middot; {{ pct(ov.cost_share) }} of cost</p>
+        <p class="es-unit">a year, estimate &middot; {{ pct(ov.cost_share) }} of cost</p>
       </div>
       <div class="es-metric is-gain is-carbon">
-        <p class="es-label">CO2e reduction</p>
+        <p class="es-label">Potential CO₂e reduction</p>
         <p class="es-value carbon-ink">{{ co2e(ov.recoverable_co2e) }}</p>
-        <p class="es-unit">per year &middot; {{ pct(ov.co2e_share) }} of carbon</p>
+        <p class="es-unit">a year, estimate &middot; {{ pct(ov.co2e_share) }} of CO₂e</p>
       </div>
     </section>
 
     <section class="es-flow" aria-labelledby="es-flow-title">
       <p class="es-flow-title" id="es-flow-title">
-        <span>Current footprint</span><span class="es-arrow" aria-hidden="true">&rarr;</span><span>Actionable opportunity</span>
+        <span>Today</span><span class="es-arrow" aria-hidden="true">&rarr;</span><span>Potential saving</span>
       </p>
       <div class="es-flow-row">
         <p class="es-flow-now"><strong>{{ usd_short(ov.cost) }}</strong> cost</p>
-        <div class="es-bar" role="img" aria-label="{{ usd(ov.recoverable_cost) }} of {{ usd(ov.cost) }} is recoverable, {{ pct(ov.cost_share) }}">
+        <div class="es-bar" role="img" aria-label="{{ usd(ov.recoverable_cost) }} of {{ usd(ov.cost) }} could be saved, {{ pct(ov.cost_share) }}">
           <span class="es-bar-fill is-cost" style="width: {{ '%.2f'|format([ov.cost_share * 100, 1.5]|max) }}%"></span>
         </div>
-        <p class="es-flow-gain"><strong class="cost-ink">{{ usd_short(ov.recoverable_cost) }} cheaper</strong><span>{{ pct(ov.cost_share) }}</span></p>
+        <p class="es-flow-gain"><strong class="cost-ink">{{ usd_short(ov.recoverable_cost) }} less</strong><span>{{ pct(ov.cost_share) }}</span></p>
       </div>
       <div class="es-flow-row">
-        <p class="es-flow-now"><strong>{{ co2e(ov.co2e) }}</strong> CO2e</p>
-        <div class="es-bar" role="img" aria-label="{{ co2e(ov.recoverable_co2e) }} of {{ co2e(ov.co2e) }} is avoidable, {{ pct(ov.co2e_share) }}">
+        <p class="es-flow-now"><strong>{{ co2e(ov.co2e) }}</strong> CO₂e</p>
+        <div class="es-bar" role="img" aria-label="{{ co2e(ov.recoverable_co2e) }} of {{ co2e(ov.co2e) }} could be avoided, {{ pct(ov.co2e_share) }}">
           <span class="es-bar-fill is-carbon" style="width: {{ '%.2f'|format([ov.co2e_share * 100, 1.5]|max) }}%"></span>
         </div>
-        <p class="es-flow-gain"><strong class="carbon-ink">{{ co2e(ov.recoverable_co2e) }} avoided</strong><span>{{ pct(ov.co2e_share) }}</span></p>
+        <p class="es-flow-gain"><strong class="carbon-ink">{{ co2e(ov.recoverable_co2e) }} less</strong><span>{{ pct(ov.co2e_share) }}</span></p>
       </div>
     </section>
 
     <section class="es-section" aria-labelledby="es-top-title">
       <div class="es-section-head">
-        <h2 id="es-top-title">Biggest opportunities</h2>
-        <p>The changes with the strongest combined cost and carbon case.</p>
+        <h2 id="es-top-title">Top changes to review</h2>
+        <p>Ranked by combined cost and carbon impact.</p>
       </div>
       <div class="es-cards">
         {% for problem in problems[:3] %}
@@ -217,8 +216,8 @@
             <span class="es-more-rank">{{ "%02d"|format(loop.index + 3) }}</span>
             <span class="es-more-name">{{ problem.title }}<span class="es-more-change">{{ problem.change }}</span></span>
             <span class="cost-ink">{% if problem.cost_at_stake %}{{ usd(problem.cost_at_stake) }}{% endif %}</span>
-            <span class="carbon-ink">{% if problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }}{% endif %}</span>
-            <span class="es-more-type">{{ "Simulated" if problem.route else "Not simulated" }}</span>
+            <span class="carbon-ink">{% if problem.co2e_at_stake and not problem.co2e_line %}{{ co2e(problem.co2e_at_stake) }}{% endif %}</span>
+            <span class="es-more-type">{{ groups.by_rank[loop.index + 3].label }}</span>
           </li>
           {% endfor %}
         </ol>
@@ -234,8 +233,8 @@
   <section class="es-sheet es-page-two" aria-label="Before acting">
     <div class="es-pair">
       <section class="es-panel es-checks" aria-labelledby="es-checks-title">
-        <h2 id="es-checks-title"><span class="es-mark" aria-hidden="true">!</span>Check before acting</h2>
-        <p class="es-panel-sub">What management needs to verify before changing anything.</p>
+        <h2 id="es-checks-title"><span class="es-mark" aria-hidden="true">!</span>What to check before acting</h2>
+        <p class="es-panel-sub">What needs confirming before anything changes.</p>
         <ol>
           {% for problem in problems[:3] %}
           <li>
@@ -247,39 +246,39 @@
       </section>
 
       <section class="es-panel es-confidence" aria-labelledby="es-conf-title">
-        <h2 id="es-conf-title">How confident</h2>
+        <h2 id="es-conf-title">How confident we are</h2>
         {% if sure.tested %}
-        <p class="es-conf-level">{{ meter(sure.level) }}{{ sure.level }} confidence</p>
+        <p class="es-conf-level">{{ meter(sure.level) }}{{ sure.level|capitalize }} confidence</p>
         <dl class="es-conf-figs">
           <div>
-            <dt>{{ sure.high }} / {{ sure.tested }}</dt>
-            <dd>route change{{ "s" if sure.tested != 1 }} remain worthwhile in &ge;90% of {{ confidence_checks }} simulations</dd>
+            <dt>{{ sure.high }} of {{ sure.tested }}</dt>
+            <dd>route change{{ "s" if sure.tested != 1 }} held up in at least {{ pct(confidence_high) }} of {{ confidence_checks }} re-runs with different rates</dd>
           </div>
           <div>
             <dt>{{ pct(sure.lowest) }}</dt>
-            <dd>weakest route-change confidence</dd>
+            <dd>of re-runs for the least certain route change</dd>
           </div>
           {% if uncertainty %}
           <div>
             <dt>{{ usd(uncertainty.p10) }}&ndash;{{ usd(uncertainty.p90) }}</dt>
-            <dd>80% simulation range for the route saving, {{ "{:,}".format(uncertainty.trials) }} runs</dd>
+            <dd>range of the route-change saving in 80% of {{ "{:,}".format(uncertainty.trials) }} re-runs</dd>
           </div>
           {% endif %}
         </dl>
         <p class="es-conf-note">
-          High means the change held when every cost and emission factor was
-          redrawn{% if uncertainty %} up to {{ pct(uncertainty.spread) }} either side{% endif %}.
+          High means the change still cut both cost and CO₂e when every cost and
+          emission rate was redrawn{% if uncertainty %} up to {{ pct(uncertainty.spread) }} either side{% endif %}.
           It is not a guarantee: contract rates, real routes and service needs
           were not tested.
         </p>
         {% else %}
-        <p class="es-conf-level">{{ meter(None) }}Not tested</p>
-        <p class="es-conf-note">There are no route mode changes to simulate.</p>
+        <p class="es-conf-level">{{ meter(None) }}Not stress-tested</p>
+        <p class="es-conf-note">There are no transport mode changes to re-run.</p>
         {% endif %}
         {% if sure.untested %}
         <p class="es-untested">
-          <strong>{{ sure.untested }}</strong> opportunit{{ "ies rely" if sure.untested != 1 else "y relies" }}
-          on assumptions and {{ "were" if sure.untested != 1 else "was" }} not simulated.
+          <strong>{{ sure.untested }}</strong> change{{ "s were" if sure.untested != 1 else " was" }}
+          not stress-tested. Each rests on an assumption or needs more data.
         </p>
         {% endif %}
       </section>
@@ -288,34 +287,34 @@
     <section class="es-panel es-assume" aria-labelledby="es-assume-title">
       <h2 id="es-assume-title">Important assumptions</h2>
       <ul>
-        <li>A screening estimate, not a network optimisation.</li>
-        <li>A change is recommended only with a &ge;{{ pct(flag_threshold) }} cost <strong>and</strong> a &ge;{{ pct(flag_threshold) }} carbon reduction.</li>
-        <li>Cost factors are industry defaults, not your contract rates.</li>
-        <li>Distances use mode-specific screening multipliers, not routed distances.</li>
-        <li>Transit times are planning estimates.</li>
+        <li>A screening estimate, not a network optimisation or a quote.</li>
+        <li>A change is listed only if it cuts cost <strong>and</strong> CO₂e by at least {{ pct(flag_threshold) }}.</li>
+        <li>Cost rates are industry defaults, not your contract prices.</li>
+        <li>Distances use an allowance per transport mode, not routed distances.</li>
+        <li>Transit times are planning estimates, and the file is treated as one year.</li>
         <li>Inventory cost, carrier capacity and customer service levels are not modelled.</li>
       </ul>
-      <p class="es-assume-more">Factor values and sources are in the full report, under How sure to be. The full method is available from Overlap's creator, {{ contact_email }}.</p>
+      <p class="es-assume-more">Factors and sources are in the full results, under Data &amp; assumptions. The full method is available from Overlap's creator, {{ contact_email }}.</p>
     </section>
 
     <footer class="es-foot">
       {% if ingest %}
       <div class="es-health{{ ' has-issues' if ingest.rows_skipped or ingest.warnings }}">
-        <p class="es-health-title">Data health</p>
+        <p class="es-health-title">Data check</p>
         <ul>
-          <li><span class="es-dot{{ ' is-warn' if ingest.rows_skipped }}" aria-hidden="true"></span>{{ "{:,}".format(ingest.orders_loaded) }} / {{ "{:,}".format(ingest.rows_in_file) }} orders processed</li>
-          <li><span class="es-dot{{ ' is-warn' if ingest.rows_skipped }}" aria-hidden="true"></span>{{ "{:,}".format(ingest.rows_skipped) }} excluded</li>
+          <li><span class="es-dot{{ ' is-warn' if ingest.rows_skipped }}" aria-hidden="true"></span>{{ "{:,}".format(ingest.orders_loaded) }} of {{ "{:,}".format(ingest.rows_in_file) }} orders included</li>
+          <li><span class="es-dot{{ ' is-warn' if ingest.rows_skipped }}" aria-hidden="true"></span>{{ "{:,}".format(ingest.rows_skipped) }} could not be used</li>
           <li><span class="es-dot" aria-hidden="true"></span>{{ ingest.edges }} routes analysed</li>
           {% if ingest.warnings %}
-          <li><span class="es-dot is-warn" aria-hidden="true"></span>{{ ingest.warnings|length }} data warning{{ "s" if ingest.warnings|length != 1 }}, see the report</li>
+          <li><span class="es-dot is-warn" aria-hidden="true"></span>{{ ingest.warnings|length }} data warning{{ "s" if ingest.warnings|length != 1 }}, see the full results</li>
           {% endif %}
         </ul>
       </div>
       {% endif %}
       <p class="es-ref">
-        Every figure is from the full report, where each change can be
-        investigated, tested and traced to its calculation.<br>
-        <span>Report</span> {{ url_for('report_page', _external=True) }}<br>
+        Every figure is from the full results, where each change can be
+        reviewed, tested and traced to its calculation.<br>
+        <span>Results</span> {{ url_for('report_page', _external=True) }}<br>
         <span>Creator</span> {{ contact_email }}
       </p>
     </footer>

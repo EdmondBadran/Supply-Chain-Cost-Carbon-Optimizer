@@ -52,22 +52,15 @@ const flaggedLanes = () => network.lanes.filter((lane) => lane.flagged);
 
 /* Headline */
 
+// A count, not a sum. The totals worth quoting are the report's own, and a
+// second total added up here would drift from them.
 function drawFinding() {
-    const flagged = flaggedLanes();
+    const count = flaggedLanes().length;
     const el = document.getElementById("finding");
-    if (!flagged.length) {
-        el.innerHTML =
-            "<p class=\"finding-lead\">No route here can be improved by changing transport mode.</p>";
-        return;
-    }
-    const cost = flagged.reduce((sum, l) => sum + l.switch.saved_cost, 0);
-    const co2e = flagged.reduce((sum, l) => sum + l.switch.saved_co2e, 0);
-    el.innerHTML = `
-    <p class="finding-lead">
-      <strong>${flagged.length} route${flagged.length === 1 ? "" : "s"}</strong>
-      could switch mode and save <strong class="cost-ink">${money(cost)}</strong>
-      and <strong class="carbon-ink">${tonnes(co2e)} CO2e</strong> a year.
-    </p>`;
+    el.innerHTML = count
+        ? `<p class="finding-lead"><strong>${count} route${count === 1 ? "" : "s"}</strong>
+             could switch transport mode and cut both cost and CO₂e. They are drawn bright.</p>`
+        : '<p class="finding-lead">No route here can cut both cost and CO₂e by changing transport mode.</p>';
 }
 
 /* Map */
@@ -263,9 +256,9 @@ function drawNetwork() {
         const tipHtml = `
       <strong>${esc(lane.origin_name)} to ${esc(lane.dest_name)}</strong>
       <span>${esc(lane.leg)} by ${esc(lane.mode)}, about ${Math.round(lane.route_km).toLocaleString()} km</span>
-      <span class="cost-ink">${money(lane.cost)}</span>
-      <span class="carbon-ink">${tonnes(lane.co2e)} CO2e</span>
-      ${lane.flagged ? '<span class="tip-flag">Worth changing to ' + esc(lane.switch.mode) + "</span>" : ""}`;
+      <span class="cost-ink">${money(lane.cost)} a year</span>
+      <span class="carbon-ink">${tonnes(lane.co2e)} CO₂e a year</span>
+      ${lane.flagged ? '<span class="tip-flag">Could switch to ' + esc(lane.switch.mode) + "</span>" : ""}`;
 
         group
             .on("click", () => select(lane.id))
@@ -279,7 +272,7 @@ function drawNetwork() {
             group
                 .attr("tabindex", 0)
                 .attr("role", "button")
-                .attr("aria-label", `${label}, worth changing to ${lane.switch.mode}. Enter to investigate.`)
+                .attr("aria-label", `${label}, could switch to ${lane.switch.mode}. Press Enter to review the change.`)
                 .on("keydown", (event) => {
                     if (event.key === "Enter" || event.key === " ") {
                         event.preventDefault();
@@ -347,8 +340,8 @@ function drawNetwork() {
                     event,
                     `<strong>${esc(node.name)}</strong>
            <span>${NODE_LABEL[node.node_type]}, ${lanes.length} route${lanes.length === 1 ? "" : "s"}</span>
-           <span class="cost-ink">${money(cost)}</span>
-           <span class="carbon-ink">${tonnes(co2e)} CO2e</span>`
+           <span class="cost-ink">${money(cost)} a year</span>
+           <span class="carbon-ink">${tonnes(co2e)} CO₂e a year</span>`
                 )
             )
             .on("mouseleave", hideTip);
@@ -471,8 +464,8 @@ function drawWins() {
 
     if (!flagged.length) {
         wins.innerHTML =
-            '<p class="empty">No route can be improved by changing transport ' +
-            "mode. Every route is already on the best option available to it.</p>";
+            '<p class="empty">There are no route changes to rate. Every route is ' +
+            "already on the best transport mode available to it.</p>";
         return;
     }
 
@@ -481,35 +474,30 @@ function drawWins() {
             const s = lane.switch;
             return `
       <article class="win${lane.id === selectedId ? " on" : ""}" data-id="${lane.id}">
-        <div class="win-rank">${String(index + 1).padStart(2, "0")}</div>
+        <div class="win-rank">${index + 1}</div>
         <div class="win-body">
-          <h4>${esc(lane.origin_name)} <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span> ${esc(lane.dest_name)}
-            <span class="leg-tag ${lane.leg}">${lane.leg}</span>
-          </h4>
+          <h4>${esc(lane.origin_name)} <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span> ${esc(lane.dest_name)}</h4>
           <p class="win-move">
             <span class="change">${modeTag(lane.mode)}<span class="arrow" aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span>${modeTag(s.mode)}</span>
+            <span>${lane.leg === "inbound" ? "Inbound" : "Outbound"}</span>
             ${confTag(lane)}
           </p>
-          <div class="win-gain">
-            <span class="cost-ink">${money(s.saved_cost)} a year</span>
-            <span class="carbon-ink">${tonnes(s.saved_co2e)} CO2e</span>
-            <span class="muted-ink">&minus;${percent(lane.saving_cost_pct)} cost, &minus;${percent(lane.saving_co2e_pct)} carbon</span>
-          </div>
+          <p class="win-gain">
+            Save <span class="cost-ink">${money(s.saved_cost)}</span>
+            and <span class="carbon-ink">${tonnes(s.saved_co2e)} CO₂e</span> a year
+          </p>
         </div>
         <div class="win-side">
-          <div class="rec-actions">
-            <button type="button" class="btn btn-small" data-investigate="${lane.id}">Investigate</button>
-            <button type="button" class="btn btn-small btn-quiet" data-scenario="${lane.id}">Test scenario</button>
-          </div>
           <label class="win-effort">
             <span>How hard</span>
             <select data-effort="${lane.id}">
-              <option value=""${!lane.effort ? " selected" : ""}>Not judged</option>
+              <option value=""${!lane.effort ? " selected" : ""}>Not rated</option>
               <option value="low"${lane.effort === "low" ? " selected" : ""}>Easy</option>
               <option value="med"${lane.effort === "med" ? " selected" : ""}>Medium</option>
               <option value="high"${lane.effort === "high" ? " selected" : ""}>Hard</option>
             </select>
           </label>
+          <button type="button" class="btn btn-ghost btn-small" data-investigate="${lane.id}">Review</button>
         </div>
       </article>`;
         })
@@ -575,37 +563,36 @@ function drawDetail() {
 
     if (!lane) {
         panel.innerHTML =
-            '<p class="empty">Pick a route on the map or in the list above.</p>';
+            '<p class="detail-empty">Select a route on the map, or open a recommendation, to see it here.</p>';
         return;
     }
 
     const s = lane.switch;
+    const arrow = '<span class="arrow" aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span>';
     panel.innerHTML = `
-    <header class="detail-head">
-      <p class="detail-kicker">${lane.flagged ? "Worth changing" : "Route"}</p>
-      <h4>${esc(lane.origin_name)} <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span> ${esc(lane.dest_name)}</h4>
-      <p>${lane.leg === "inbound" ? "Supplier into warehouse" : "Warehouse out to customer"},
-         about ${Math.round(lane.route_km).toLocaleString()} km by ${esc(lane.mode)},
-         ${(lane.total_weight_kg / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t a year</p>
-    </header>
+    <p class="detail-kicker">Selected route</p>
+    <h4 class="detail-title">${esc(lane.origin_name)} ${arrow} ${esc(lane.dest_name)}</h4>
+    <p class="detail-sub">${lane.leg === "inbound" ? "Inbound from a supplier" : "Outbound to customers"},
+       about ${Math.round(lane.route_km).toLocaleString("en-US")} km by ${esc(lane.mode)},
+       ${(lane.total_weight_kg / 1000).toLocaleString("en-US", { maximumFractionDigits: 1 })} t a year</p>
 
-    <dl class="detail-figures">
-      <div><dt>Costs</dt><dd class="cost-ink">${money(lane.cost)}</dd></div>
-      <div><dt>Emits</dt><dd class="carbon-ink">${tonnes(lane.co2e)}</dd></div>
-    </dl>
+    <div class="detail-state">
+      <p class="detail-label">Before: today</p>
+      <p class="detail-line">${modeTag(lane.mode)}</p>
+      <p class="detail-figs"><span class="cost-ink">${money(lane.cost)}</span> and <span class="carbon-ink">${tonnes(lane.co2e)} CO₂e</span> a year</p>
+    </div>
 
     ${
         lane.flagged
-            ? `<p class="detail-switch"><span class="change">${modeTag(lane.mode)}<span class="arrow" aria-hidden="true">&rarr;</span>${modeTag(s.mode)}</span>
-               saves <strong class="cost-ink">${money(s.saved_cost)}</strong> and
-               <strong class="carbon-ink">${tonnes(s.saved_co2e)}</strong> a year</p>`
-            : '<p class="detail-switch muted-ink">No mode change on this route cuts both cost and carbon by a quarter.</p>'
+            ? `<div class="detail-state is-proposed">
+                 <p class="detail-label">After: recommended change</p>
+                 <p class="detail-line"><span class="change">${modeTag(lane.mode)}${arrow}${modeTag(s.mode)}</span></p>
+                 <p class="detail-figs">Saves an estimated <span class="cost-ink">${money(s.saved_cost)}</span> and <span class="carbon-ink">${tonnes(s.saved_co2e)} CO₂e</span> a year</p>
+               </div>`
+            : `<p class="detail-none">No change recommended. No other realistic mode on this route cuts both cost and CO₂e by at least ${percent(network.threshold)}.</p>`
     }
 
-    <div class="rec-actions">
-      <button type="button" class="btn" data-investigate="${lane.id}">Investigate route</button>
-      <button type="button" class="btn btn-quiet" data-scenario="${lane.id}">Test scenario</button>
-    </div>`;
+    <button type="button" class="btn btn-secondary btn-small detail-open" data-investigate="${lane.id}">${lane.flagged ? "Review change" : "Open route details"}</button>`;
 }
 
 // The route panel lives in workspace.js. It asks the map to follow along

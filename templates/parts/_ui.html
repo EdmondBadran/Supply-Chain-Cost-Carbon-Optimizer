@@ -1,6 +1,10 @@
-{# The pieces a recommendation is built from, shared by the report, the
-   landing page and the executive summary so one route reads the same way
-   wherever it appears. Every figure comes from diagnosis.build. #}
+{# The pieces a change is built from, shared by the report, the landing page,
+   the executive summary and the change brief, so one change reads the same
+   way wherever it appears. Every figure comes from diagnosis.build; these
+   macros only choose the words and the layout around it.
+
+   Import with context wherever a macro quotes the engine's settings (the
+   number of re-runs, the confidence thresholds, the qualifying cut). #}
 {% from "parts/_units.html" import co2e %}
 
 {% macro usd(value) -%}
@@ -28,6 +32,29 @@ ${{ "{:,.0f}".format(value or 0) }}
 {{ n }} day{{ "s" if n != 1 }}
 {%- endmacro %}
 
+{# One stroke icon set, drawn at the size of the text beside it. #}
+{% macro icon(name) -%}
+<svg class="icon icon-{{ name }}" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+{%- if name == "check" -%}<path d="M4.5 10.5l3.5 3.5 7.5-8"/>
+{%- elif name == "alert" -%}<path d="M10 3.2l7.2 12.8H2.8z"/><path d="M10 8.2v3.6"/><path d="M10 14.2v.1"/>
+{%- elif name == "search" -%}<circle cx="8.8" cy="8.8" r="5"/><path d="M12.6 12.6l4 4"/>
+{%- elif name == "info" -%}<circle cx="10" cy="10" r="7.2"/><path d="M10 9v4.6"/><path d="M10 6.4v.1"/>
+{%- elif name == "arrow-right" -%}<path d="M4 10h12"/><path d="M11.5 5.5L16 10l-4.5 4.5"/>
+{%- elif name == "arrow-left" -%}<path d="M16 10H4"/><path d="M8.5 5.5L4 10l4.5 4.5"/>
+{%- elif name == "close" -%}<path d="M5 5l10 10"/><path d="M15 5L5 15"/>
+{%- elif name == "upload" -%}<path d="M10 13V3.8"/><path d="M6.2 7.4L10 3.6l3.8 3.8"/><path d="M3.8 12.6v2.2a1.6 1.6 0 0 0 1.6 1.6h9.2a1.6 1.6 0 0 0 1.6-1.6v-2.2"/>
+{%- elif name == "download" -%}<path d="M10 3.6v9.2"/><path d="M6.2 9L10 12.8 13.8 9"/><path d="M3.8 12.6v2.2a1.6 1.6 0 0 0 1.6 1.6h9.2a1.6 1.6 0 0 0 1.6-1.6v-2.2"/>
+{%- elif name == "lock" -%}<rect x="4.4" y="8.8" width="11.2" height="7.8" rx="1.6"/><path d="M6.8 8.8V6.6a3.2 3.2 0 0 1 6.4 0v2.2"/>
+{%- elif name == "bookmark" -%}<path d="M5.6 3.4h8.8v13.2L10 13.2l-4.4 3.4z"/>
+{%- elif name == "map" -%}<path d="M2.8 5.2l4.6-1.8 5.2 1.8 4.6-1.8v11.4l-4.6 1.8-5.2-1.8-4.6 1.8z"/><path d="M7.4 3.4v11.4"/><path d="M12.6 5.2v11.4"/>
+{%- elif name == "clock" -%}<circle cx="10" cy="10" r="7.2"/><path d="M10 6v4.2l2.8 1.8"/>
+{%- elif name == "print" -%}<path d="M5.6 7.6V3.4h8.8v4.2"/><rect x="3" y="7.6" width="14" height="6.4" rx="1.4"/><path d="M5.6 12h8.8v4.6H5.6z"/>
+{%- elif name == "file" -%}<path d="M5 2.8h6.4L15 6.4v10.8H5z"/><path d="M11.2 2.8v3.8H15"/>
+{%- elif name == "table" -%}<rect x="3" y="4" width="14" height="12" rx="1.4"/><path d="M3 8.2h14"/><path d="M3 12.2h14"/><path d="M8.2 4v12"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}
+
 {% macro mode_glyph(mode) -%}
 <svg class="mode-glyph mode-{{ mode }}" viewBox="0 0 28 8" aria-hidden="true" focusable="false"><line x1="3" y1="4" x2="25" y2="4"/></svg>
 {%- endmacro %}
@@ -52,194 +79,310 @@ ${{ "{:,.0f}".format(value or 0) }}
 {%- endif -%}
 {%- endmacro %}
 
+{# What would change, as an instruction someone could act on. Wording only. #}
+{% macro rec_headline(problem) -%}
+{%- set route = problem.route -%}
+{%- if route -%}
+Ship from {{ route.origin }} to {{ route.dest }} by {{ route.proposed.mode }} instead of {{ route.now.mode }}
+{%- elif problem.kind == "supplier_on_time" -%}
+Cut late deliveries from {{ problem.title }}
+{%- elif problem.kind == "warehouse_grid" -%}
+Move {{ problem.title }} onto cleaner electricity
+{%- elif problem.kind == "cost_to_serve" -%}
+Serve this destination from a nearer warehouse: {{ problem.title }}
+{%- elif problem.kind == "returns" -%}
+Reduce returns on the {{ problem.title }} route
+{%- else -%}
+{{ problem.change or problem.action }}{% if problem.title %}: {{ problem.title }}{% endif %}
+{%- endif -%}
+{%- endmacro %}
+
+{# The key a change is remembered by when somebody marks it for review. #}
+{% macro mark_key(problem) -%}
+{{ problem.title }}|{{ problem.change or "" }}
+{%- endmacro %}
+
 {% macro meter(label) -%}
 <span class="meter meter-{{ label or 'none' }}" aria-hidden="true"><i></i><i></i><i></i></span>
 {%- endmacro %}
 
-{# Said the same way everywhere sample figures appear: the samples are
+{# Said the same way everywhere example figures appear: the companies are
    invented, and their data only follows realistic patterns. #}
 {% macro sample_note(subject=None) -%}
-<p class="sample-note"><span class="sample-note-tag">Sample data</span><span>{{ subject ~ " is" if subject else "This is" }} not a real company. Its data is generated to follow realistic patterns.</span></p>
+<p class="sample-note"><span class="sample-note-tag">Example data</span><span>{{ subject ~ " is" if subject else "This is" }} not a real company. Its data is generated to follow realistic patterns.</span></p>
+{%- endmacro %}
+
+{# Which of the three groups a change is shown in, as a label that never rests
+   on colour alone: each has its own icon and its own words. #}
+{% macro group_badge(group) -%}
+<span class="status status-{{ group.key }}">{{ icon({"now": "check", "review": "search"}.get(group.key, "alert")) }}{{ group.label }}</span>
 {%- endmacro %}
 
 {% macro confidence(problem, short=False) -%}
 {%- if problem.confidence_label -%}
-<span class="conf conf-{{ problem.confidence_label }}">{{ meter(problem.confidence_label) }}<span>{{ problem.confidence_label|title }} confidence{% if not short %}<span class="conf-share">, {{ pct(problem.confidence) }} of simulations</span>{% endif %}</span></span>
+<span class="conf conf-{{ problem.confidence_label }}">{{ meter(problem.confidence_label) }}<span>{{ problem.confidence_label|capitalize }} confidence{% if not short %}<span class="conf-share">, held in {{ pct(problem.confidence) }} of re-runs</span>{% endif %}</span></span>
 {%- else -%}
-<span class="conf conf-none" title="Only route mode changes are re-run under redrawn factors. This one rests on the assumptions listed with it.">{{ meter(None) }}<span>Not simulated</span></span>
+<span class="conf conf-none">{{ meter(None) }}<span>Not stress-tested</span></span>
 {%- endif -%}
 {%- endmacro %}
 
-{% macro checks(items, title="Check before acting") -%}
+{# Confidence in a sentence: what the label means for this change. #}
+{% macro confidence_plain(problem, group) -%}
+{%- set label = problem.confidence_label -%}
+<p class="confidence conf-{{ label or 'none' }}">
+  {{ meter(label) }}
+  <span>
+  {%- if label -%}
+    <strong>{{ label|capitalize }} confidence.</strong>
+    {% if problem.confidence >= 1 %}In all {{ confidence_checks }} re-runs{% else %}In {{ pct(problem.confidence) }} of {{ confidence_checks }} re-runs{% endif %}
+    with cost and emission rates varied up to {{ pct(factor_spread) }} either way,
+    this change still cut both cost and CO₂e by at least {{ pct(flag_threshold) }}.
+  {%- else -%}
+    <strong>Not stress-tested.</strong> {{ group.basis }}
+  {%- endif -%}
+  </span>
+</p>
+{%- endmacro %}
+
+{# The overall answer to "how sure", in one sentence. #}
+{% macro confidence_summary(sure) -%}
+{%- set plural = "s" if sure.tested != 1 else "" -%}
+{%- if sure.high == sure.tested and sure.lowest >= 1 -%}
+{{ sure.tested }} route change{{ plural }} held up in all {{ confidence_checks }} re-runs with different cost and emission rates.
+{%- elif sure.high == sure.tested -%}
+{{ sure.tested }} route change{{ plural }} held up in at least {{ pct(sure.lowest) }} of {{ confidence_checks }} re-runs with different cost and emission rates.
+{%- else -%}
+{{ sure.high }} of {{ sure.tested }} route changes held up in at least {{ pct(confidence_high) }} of re-runs with different rates. The weakest held in {{ pct(sure.lowest) }}.
+{%- endif -%}
+{%- endmacro %}
+
+{% macro estimate_tag() -%}
+<span class="estimate-tag">Estimate</span>
+{%- endmacro %}
+
+{# The saving on one change, each figure with its unit and its timeframe. #}
+{% macro impact(problem) -%}
+<dl class="impact">
+  <div class="impact-fig">
+    <dt>Cost saving</dt>
+    <dd>{% if problem.cost_at_stake %}<strong class="cost-ink">{{ usd(problem.cost_at_stake) }}</strong><span class="unit">a year</span>{% else %}<span class="none">No direct cost saving</span>{% endif %}</dd>
+  </div>
+  <div class="impact-fig">
+    <dt>CO₂e reduction</dt>
+    <dd>{% if problem.co2e_line %}<span class="none">Not estimated</span>{% elif problem.co2e_at_stake %}<strong class="carbon-ink">{{ co2e(problem.co2e_at_stake) }}</strong><span class="unit">CO₂e a year</span>{% else %}<span class="none">No measurable change</span>{% endif %}</dd>
+  </div>
+</dl>
+{%- endmacro %}
+
+{% macro transit_change(route) -%}
+{%- set now_days = route.now.days|round|int -%}
+{%- set new_days = route.proposed.days|round|int -%}
+{%- set added = new_days - now_days -%}
+<span class="transit{{ ' is-longer' if added >= transit_material_days }}">{{ icon("clock") }}<span>{{ days(route.now.days) }} <span aria-hidden="true">&rarr;</span><span class="visually-hidden">to</span> {{ days(route.proposed.days) }} in transit{% if added >= transit_material_days %} <strong>+{{ added }} days</strong>{% endif %}</span></span>
+{%- endmacro %}
+
+{% macro checks(items, title="What to check before acting") -%}
 {%- if items -%}
 <div class="checks">
   <p class="checks-title">{{ title }}</p>
   <ul>
-    {% for item in items %}<li><span class="checks-icon" aria-hidden="true">&#9888;</span>{{ item }}</li>{% endfor %}
+    {% for item in items %}<li>{{ icon("alert") }}<span>{{ item }}</span></li>{% endfor %}
   </ul>
 </div>
 {%- endif -%}
 {%- endmacro %}
 
-{% macro saving_figures(problem) -%}
-<dl class="impact">
-  <div>
-    <dt>Annual cost saving</dt>
-    <dd class="cost-ink">{% if problem.cost_at_stake %}{{ usd(problem.cost_at_stake) }}{% else %}<span class="muted-ink">None</span>{% endif %}</dd>
-    {% if problem.route %}<span class="impact-pct">&minus;{{ pct(problem.route.cost_pct) }} cost</span>{% endif %}
-  </div>
-  <div>
-    <dt>CO2e avoided a year</dt>
-    <dd class="carbon-ink">{% if problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }}{% else %}<span class="muted-ink">Not estimated</span>{% endif %}</dd>
-    {% if problem.route %}<span class="impact-pct">&minus;{{ pct(problem.route.co2e_pct) }} carbon</span>{% endif %}
-  </div>
-</dl>
-{%- endmacro %}
-
-{% macro actions(problem, small=False) -%}
-{%- if problem.edge_id -%}
-<div class="rec-actions">
-  <button type="button" class="btn{{ ' btn-small' if small }}" data-investigate="{{ problem.edge_id }}">Investigate route</button>
-  <button type="button" class="btn btn-quiet{{ ' btn-small' if small }}" data-scenario="{{ problem.edge_id }}">Test scenario</button>
+{% macro why_route(route, route_count) -%}
+<div class="why">
+  <p class="why-title">Where this route ranks among your {{ route_count }} routes</p>
+  <dl class="why-grid">
+    <div><dt>Cost today</dt><dd>{{ route.cost_level }}</dd></div>
+    <div><dt>CO₂e today</dt><dd>{{ route.carbon_level }}</dd></div>
+    <div><dt>Cost cut on this route</dt><dd>{{ pct(route.cost_pct) }}</dd></div>
+    <div><dt>CO₂e cut on this route</dt><dd>{{ pct(route.co2e_pct) }}</dd></div>
+  </dl>
+  <p class="why-note">
+    It is listed because switching cuts both cost and CO₂e by at least
+    {{ pct(route.threshold) }}.
+  </p>
 </div>
-{%- endif -%}
 {%- endmacro %}
 
-{# The card: route, change, money, carbon, transit, confidence and the catch,
-   readable in the time it takes to look at it. #}
-{% macro rec_card(problem, rank, with_actions=True, link=None) -%}
+{# The arithmetic behind a route change, current and proposed side by side,
+   so the saving can be checked with one subtraction. #}
+{% macro audit(route) -%}
+<div class="audit-body">
+  {% for side, label in [("now", "Today"), ("proposed", "Proposed")] %}
+  {% set s = route[side] %}
+  <div class="audit-side">
+    <p class="audit-title">{{ label }}: {{ s.mode|title }}</p>
+    <p class="audit-line">
+      {{ km(route.straight_km) }} straight line &times; {{ "%.2f"|format(s.circuity) }}
+      {{ s.mode }} distance allowance = {{ km(s.route_km) }}
+    </p>
+    <table class="audit-sum">
+      <tbody>
+        <tr><td>{{ "{:,.1f}".format(route.weight_t) }} t &times; {{ km(s.route_km) }} &times; ${{ "%.3f"|format(s.cost_factor) }} per tonne-km</td><td class="num">{{ usd(s.freight_cost) }}</td></tr>
+        <tr><td>Returns</td><td class="num">+ {{ usd(s.returns_cost) }}</td></tr>
+        <tr><td>Warehouse and packaging share, unchanged</td><td class="num">+ {{ usd(s.fixed_cost) }}</td></tr>
+        <tr class="audit-total"><td>Cost a year</td><td class="num cost-ink">{{ usd(s.cost) }}</td></tr>
+        <tr><td>{{ "{:,.1f}".format(route.weight_t) }} t &times; {{ km(s.route_km) }} &times; {{ "%.3f"|format(s.emission_factor) }} kg CO₂e per tonne-km</td><td class="num">{{ co2e(s.freight_co2e) }}</td></tr>
+        <tr><td>Returns</td><td class="num">+ {{ co2e(s.returns_co2e) }}</td></tr>
+        <tr><td>Warehouse energy and packaging, unchanged</td><td class="num">+ {{ co2e(s.fixed_co2e) }}</td></tr>
+        <tr class="audit-total"><td>CO₂e a year</td><td class="num carbon-ink">{{ co2e(s.co2e) }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+  <p class="audit-result">
+    {{ usd(route.now.cost) }} &minus; {{ usd(route.proposed.cost) }} =
+    <strong class="cost-ink">{{ usd(route.saved_cost) }}</strong> a year.
+    {{ co2e(route.now.co2e) }} &minus; {{ co2e(route.proposed.co2e) }} =
+    <strong class="carbon-ink">{{ co2e(route.saved_co2e) }}</strong> CO₂e a year.
+  </p>
+  <p class="audit-note">
+    Rounded for display. Distance allowances are planning assumptions, not
+    measured routes, and cost rates are industry defaults, not your contract
+    prices.
+  </p>
+</div>
+{%- endmacro %}
+
+{# A change in the recommendations list. Collapsed to what a manager needs to
+   decide whether to open it: what would change, what it is worth, why, and
+   how sure to be. The full decision view is rec_detail. #}
+{% macro rec_card(problem, rank, group) -%}
 {%- set route = problem.route -%}
-<article class="rec"{% if problem.edge_id %} data-edge="{{ problem.edge_id }}"{% endif %}>
-  <header class="rec-head">
-    <span class="rec-rank">{{ "%02d"|format(rank) }}</span>
-    {{ confidence(problem, short=True) }}
-  </header>
-  <p class="rec-stage">{{ problem.stage }}</p>
-  <h3 class="rec-title">{{ route_name(problem) }}</h3>
-  <p class="rec-change">{{ change(problem) }}</p>
-  {{ saving_figures(problem) }}
-  {% if route %}
-  <p class="rec-transit"><span class="label">Transit</span> {{ days(route.now.days) }} <span aria-hidden="true">&rarr;</span><span class="visually-hidden"> to </span> {{ days(route.proposed.days) }}</p>
-  {% endif %}
-  {{ checks(problem.checks[1:3] if route else problem.checks[:2]) }}
-  {% if with_actions %}{{ actions(problem) }}{% endif %}
-  {% if link %}<a class="rec-link" href="{{ link }}">Investigate this route</a>{% endif %}
+<article class="rec-card{{ ' is-untested' if not problem.confidence_label }}" id="change-{{ rank }}" data-rank="{{ rank }}" data-mark-key="{{ mark_key(problem) }}" aria-labelledby="change-{{ rank }}-title">
+  <div class="rec-main">
+    <p class="rec-meta">
+      <span class="rec-priority">Priority {{ rank }}</span>
+      {{ group_badge(group) }}
+      <span class="marked-flag" data-marked-flag hidden>{{ icon("bookmark") }}Marked for review</span>
+    </p>
+    <h4 class="rec-title" id="change-{{ rank }}-title">{{ rec_headline(problem) }}</h4>
+    <p class="rec-change">
+      {% if route %}
+      {{ change(problem) }}
+      <span>{{ "Inbound from a supplier" if route.leg == "inbound" else "Outbound to customers" }}</span>
+      {{ transit_change(route) }}
+      {% else %}
+      <span>{{ problem.stage }}</span>
+      {% endif %}
+    </p>
+    <div class="rec-why">
+      <p class="rec-label">Why this is recommended</p>
+      <p>{{ problem.happening }} {{ problem.why }}</p>
+    </div>
+  </div>
+  <div class="rec-side">
+    <p class="rec-label">Estimated annual impact</p>
+    {{ impact(problem) }}
+    {{ confidence_plain(problem, group) }}
+    <button type="button" class="btn btn-secondary rec-open" data-open-change="{{ rank }}">Review change {{ icon("arrow-right") }}</button>
+  </div>
+  <div class="print-only rec-print-checks">{{ checks(problem.checks) }}</div>
 </article>
 {%- endmacro %}
 
-{% macro why_route(route, route_count) -%}
-<details class="why">
-  <summary>Why this route?</summary>
-  <dl class="why-grid">
-    <div><dt>Cost</dt><dd>{{ route.cost_level }}</dd></div>
-    <div><dt>Carbon</dt><dd>{{ route.carbon_level }}</dd></div>
-    <div><dt>Alternative</dt><dd>{{ route.proposed.mode|title }}</dd></div>
-    <div><dt>Cost reduction</dt><dd>{{ pct(route.cost_pct) }}</dd></div>
-    <div><dt>Carbon reduction</dt><dd>{{ pct(route.co2e_pct) }}</dd></div>
-    <div><dt>Confidence</dt><dd>{% if route.confidence is not none %}{{ pct(route.confidence) }}{% else %}Not simulated{% endif %}</dd></div>
-  </dl>
-  <p class="why-note">
-    Cost and carbon are where this route ranks among your {{ route_count }}
-    routes. It is flagged because switching cuts both by at least
-    {{ pct(route.threshold) }}.
-  </p>
-</details>
-{%- endmacro %}
+{# The decision view for one change, written into a template the side panel
+   copies when the change is opened. Summary first; the arithmetic and the
+   what-if wait behind their own disclosures. #}
+{% macro rec_detail(problem, rank, group, route_count, total) -%}
+{%- set route = problem.route -%}
+<template id="change-detail-{{ rank }}" data-rank="{{ rank }}"{% if problem.edge_id %} data-edge="{{ problem.edge_id }}"{% endif %}>
+  <header class="dv-head">
+    <p class="dv-meta"><span class="rec-priority">Priority {{ rank }} of {{ total }}</span>{{ group_badge(group) }}</p>
+    <h2 id="drawer-title" tabindex="-1">{{ rec_headline(problem) }}</h2>
+    <p class="dv-sub">
+      {% if route %}
+      {{ "Inbound from a supplier" if route.leg == "inbound" else "Outbound to customers" }}
+      &middot; {{ "{:,.1f}".format(route.weight_t) }} t shipped a year
+      &middot; {{ "{:,}".format(route.orders) }} order{{ "s" if route.orders != 1 }}
+      {% else %}
+      {{ problem.stage }} &middot; {{ problem.title }}
+      {% endif %}
+    </p>
+  </header>
 
-{% macro audit(route) -%}
-<details class="audit">
-  <summary>Show the calculation</summary>
-  <div class="audit-body">
-    {% for side, label in [("now", "Current"), ("proposed", "Proposed")] %}
+  {% if route %}
+  <section class="dv-compare" aria-label="Today and proposed">
+    {% for side, label in [("now", "Today"), ("proposed", "Proposed")] %}
     {% set s = route[side] %}
-    <div class="audit-side">
-      <p class="audit-title">{{ label }}: {{ s.mode|title }}</p>
-      <p class="audit-line">
-        {{ km(route.straight_km) }} straight line &times; {{ "%.2f"|format(s.circuity) }}
-        {{ s.mode }} distance multiplier = {{ km(s.route_km) }}
-      </p>
-      <table class="audit-sum">
-        <tbody>
-          <tr><td>{{ "{:,.1f}".format(route.weight_t) }} t &times; {{ km(s.route_km) }} &times; ${{ "%.3f"|format(s.cost_factor) }} per t-km</td><td class="num">{{ usd(s.freight_cost) }}</td></tr>
-          <tr><td>Returns</td><td class="num">+ {{ usd(s.returns_cost) }}</td></tr>
-          <tr><td>Warehouse and packaging share, unchanged</td><td class="num">+ {{ usd(s.fixed_cost) }}</td></tr>
-          <tr class="audit-total"><td>Cost a year</td><td class="num cost-ink">{{ usd(s.cost) }}</td></tr>
-          <tr><td>{{ "{:,.1f}".format(route.weight_t) }} t &times; {{ km(s.route_km) }} &times; {{ "%.3f"|format(s.emission_factor) }} kg CO2e per t-km</td><td class="num">{{ co2e(s.freight_co2e) }}</td></tr>
-          <tr><td>Returns</td><td class="num">+ {{ co2e(s.returns_co2e) }}</td></tr>
-          <tr><td>Warehouse energy and packaging, unchanged</td><td class="num">+ {{ co2e(s.fixed_co2e) }}</td></tr>
-          <tr class="audit-total"><td>CO2e a year</td><td class="num carbon-ink">{{ co2e(s.co2e) }}</td></tr>
-        </tbody>
-      </table>
+    {% if not loop.first %}<span class="dv-arrow" aria-hidden="true">{{ icon("arrow-right") }}</span>{% endif %}
+    <div class="dv-side{{ ' is-proposed' if side == 'proposed' }}">
+      <p class="dv-label">{{ label }}</p>
+      <p class="dv-mode">{{ mode(s.mode) }}</p>
+      <dl>
+        <div><dt>Cost</dt><dd>{{ usd(s.cost) }} <span>a year</span></dd></div>
+        <div><dt>CO₂e</dt><dd>{{ co2e(s.co2e) }} <span>a year</span></dd></div>
+        <div><dt>Transit</dt><dd>{{ days(s.days) }}</dd></div>
+      </dl>
     </div>
     {% endfor %}
-    <p class="audit-result">
-      {{ usd(route.now.cost) }} &minus; {{ usd(route.proposed.cost) }} =
-      <strong class="cost-ink">{{ usd(route.saved_cost) }}</strong> a year.
-      {{ co2e(route.now.co2e) }} &minus; {{ co2e(route.proposed.co2e) }} =
-      <strong class="carbon-ink">{{ co2e(route.saved_co2e) }}</strong> a year.
-    </p>
-    <p class="audit-note">
-      Figures are rounded for display. Distance multipliers are screening
-      assumptions, not measured routes. Every factor and its source is listed
-      under How sure to be.
-    </p>
-  </div>
-</details>
-{%- endmacro %}
+  </section>
+  {% else %}
+  <section class="dv-block dv-what">
+    <h3 class="dv-label">What would change</h3>
+    <p>{{ problem.action }}</p>
+  </section>
+  {% endif %}
 
-{# One line in the ranked list. Collapsed it is the decision. Open, the two
-   questions anyone opens it for come first, what to do and what it is worth,
-   then the context, the checks and the working. #}
-{% macro rec_row(problem, rank, route_count, step=None) -%}
-{%- set route = problem.route -%}
-<li class="rec-row{{ ' is-top' if rank <= 3 }}">
-  <details>
-    <summary>
-      <span class="rec-rank">{{ "%02d"|format(rank) }}</span>
-      <span class="row-main">
-        <span class="row-title">{{ route_name(problem) }}</span>
-        <span class="row-change">{{ change(problem) }}</span>
-      </span>
-      <span class="row-figs">
-        <span class="cost-ink">{% if problem.cost_at_stake %}{{ usd(problem.cost_at_stake) }}{% else %}<span class="muted-ink">No saving</span>{% endif %}</span>
-        <span class="carbon-ink">{% if problem.co2e_at_stake %}{{ co2e(problem.co2e_at_stake) }} CO2e{% else %}<span class="muted-ink">No CO2e figure</span>{% endif %}</span>
-      </span>
-      <span class="row-conf">{{ confidence(problem, short=True) }}</span>
-    </summary>
-    <div class="row-body">
-      <div class="row-grid">
-        <div>
-          <p class="row-label">What to do</p>
-          <p class="row-decision">{{ problem.action }}</p>
-          {% if problem.alternatives %}
-          <p class="row-alt"><strong>If that is not possible:</strong> {% for alt in problem.alternatives %}{{ alt }} {% endfor %}</p>
-          {% endif %}
-        </div>
-        <div>
-          <p class="row-label">What it is worth</p>
-          {% if step %}
-          <p class="row-worth">{{ step.cost_line }}</p>
-          <p class="row-worth">{{ step.co2e_line }}</p>
-          {% endif %}
-          {% if route %}
-          <dl class="row-facts">
-            <div><dt>Transit</dt><dd>{{ days(route.now.days) }} &rarr; {{ days(route.proposed.days) }}</dd></div>
-            <div><dt>Cost</dt><dd>&minus;{{ pct(route.cost_pct) }}</dd></div>
-            <div><dt>Carbon</dt><dd>&minus;{{ pct(route.co2e_pct) }}</dd></div>
-            <div><dt>Confidence</dt><dd>{% if route.confidence is not none %}{{ pct(route.confidence) }} of simulations{% else %}Not simulated{% endif %}</dd></div>
-          </dl>
-          {% endif %}
-        </div>
-      </div>
-      <p class="row-stage">{{ problem.stage }}. {{ problem.happening }}</p>
-      <p class="row-why"><strong>Why it matters.</strong> {{ problem.why }}</p>
-      {{ checks(problem.checks) }}
+  <section class="dv-block dv-impact">
+    <h3 class="dv-label">Expected annual impact {{ estimate_tag() }}</h3>
+    {{ impact(problem) }}
+    {% if route %}
+    <p class="dv-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route, treating the file as one year of orders.</p>
+    {% endif %}
+  </section>
+
+  <section class="dv-block">
+    <h3 class="dv-label">Why this helps</h3>
+    <p>{{ problem.happening }} {{ problem.why }}</p>
+  </section>
+
+  <section class="dv-block">
+    <h3 class="dv-label">Confidence</h3>
+    {{ confidence_plain(problem, group) }}
+  </section>
+
+  <section class="dv-block">
+    {{ checks(problem.checks) }}
+    {% if problem.alternatives %}
+    <p class="dv-alt"><strong>If that is not possible:</strong> {{ problem.alternatives|join(" ") }}</p>
+    {% endif %}
+  </section>
+
+  <div class="dv-actions">
+    <button type="button" class="btn btn-primary" data-mark="{{ mark_key(problem) }}" aria-pressed="false">{{ icon("bookmark") }}<span data-mark-label>Mark for review</span></button>
+    <a class="btn btn-secondary" href="{{ url_for('change_brief', rank=rank) }}" target="_blank" rel="noopener">{{ icon("download") }}Export this recommendation</a>
+    <button type="button" class="btn btn-ghost" data-back>{{ icon("arrow-left") }}Back to all changes</button>
+  </div>
+
+  <details class="disclosure dv-more">
+    <summary>See calculation details</summary>
+    <div class="disclosure-body">
       {% if route %}
-      {{ why_route(route, route_count) }}
       {{ audit(route) }}
+      {{ why_route(route, route_count) }}
+      {% else %}
+      <p class="dv-text">{{ problem.note }}</p>
+      <dl class="facts">
+        <div><dt>Share of your annual cost</dt><dd>{{ "{:.1%}".format(problem.cost_share) }}</dd></div>
+        <div><dt>Share of your annual CO₂e</dt><dd>{{ "{:.1%}".format(problem.co2e_share) }}</dd></div>
+      </dl>
+      <p class="dv-note">Only transport mode changes are re-run with different rates, so this figure was not stress-tested.</p>
       {% endif %}
-      {{ actions(problem) }}
+      <p class="dv-note">Rates, distance allowances and their sources are under <a href="#data" data-back>Data &amp; assumptions</a>.</p>
     </div>
   </details>
-</li>
+
+  {% if problem.edge_id %}
+  <details class="disclosure dv-more" data-scenario-panel>
+    <summary>Try a different transport mode or warehouse</summary>
+    <div class="disclosure-body sc-host"></div>
+  </details>
+  <p class="dv-map"><button type="button" class="btn-link" data-go="map">{{ icon("map") }}See this route on the map</button></p>
+  {% endif %}
+</template>
 {%- endmacro %}

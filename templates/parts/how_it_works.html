@@ -1,13 +1,13 @@
-{# How it works, in two boxes. Shared by the landing page and the How it works
-   page so the explanation is written once. The figures come from the engine
-   through the site context, never typed in. #}
+{# How it works, in two boxes. Shared by the How it works page so the
+   explanation is written once. The figures come from the engine through the
+   site context, never typed in. #}
 {% from "parts/_ui.html" import pct %}
 
 {% macro how_it_works(level=2) -%}
 <div class="hiw-grid">
   <article class="hiw-box">
-    <p class="hiw-label">1 &middot; What it works out</p>
-    <h{{ level }}>A yearly cost and carbon figure for every route</h{{ level }}>
+    <p class="hiw-label">1. What it works out</p>
+    <h{{ level }}>A yearly cost and CO₂e estimate for every route</h{{ level }}>
     <p>
       You upload a year of shipping orders. Orders that travel between the
       same two places by the same transport mode are grouped into one route,
@@ -15,26 +15,26 @@
     </p>
     <p>
       For each route, the weight shipped times the distance times a standard
-      rate for its mode gives a yearly freight cost and CO2e. Warehouse,
-      packaging and returns are added on top. Carbon rates follow DEFRA and
-      GLEC, the basis of most freight carbon reporting. Cost rates are typical
-      industry rates, not your contract prices.
+      rate for its transport mode gives a yearly freight cost and CO₂e.
+      Warehouse, packaging and returns are added on top. Emission rates follow
+      DEFRA and GLEC, the basis of most freight carbon reporting. Cost rates
+      are typical industry rates, not your contract prices.
     </p>
   </article>
   <article class="hiw-box">
-    <p class="hiw-label">2 &middot; What it recommends</p>
-    <h{{ level }}>Only changes that cut cost and carbon together</h{{ level }}>
+    <p class="hiw-label">2. What it recommends</p>
+    <h{{ level }}>Only changes that cut cost and CO₂e together</h{{ level }}>
     <p>
-      Each route is priced again on every realistic alternative, such as air
-      to sea on a long route or road to rail. A change is recommended only if
-      it cuts both the route's cost and its carbon by at least
-      {{ pct(flag_threshold) }}. The list is ranked by what each change saves.
+      Each route is priced again on every realistic alternative, such as sea
+      instead of air on a long route, or rail instead of road. A change is
+      listed only if it cuts both the route's cost and its CO₂e by at least
+      {{ pct(flag_threshold) }}. The list is ranked by combined impact.
     </p>
     <p>
-      Every rate is then varied and the check run again
-      {{ confidence_checks }} times. High confidence means a change still paid
-      off in at least {{ pct(confidence_high) }} of those runs. The figures are
-      screening estimates for deciding where to look, not quotes.
+      Every route change is then re-run {{ confidence_checks }} times with the
+      cost and emission rates varied. High confidence means it still qualified
+      in at least {{ pct(confidence_high) }} of those re-runs. The figures are
+      planning estimates for deciding where to look, not quotes.
     </p>
   </article>
 </div>

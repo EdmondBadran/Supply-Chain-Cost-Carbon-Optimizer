@@ -102,6 +102,7 @@ def build(conn, limit=REPORT_LIMIT):
     }
     everything = _problems(lanes, stages, totals, context)
     problems = everything[:limit]
+    _scale(problems)
 
     return {
         "overview": _overview(lanes, totals, problems, len(everything)),
@@ -116,6 +117,25 @@ def build(conn, limit=REPORT_LIMIT):
             "together rather than trading one against the other."
         ),
     }
+
+
+def _scale(problems):
+    """How long each problem's bars are drawn in the short answer, as a share
+    of the largest on the list, so the page can draw them without doing
+    arithmetic of its own. A problem whose carbon is not estimated gets no
+    carbon bar, rather than one drawn at zero."""
+    top_cost = max((p["cost_at_stake"] or 0.0 for p in problems), default=0.0)
+    top_co2e = max(
+        (p["co2e_at_stake"] or 0.0 for p in problems if p["co2e_line"] is None),
+        default=0.0,
+    )
+    for problem in problems:
+        cost = problem["cost_at_stake"] or 0.0
+        co2e = problem["co2e_at_stake"] or 0.0
+        problem["cost_scale"] = cost / top_cost if top_cost else 0.0
+        problem["co2e_scale"] = (
+            co2e / top_co2e if top_co2e and problem["co2e_line"] is None else 0.0
+        )
 
 
 def _confidence_summary(problems):

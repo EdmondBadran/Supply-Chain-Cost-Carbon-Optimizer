@@ -1,5 +1,3 @@
-import csv
-import io
 import os
 import secrets
 import tempfile
@@ -23,12 +21,14 @@ from optimizer import (
     db,
     diagnosis,
     distance,
+    exports,
     factors,
     geo,
     ingest,
     scoring,
     stats,
     store,
+    xlsx,
 )
 
 ROOT = Path(__file__).resolve().parent
@@ -146,7 +146,39 @@ def site_details():
         "flag_threshold": scoring.FLAG_THRESHOLD,
         "confidence_checks": stats.CONFIDENCE_CHECKS,
         "confidence_high": diagnosis.CONFIDENCE_HIGH,
+        "confidence_moderate": diagnosis.CONFIDENCE_MODERATE,
+        "factor_spread": stats.FACTOR_SPREAD,
+        "expedite_share": factors.EXPEDITE_SHARE_OF_LATE,
+        "idle_hours": store.IDLE_TIMEOUT_SECONDS // 3600,
+        "required_fields": REQUIRED_FIELDS,
+        "transit_material_days": TRANSIT_MATERIAL_DAYS,
+        "default_sample": DEFAULT_SAMPLE,
     }
+
+
+@app.template_filter("nice_date")
+def nice_date(value):
+    """An order date from the file as a person writes it, 1 Sep 2025. Anything
+    that is not an ISO date is shown as the file gave it."""
+    try:
+        parsed = date.fromisoformat(str(value)[:10])
+    except ValueError:
+        return value
+    return f"{parsed.day} {parsed:%b %Y}"
+
+
+# The five columns an orders file must have, in the words an operations
+# manager would use for them, with an example value from the sample file.
+# tests/test_routes.py checks this names exactly what the loader requires.
+REQUIRED_FIELDS = (
+    ("origin_name", "Who shipped it: your site or supplier name", "Bristol Roastery"),
+    ("origin_city", "The city the shipment started in", "Bristol"),
+    ("dest_city", "The city it was delivered to", "Edinburgh"),
+    ("weight_kg", "Its weight, in kilograms", "52.46"),
+    ("mode", "How it travelled: road, rail, sea or air", "road"),
+)
+
+FIELD_MEANING = {name: meaning for name, meaning, _ in REQUIRED_FIELDS}
 
 
 def ensure_data(conn):
@@ -176,10 +208,12 @@ def index():
     numbers on it are the same ones the tool would show a customer."""
     with store.workspace() as conn:
         ensure_data(conn)
+        report = diagnosis.build(conn)
         return render_template(
             "landing.html",
             summary=db.summary(conn),
-            report=diagnosis.build(conn),
+            report=report,
+            groups=decision_groups(report),
             using_sample=db.get_meta(conn, "source") == "sample",
             subject=subject_of(conn),
         )
@@ -221,19 +255,95 @@ def recommendation_payload(report):
     }
 
 
+# The three groups the report sorts its ranked changes into. Presentation
+# only: the ranking, the figures and the confidence are the engine's, and a
+# change keeps its rank whichever group it is shown in.
+GROUP_LABELS = {
+    "now": "Recommended now",
+    "review": "Worth reviewing",
+    "more_data": "Needs more data to confirm",
+}
+
+
+def _untested_basis(problem):
+    """The group for a change that was not stress-tested, and what its figure
+    rests on, in one sentence. A figure built on an assumption the file cannot
+    confirm never sits beside a route change that survived every redraw."""
+    kind = problem["kind"]
+    if kind == "warehouse_grid":
+        return "review", (
+            "Worked out from this site's electricity use and the carbon "
+            "intensity of its local grid. Not stress-tested."
+        )
+    if kind == "supplier_on_time":
+        return "more_data", (
+            f"Depends on an assumption that {factors.EXPEDITE_SHARE_OF_LATE:.0%} "
+            "of late deliveries are flown in. Your own expedite records would "
+            "confirm it."
+        )
+    if kind == "returns":
+        return "more_data", (
+            "Your file shows how often orders on this route come back, but not why."
+        )
+    if kind == "cost_to_serve":
+        return "more_data", (
+            "The CO₂e change is not estimated, and the saving depends on a "
+            "nearer warehouse having room."
+        )
+    return "more_data", (
+        problem["checks"][0] if problem["checks"] else "Not stress-tested."
+    )
+
+
+def decision_groups(report):
+    """Which group each ranked change is shown in, keyed by its rank.
+
+    A change that was stress-tested goes by its confidence label: high is
+    recommended now, moderate is worth reviewing, low needs more data. One
+    that was not goes by what its figure rests on. Nothing is reordered.
+    """
+    if not report:
+        return {"by_rank": {}, "groups": [], "counts": {}, "all_cut_both": False}
+    by_rank = {}
+    for rank, problem in enumerate(report["problems"], start=1):
+        label = problem["confidence_label"]
+        if label is None:
+            key, basis = _untested_basis(problem)
+        else:
+            key = {"high": "now", "moderate": "review"}.get(label, "more_data")
+            basis = None
+        by_rank[rank] = {"key": key, "label": GROUP_LABELS[key], "basis": basis}
+    groups = []
+    for key, label in GROUP_LABELS.items():
+        ranks = [rank for rank, group in by_rank.items() if group["key"] == key]
+        if ranks:
+            groups.append({"key": key, "label": label, "ranks": ranks})
+    return {
+        "by_rank": by_rank,
+        "groups": groups,
+        "counts": {group["key"]: len(group["ranks"]) for group in groups},
+        # Whether the overview may say every change cuts both. A cleaner
+        # power supply saves carbon and no money, so it is not always true.
+        "all_cut_both": all(
+            problem["cost_at_stake"] > 0
+            and problem["co2e_at_stake"] > 0
+            and not problem["co2e_line"]
+            for problem in report["problems"]
+        ),
+    }
+
+
 @app.route("/report")
 def report_page():
-    """The whole analysis as one document.
-
-    This used to be four pages: the chain, the map, the written report and the
-    statistics. Each opened cold, none of them said why you had arrived, and
-    the owner of the tool got lost moving between them. They are five steps of
-    one argument, so they are now five steps of one page.
-    """
+    """The whole analysis as one page, in the order a decision is made: what
+    was found and what to do first, every change grouped by how ready it is to
+    act on, where the routes run, how far to trust the figures, and how to
+    share them."""
     with store.workspace() as conn:
         ensure_data(conn)
-        stages = chain.build(conn)
+        stages = chain.pictured(chain.build(conn))
         report = diagnosis.build(conn)
+        regions = analysis.by_region(conn)
         return render_template(
             "report.html",
             summary=db.summary(conn),
@@ -241,12 +351,14 @@ def report_page():
             stages=stages,
             flow=chain.flow_layout(stages),
             report=report,
+            groups=decision_groups(report),
             recommendations=recommendation_payload(report),
             stats=stats.build(conn),
             totals=analysis.totals(conn),
             network=network_payload(conn),
-            regions=analysis.by_region(conn, limit=8),
-            warehouses=analysis.by_warehouse(conn),
+            regions=regions[:REGIONS_SHOWN],
+            region_count=len(regions),
+            transit_material_days=TRANSIT_MATERIAL_DAYS,
             using_sample=db.get_meta(conn, "source") == "sample",
             subject=subject_of(conn),
             generated=date.today().strftime("%d %B %Y"),
@@ -269,6 +381,7 @@ def summary_page():
             summary=db.summary(conn),
             ingest=db.ingest_report(conn),
             report=report,
+            groups=decision_groups(report),
             uncertainty=stats.uncertainty(scoring.rank(conn)) if report else None,
             subject=subject_of(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
@@ -281,20 +394,47 @@ def summary_page():
         )
 
 
+@app.route("/report/change/<int:rank>")
+def change_brief(rank):
+    """One change on a page of its own, to print or save as a PDF and hand to
+    whoever has to act on it. Every figure is the report's own."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        if not report or not 1 <= rank <= len(report["problems"]):
+            return redirect(url_for("report_page"))
+        return render_template(
+            "change.html",
+            report=report,
+            problem=report["problems"][rank - 1],
+            rank=rank,
+            group=decision_groups(report)["by_rank"][rank],
+            summary=db.summary(conn),
+            subject=subject_of(conn),
+            using_sample=db.get_meta(conn, "source") == "sample",
+            generated=date.today().strftime("%d %B %Y"),
+            transit_material_days=TRANSIT_MATERIAL_DAYS,
+        )
+
+
 # How many extra days of transit the summary calls out as a trade-off to check.
 # A presentation rule only: it decides what is highlighted, not what is
 # recommended.
 TRANSIT_MATERIAL_DAYS = 2
 
+# How many destinations part one lists by cost to serve. Past this the table
+# stops being read, and the workbook carries every route anyway.
+REGIONS_SHOWN = 8
+
 
 # The addresses these pages used to live at. Kept so a link already sent to
-# somebody still lands somewhere sensible, and pointed at the step that
+# somebody still lands somewhere sensible, and pointed at the section that
 # replaced them rather than at the top.
 LEGACY_STEPS = {
-    "/chain": "step-1",
-    "/diagnosis": "step-2",
-    "/dashboard": "step-3",
-    "/stats": "step-4",
+    "/chain": "network",
+    "/diagnosis": "recommendations",
+    "/dashboard": "network",
+    "/stats": "data",
 }
 
 
@@ -303,7 +443,7 @@ LEGACY_STEPS = {
 @app.route("/dashboard")
 @app.route("/stats")
 def legacy_page():
-    step = LEGACY_STEPS.get(request.path, "step-1")
+    step = LEGACY_STEPS.get(request.path, "overview")
     query = request.query_string.decode()
     target = url_for("report_page") + ("?" + query if query else "") + "#" + step
     return redirect(target, code=301)
@@ -363,6 +503,14 @@ def upload_page():
         )
 
 
+@app.route("/data/example-orders.csv")
+def example_orders():
+    """The roastery sample's orders file, to copy the columns from. It is
+    invented data, and its filename says so."""
+    path = sample_paths(DEFAULT_SAMPLE)[0]
+    return attachment(path.read_bytes(), "text/csv", "overlap-sample-orders.csv")
+
+
 @app.route("/data/start")
 def start_upload():
     """Where 'Upload my orders CSV' goes. The landing page always loads the
@@ -391,134 +539,75 @@ def privacy():
     )
 
 
-# Read left to right the way the report is: what the opportunity is, what it
-# is worth, how sure to be, what to do. The evidence behind each saving comes
-# after, current and proposed side by side. Every heading carries its unit.
-CSV_COLUMNS = [
-    "Rank",
-    "Opportunity",
-    "Type",
-    "Stage",
-    "Origin",
-    "Destination",
-    "Change",
-    "Current mode",
-    "Proposed mode",
-    "Cost saving (USD per year)",
-    "CO2e avoided (kg per year)",
-    "Cost cut on route (%)",
-    "CO2e cut on route (%)",
-    "Confidence",
-    "Simulations still worth it (%)",
-    "Current transit (days)",
-    "Proposed transit (days)",
-    "What to do",
-    "Check before acting",
-    "Current cost (USD per year)",
-    "Proposed cost (USD per year)",
-    "Current CO2e (kg per year)",
-    "Proposed CO2e (kg per year)",
-    "Weight (tonnes per year)",
-    "Orders per year",
-    "Straight-line distance (km)",
-    "Current mode distance (km)",
-    "Proposed mode distance (km)",
-    "Share of chain cost (%)",
-    "Share of chain CO2e (%)",
-    "Effort",
-]
-
-EFFORT_LABELS = {"low": "Easy", "med": "Medium", "high": "Hard"}
+def export_context(conn, band=False):
+    """Everything an export needs, read while the workspace is held, so
+    writing the file afterwards does not keep this visitor's database locked.
+    The uncertainty band is two thousand reruns, so only the workbook, which
+    prints it, asks for it."""
+    report = diagnosis.build(conn)
+    lanes = scoring.rank(conn)
+    tested = bool(report and report["confidence"]["tested"])
+    return {
+        "report": report,
+        "lanes": lanes,
+        "summary": db.summary(conn),
+        "ingest": db.ingest_report(conn),
+        "totals": analysis.totals(conn),
+        "subject": subject_of(conn),
+        "sample": db.get_meta(conn, "source") == "sample",
+        "uncertainty": stats.uncertainty(lanes) if band and tested else None,
+        "generated": date.today(),
+        "contact_email": CONTACT_EMAIL,
+    }
 
 
-def _csv_number(value, places=2):
-    """A bare number, so a spreadsheet can sum and sort the column without
-    anybody reformatting it first."""
-    if value is None:
-        return ""
-    return int(round(value)) if places == 0 else round(value, places)
+def export_name(context, what, extension):
+    return "overlap-{}{}-{}.{}".format(
+        "sample-" if context["sample"] else "",
+        what,
+        context["generated"].isoformat(),
+        extension,
+    )
 
 
-def _csv_percent(share, places=1):
-    """A share written as percentage points, the way a spreadsheet reader
-    expects to see one."""
-    return "" if share is None else _csv_number(share * 100, places)
+def attachment(body, mimetype, name):
+    return Response(
+        body,
+        mimetype=mimetype,
+        headers={"Content-Disposition": 'attachment; filename="' + name + '"'},
+    )
 
 
 @app.route("/findings.csv")
 def findings_csv():
-    """The route opportunities as a spreadsheet.
-
-    A report somebody agrees with is still a web page. This is the same
-    findings in the form the next conversation actually happens in, which is
-    a spreadsheet with a column for who is doing it. One row per opportunity,
-    one header row, plain column names with the unit in brackets. Route
-    changes carry the current and proposed figures side by side, so the
-    saving in each row can be checked with a subtraction.
-    """
+    """Every opportunity as plain data, one row each, for whatever system
+    reads it next. The version laid out for a person is the workbook."""
     with store.workspace() as conn:
         ensure_data(conn)
-        report = diagnosis.build(conn)
-        if report is None:
-            return redirect(url_for("report_page"))
-        sample = db.get_meta(conn, "source") == "sample"
-
-        buffer = io.StringIO()
-        writer = csv.writer(buffer)
-        writer.writerow(CSV_COLUMNS)
-        for index, problem in enumerate(report["problems"], start=1):
-            route = problem["route"] or {}
-            now = route.get("now") or {}
-            proposed = route.get("proposed") or {}
-            writer.writerow(
-                [
-                    index,
-                    problem["title"],
-                    "Route mode change" if route else "Operational",
-                    problem["stage"],
-                    route.get("origin", ""),
-                    route.get("dest", ""),
-                    (
-                        now["mode"].title() + " to " + proposed["mode"].title()
-                        if route
-                        else problem["change"] or ""
-                    ),
-                    now.get("mode", "").title(),
-                    proposed.get("mode", "").title(),
-                    _csv_number(problem["cost_at_stake"] or 0),
-                    _csv_number(problem["co2e_at_stake"] or 0, 1),
-                    _csv_percent(route.get("cost_pct")),
-                    _csv_percent(route.get("co2e_pct")),
-                    (problem["confidence_label"] or "not simulated").capitalize(),
-                    _csv_percent(problem["confidence"], 0),
-                    _csv_number(now.get("days"), 1),
-                    _csv_number(proposed.get("days"), 1),
-                    problem["action"],
-                    "; ".join(problem["checks"]),
-                    _csv_number(now.get("cost")),
-                    _csv_number(proposed.get("cost")),
-                    _csv_number(now.get("co2e"), 1),
-                    _csv_number(proposed.get("co2e"), 1),
-                    _csv_number(route.get("weight_t"), 3),
-                    route.get("orders", ""),
-                    _csv_number(route.get("straight_km"), 0),
-                    _csv_number(now.get("route_km"), 0),
-                    _csv_number(proposed.get("route_km"), 0),
-                    _csv_percent(problem["cost_share"], 2),
-                    _csv_percent(problem["co2e_share"], 2),
-                    EFFORT_LABELS.get(problem["effort"], ""),
-                ]
-            )
-
-    name = "overlap-{}route-opportunities-{}.csv".format(
-        "sample-" if sample else "", date.today().isoformat()
+        context = export_context(conn)
+    if context["report"] is None:
+        return redirect(url_for("report_page"))
+    return attachment(
+        exports.opportunities_csv(context),
+        "text/csv",
+        export_name(context, "opportunities", "csv"),
     )
-    # The byte order mark is what makes Excel read the file as UTF-8, so a
-    # city like Malmö arrives intact rather than as two stray characters.
-    return Response(
-        "﻿" + buffer.getvalue(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="' + name + '"'},
+
+
+@app.route("/findings.xlsx")
+def findings_xlsx():
+    """The findings as a workbook that is ready to use when it opens: a
+    summary sheet, every opportunity and every route with units, formats,
+    totals and filters, the data check and the assumptions."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        context = export_context(conn, band=True)
+    if context["report"] is None:
+        return redirect(url_for("report_page"))
+    return attachment(
+        exports.workbook(context),
+        xlsx.MIMETYPE,
+        export_name(context, "cost-and-carbon", "xlsx"),
     )
 
 
@@ -706,6 +795,66 @@ def network_payload(conn):
     }
 
 
+def friendly_error(message):
+    """An upload problem said the way a person would say it, with what to do
+    next. The loader's own words stay underneath as the detail, for whoever
+    ends up fixing the file."""
+    text = message.strip()
+    lowered = text.lower()
+    missing = []
+    if lowered.startswith("missing required columns:"):
+        missing = [name.strip() for name in text.split(":", 1)[1].split(",") if name.strip()]
+        title = "Your file is missing {} required column{}".format(
+            len(missing), "" if len(missing) == 1 else "s"
+        )
+        advice = "Add or rename these columns in your spreadsheet, then upload it again."
+    elif "not a csv" in lowered:
+        title = "That file is not a CSV"
+        advice = (
+            "Save your spreadsheet as CSV (comma-separated values) and upload "
+            "that. In Excel: File, Save As, CSV UTF-8."
+        )
+    elif lowered.startswith("choose a csv"):
+        title = "Choose a file to upload"
+        advice = "Pick your orders CSV, or drag it onto the upload area."
+    elif "utf-8" in lowered:
+        title = "We could not read the text in this file"
+        advice = "Save it as CSV UTF-8 and upload it again."
+    elif "mb limit" in lowered:
+        title = "This file is too large"
+        advice = "Split it into smaller files, or remove columns the analysis does not use."
+    elif lowered == "the file is empty":
+        title = "This file is empty"
+        advice = "Check you exported the orders, not a blank sheet."
+    elif lowered.startswith("the file has headers but no rows"):
+        title = "This file has column headings but no orders"
+        advice = "Export the order lines themselves and upload again."
+    elif lowered.startswith("no usable rows"):
+        title = "None of the orders could be used"
+        advice = "Every row had a problem. The first one is described below."
+    elif "did not reconcile" in lowered:
+        title = "We could not check this file's totals"
+        advice = (
+            "The orders did not add up to the routes built from them, so no "
+            "results were produced. Look for unusual rows and try again."
+        )
+    elif lowered.startswith("supplier file") or lowered.startswith("warehouse file"):
+        title = "There is a problem with an optional file"
+        advice = "Fix the file described below, or upload the orders on their own."
+    elif "no sample by that name" in lowered:
+        title = "That example does not exist"
+        advice = "Choose one of the examples listed on this page."
+    else:
+        title = "We could not analyze this file"
+        advice = "The problem is described below."
+    return {
+        "title": title,
+        "advice": advice,
+        "detail": text,
+        "missing": [(name, FIELD_MEANING.get(name)) for name in missing],
+    }
+
+
 def render_error(message):
     with store.workspace() as conn:
         return render_template(
@@ -714,7 +863,7 @@ def render_error(message):
             samples=SAMPLES,
             facts=sample_facts(),
             loaded_sample=db.get_meta(conn, "sample"),
-            error=message,
+            error=friendly_error(message),
         )
 
 

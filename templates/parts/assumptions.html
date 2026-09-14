@@ -1,0 +1,190 @@
+{# Data & assumptions: how far the figures can be trusted. Four short answers
+   first, each in a sentence; the factors, formulas and statistics one click
+   further, for whoever has to defend the numbers. #}
+{% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd, icon, confidence_summary with context %}
+
+{% set un = stats.uncertainty %}
+{% set sure = report.confidence if report else None %}
+
+<header class="section-head">
+  <h2 id="data-title">Data &amp; assumptions</h2>
+  <p class="section-lede">
+    How much of your file was used, how reliable the changes are, what the
+    estimates assume and what they leave out.
+  </p>
+</header>
+
+<p class="callout callout-caution">
+  {{ icon("info") }}
+  <span><strong>Important:</strong> these are planning estimates. Confirm carrier pricing and operational constraints before changing routes.</span>
+</p>
+
+<div class="qa-grid">
+  {% if ingest %}
+  <section class="qa" id="data-check" aria-labelledby="qa-data">
+    <h3 id="qa-data">How much of your data was usable?</h3>
+    <p class="qa-answer">
+      {{ "{:,}".format(ingest.orders_loaded) }} of {{ "{:,}".format(ingest.rows_in_file) }}
+      orders were included.{% if ingest.rows_skipped %}
+      {{ "{:,}".format(ingest.rows_skipped) }} could not be used.{% endif %}
+    </p>
+    <p class="qa-more">
+      They were grouped into {{ ingest.edges }} route{{ "s" if ingest.edges != 1 }}.
+      {% if summary.first_order and summary.last_order %}The orders are dated
+      {{ summary.first_order|nice_date }} to {{ summary.last_order|nice_date }}, and
+      every annual figure treats the file as one year.{% else %}Every annual
+      figure treats the file as one year of orders.{% endif %}
+    </p>
+    {% include "parts/data_check.html" %}
+  </section>
+  {% endif %}
+
+  <section class="qa" aria-labelledby="qa-sure">
+    <h3 id="qa-sure">How reliable are the recommendations?</h3>
+    {% if sure and sure.tested %}
+    <p class="qa-answer qa-level">
+      {{ meter(sure.level) }}
+      <span><strong>{{ sure.level|capitalize }} confidence.</strong> {{ confidence_summary(sure) }}</span>
+    </p>
+    {% if un.baseline %}
+    <p class="qa-more">
+      The exact saving depends on the rates. Across
+      {{ "{:,}".format(un.trials) }} re-runs of the whole ranking, 80% put the
+      saving from route changes between <strong>{{ usd(un.p10) }}</strong> and
+      <strong>{{ usd(un.p90) }}</strong> a year.
+    </p>
+    {% endif %}
+    {% else %}
+    <p class="qa-answer">There are no transport mode changes here to stress-test.</p>
+    {% endif %}
+    {% if sure and sure.untested %}
+    <p class="qa-more">
+      {{ sure.untested }} other change{{ " was" if sure.untested == 1 else "s were" }}
+      not stress-tested, because only transport mode changes can be re-run with
+      different rates. Each one says what its figure depends on.
+    </p>
+    {% endif %}
+
+    {% if sure and sure.tested %}
+    <details class="disclosure disclosure-inline">
+      <summary>Confidence for each route change</summary>
+      <div class="disclosure-body">
+        <div class="table-scroll" tabindex="0">
+          <table class="grid">
+            <thead><tr><th>Route</th><th>Change</th><th>Confidence</th></tr></thead>
+            <tbody>
+            {% for problem in report.problems if problem.route %}
+              <tr>
+                <td>{{ route_name(problem) }}</td>
+                <td>{{ change(problem) }}</td>
+                <td>{{ confidence(problem) }}</td>
+              </tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <p class="source">
+          Each re-run redraws every cost and emission rate up to
+          {{ pct(un.spread) }} either side of its published value. A change
+          still counts when it cuts both cost and CO₂e by at least
+          {{ pct(flag_threshold) }}. High means at least
+          {{ pct(confidence_high) }} of {{ confidence_checks }} re-runs,
+          moderate at least {{ pct(confidence_moderate) }}.
+        </p>
+      </div>
+    </details>
+    {% endif %}
+  </section>
+
+  <section class="qa" aria-labelledby="qa-assume">
+    <h3 id="qa-assume">Which assumptions affect the estimates?</h3>
+    <ul class="qa-list">
+      <li><strong>Cost rates</strong> are typical industry rates per tonne-km, not your contract prices.</li>
+      <li><strong>Emission rates</strong> follow DEFRA and GLEC, the basis of most freight carbon reporting.</li>
+      <li><strong>Distances</strong> are straight lines with an allowance for each transport mode, not real road, rail or sea routes.</li>
+      <li><strong>Transit times</strong> are planning estimates, not carrier schedules.</li>
+      <li><strong>A change is listed</strong> only if it cuts both cost and CO₂e by at least {{ pct(flag_threshold) }}.</li>
+      {% if report and report.problems|selectattr("kind", "equalto", "supplier_on_time")|list %}
+      <li><strong>Late-delivery savings</strong> assume {{ pct(expedite_share) }} of late deliveries are flown in.</li>
+      {% endif %}
+      <li><strong>The file is treated as one year</strong> of orders, whatever dates it covers.</li>
+    </ul>
+    <p class="qa-more">
+      <abbr title="Carbon dioxide equivalent">CO₂e</abbr> counts every greenhouse
+      gas as the amount of CO₂ with the same warming effect.
+    </p>
+
+    {% if report %}
+    <details class="disclosure disclosure-inline" id="factors">
+      <summary>See factors, formulas and sources</summary>
+      <div class="disclosure-body">
+        <div class="table-scroll" tabindex="0">
+          <table class="grid">
+            <thead>
+              <tr>
+                <th>Mode</th>
+                <th class="num">USD per tonne-km</th>
+                <th class="num">kg CO₂e per tonne-km</th>
+                <th class="num">Distance allowance</th>
+                <th class="num">km per day</th>
+                <th class="num">Fixed days</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in factor_table %}
+              <tr>
+                <td>{{ row.mode|title }}</td>
+                <td class="num">{{ row.cost }}</td>
+                <td class="num">{{ row.emission }}</td>
+                <td class="num">{{ "%.2f"|format(row.circuity) }}</td>
+                <td class="num">{{ "{:,}".format(row.speed) }}</td>
+                <td class="num">{{ row.fixed_days }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        <h4 class="factors-sub">How each figure is worked out</h4>
+        <dl class="formulas">
+          {% for name, words in report.method.formulas %}
+          <dt>{{ name }}</dt>
+          <dd>{{ words }}</dd>
+          {% endfor %}
+        </dl>
+        <h4 class="factors-sub">Assumptions in full</h4>
+        <dl class="formulas">
+          {% for name, words in report.method.assumptions %}
+          <dt>{{ name }}</dt>
+          <dd>{{ words }}</dd>
+          {% endfor %}
+        </dl>
+        <p class="source">
+          The full method, with every source, is available from Overlap's
+          creator at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
+        </p>
+      </div>
+    </details>
+    {% endif %}
+  </section>
+
+  {% if report %}
+  <section class="qa" aria-labelledby="qa-limits">
+    <h3 id="qa-limits">What does this analysis not include?</h3>
+    <ul class="qa-list">
+      {% for limit in report.method.limits %}
+      <li>{{ limit }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</div>
+
+<details class="disclosure deep" id="uncertainty-detail">
+  <summary>
+    <span>Full uncertainty analysis</span>
+    <span class="disclosure-hint">For analysts: concentration, agreement, spread and outliers</span>
+  </summary>
+  <div class="disclosure-body">
+    {% include "parts/statistics.html" %}
+  </div>
+</details>

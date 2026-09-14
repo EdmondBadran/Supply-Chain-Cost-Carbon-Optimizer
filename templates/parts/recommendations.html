@@ -1,0 +1,40 @@
+{# Recommendations: every change, grouped by how ready it is to act on, and
+   in rank order inside each group. A card is the decision in brief; its
+   Review change button opens the full decision view. #}
+{% from "parts/_ui.html" import rec_card, group_badge, pct, icon with context %}
+
+{% set blurbs = {
+  "now": "Held up in at least " ~ pct(confidence_high) ~ " of re-runs with different cost and emission rates. Check the operational points in each, then plan the change.",
+  "review": "Held up in at least " ~ pct(confidence_moderate) ~ " but under " ~ pct(confidence_high) ~ " of re-runs, or worked out from your data without a stress test. Review with the team that owns it before acting.",
+  "more_data": "Held up in under " ~ pct(confidence_moderate) ~ " of re-runs, or depends on information your file does not include. Confirm it before counting on the saving.",
+} %}
+
+<header class="section-head">
+  <h2 id="recommendations-title">Recommendations</h2>
+  <p class="section-lede">
+    {{ report.problems|length }} change{{ "s" if report.problems|length != 1 }},
+    ranked by combined impact: each one's share of your total cost plus its
+    share of your total CO₂e. Priority 1 has the biggest impact.
+  </p>
+  <div class="list-tools">
+    <p class="marked-count" data-marked-count hidden></p>
+    <label class="toggle" data-marked-filter-wrap hidden>
+      <input type="checkbox" data-marked-filter>
+      <span>Show only changes marked for review</span>
+    </label>
+  </div>
+</header>
+
+{% for group in groups.groups %}
+<section class="rec-group group-{{ group.key }}" id="group-{{ group.key }}" aria-labelledby="group-{{ group.key }}-title">
+  <header class="rec-group-head">
+    <h3 id="group-{{ group.key }}-title">{{ group_badge(group) }}<span class="rec-group-count">{{ group.ranks|length }} change{{ "s" if group.ranks|length != 1 }}</span></h3>
+    <p>{{ blurbs[group.key] }}</p>
+  </header>
+  <div class="rec-list">
+    {% for rank in group.ranks %}
+    {{ rec_card(report.problems[rank - 1], rank, groups.by_rank[rank]) }}
+    {% endfor %}
+  </div>
+</section>
+{% endfor %}

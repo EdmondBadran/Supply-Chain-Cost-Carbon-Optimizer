@@ -1,139 +1,14 @@
-{# Part 4: how much weight the figures will take. Confidence first, in plain
-   words, then whether the file loaded completely, what the tool does not
-   account for and the factors behind it. The statistics are one click away. #}
-{% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd %}
-
+{# The statistics behind the confidence, for analysts. Nothing here changes a
+   recommendation. Included inside the full uncertainty analysis disclosure
+   under Data & assumptions, and printed as the appendix. #}
 {% set c = stats.concentration %}
 {% set ov = stats.overlap %}
 {% set un = stats.uncertainty %}
-{% set sure = report.confidence if report else None %}
-
-<section class="panel confidence-lead" aria-labelledby="confidence-title">
-  <p class="eyebrow" id="confidence-title">How confident are we?</p>
-  {% if sure and sure.tested %}
-  <p class="confidence-level">{{ meter(sure.level) }}{{ sure.level|upper }}</p>
-  <p class="confidence-read">
-    {% if sure.high == sure.tested and sure.lowest >= 1 %}
-    All {{ sure.tested }} route recommendation{{ "s" if sure.tested != 1 }}
-    stayed worth doing in 100% of {{ confidence_checks }} simulations.
-    {% elif sure.high == sure.tested %}
-    All {{ sure.tested }} route recommendation{{ "s" if sure.tested != 1 }}
-    stayed worth doing in at least {{ pct(sure.lowest) }} of
-    {{ confidence_checks }} simulations.
-    {% else %}
-    {{ sure.high }} of {{ sure.tested }} route recommendations stayed worth doing
-    in at least 90% of simulations. The weakest held in {{ pct(sure.lowest) }}.
-    {% endif %}
-    The exact dollar value varies because freight and emission factors are
-    estimates: across {{ "{:,}".format(un.trials) }} runs, 80% put the
-    recoverable route saving between {{ usd(un.p10) }} and {{ usd(un.p90) }}.
-  </p>
-  {% else %}
-  <p class="confidence-level">{{ meter(None) }}NOT TESTED</p>
-  <p class="confidence-read">There are no route mode changes here to test.</p>
-  {% endif %}
-  {% if sure and sure.untested %}
-  <p class="confidence-read muted-ink">
-    {{ sure.untested }} of the opportunities {{ "is not a route change" if sure.untested == 1 else "are not route changes" }}
-    and {{ "was" if sure.untested == 1 else "were" }} not simulated. Each rests
-    on the assumptions listed with it.
-  </p>
-  {% endif %}
-
-  {% if report and report.confidence.tested %}
-  <div class="table-scroll" tabindex="0">
-    <table class="grid">
-      <thead><tr><th>Route</th><th>Change</th><th>Confidence</th></tr></thead>
-      <tbody>
-      {% for problem in report.problems if problem.route %}
-        <tr>
-          <td>{{ route_name(problem) }}</td>
-          <td>{{ change(problem) }}</td>
-          <td>{{ confidence(problem) }}</td>
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <p class="source">
-    Each simulation redraws every cost and emission factor up to
-    {{ "{:.0%}".format(un.spread) }} either side of its published value. A
-    route counts as still worth doing when switching cuts both its cost and
-    its carbon by at least 25%. High means at least 90% of simulations,
-    moderate at least 60%.
-  </p>
-  {% endif %}
-</section>
-
-{% if ingest %}
-<section class="panel data-panel" id="data-check" aria-labelledby="data-title">
-  <h3 id="data-title">Was the data complete?</h3>
-  <p class="sub">Every order in the file is either used or listed with the reason it was not.</p>
-  {% include "parts/data_check.html" %}
-</section>
-{% endif %}
-
-{% if report %}
-<section class="panel limits-panel" aria-labelledby="limits-title">
-  <h3 id="limits-title">What this does not account for</h3>
-  <ul class="limits">
-    {% for limit in report.method.limits %}
-    <li>{{ limit }}</li>
-    {% endfor %}
-  </ul>
-</section>
-
-<details class="panel quiet-details" id="factors">
-  <summary>Factors, formulas and sources</summary>
-  <div class="table-scroll" tabindex="0">
-    <table class="grid">
-      <thead>
-        <tr>
-          <th>Mode</th>
-          <th class="num">USD per t-km</th>
-          <th class="num">kg CO2e per t-km</th>
-          <th class="num">Distance multiplier</th>
-          <th class="num">km per day</th>
-          <th class="num">Fixed days</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in factor_table %}
-        <tr>
-          <td>{{ row.mode|title }}</td>
-          <td class="num">{{ row.cost }}</td>
-          <td class="num">{{ row.emission }}</td>
-          <td class="num">{{ "%.2f"|format(row.circuity) }}</td>
-          <td class="num">{{ "{:,}".format(row.speed) }}</td>
-          <td class="num">{{ row.fixed_days }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  <h4 class="factors-sub">How each figure is worked out</h4>
-  <dl class="formulas">
-    {% for name, words in report.method.formulas %}
-    <dt>{{ name }}</dt>
-    <dd>{{ words }}</dd>
-    {% endfor %}
-  </dl>
-  <h4 class="factors-sub">Assumptions</h4>
-  <dl class="formulas">
-    {% for name, words in report.method.assumptions %}
-    <dt>{{ name }}</dt>
-    <dd>{{ words }}</dd>
-    {% endfor %}
-  </dl>
-  <p class="source">
-    The full method, with every source, is available from Overlap's creator
-    at <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>.
-  </p>
-</details>
-{% endif %}
-
-<details class="deep" id="uncertainty-detail">
-<summary>See full uncertainty analysis</summary>
+{# Concentration and agreement need routes to compare. Below three there is
+   nothing to measure, so those sections are left out rather than printed as
+   one route carrying all of itself. #}
+{% set enough = stats.lane_count >= 3 %}
+{% if enough %}
 <p class="step-lede">
   For analysts. Nothing here changes a recommendation. It answers three
   questions: how concentrated the waste is, how far out the estimate could
@@ -156,21 +31,31 @@
     <strong class="figure-value">{% if ov.rho is not none %}{{ "%.2f"|format(ov.rho) }}{% else %}n/a{% endif %}</strong>
     <span class="figure-foot">rank correlation across routes</span>
   </div>
+  {% if un.baseline %}
   <div class="figure lit">
     <span class="figure-label">Recoverable, low to high</span>
     <strong class="figure-value range cost-ink">${{ "{:,.0f}".format(un.p10) }}<span>to</span>${{ "{:,.0f}".format(un.p90) }}</strong>
     <span class="figure-foot">80% of {{ "{:,}".format(un.trials) }} runs landed in here</span>
   </div>
+  {% endif %}
 </div>
+{% else %}
+<p class="step-lede">
+  For analysts. With {{ stats.lane_count }} route{{ "s" if stats.lane_count != 1 }}
+  there is nothing to compare for concentration, or for whether cost and
+  carbon land on the same routes, so those are left out.
+</p>
+{% endif %}
 
+{% if enough %}
 <section class="panel prose" id="overlap">
   <h3>Do cost and carbon actually overlap here</h3>
+  {% if stats.lane_count >= 4 %}
   <p class="sub">
-    This is the assumption the whole tool is built on, so it is the one worth
-    testing rather than asserting. Each dot is one route: money along the
-    bottom, emissions up the side, both on a log scale because route sizes
-    span several orders of magnitude. If the assumption holds the dots climb
-    together.
+    This is the assumption the whole tool is built on, so it is tested here
+    rather than asserted. Each dot is one route, cost along the bottom and
+    carbon up the side, both on a log scale. If the assumption holds, the
+    dots climb together.
   </p>
 
   <div class="chart-wrap">
@@ -193,6 +78,13 @@
     <span class="chart-x">Cost a year, log scale</span>
     <span class="chart-y">Carbon a year, log scale</span>
   </div>
+  {% else %}
+  <p class="sub">
+    This is the assumption the whole tool is built on. With
+    {{ stats.lane_count }} route{{ "s" if stats.lane_count != 1 }} there are
+    too few to plot or to test it, so the reading below is only indicative.
+  </p>
+  {% endif %}
 
   <p class="stat-read">
     Spearman rank correlation is
@@ -210,6 +102,26 @@
     opens with.
   </p>
 
+  {% set sea_listed = (ov.ranked if ov.ranked|length <= 8 else ov.dirtiest)|selectattr("mode", "equalto", "sea")|list %}
+  {% if ov.ranked|length <= 8 %}
+  <h4>Carbon per dollar spent, every route</h4>
+  <div class="table-scroll">
+    <table class="grid">
+      <thead><tr><th>Route</th><th>Mode</th><th class="num">kg CO2e per $</th></tr></thead>
+      <tbody>
+      {% for row in ov.ranked %}
+        <tr><td>{{ row.name }}</td><td>{{ row.mode }}</td><td class="num">{{ "%.2f"|format(row.kg_per_dollar) }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="source">
+    A high figure is a route where the money spent buys an unusual amount of
+    carbon, which is not the same as an expensive route.{% if sea_listed %}
+    Sea lands near 1.00 because it costs about $0.008 and emits about 0.008 kg
+    a tonne-kilometre, a coincidence of the two factors.{% endif %}
+  </p>
+  {% else %}
   <div class="split-2">
     <div>
       <h4>Most carbon per dollar spent</h4>
@@ -224,12 +136,10 @@
         </table>
       </div>
       <p class="source">
-        A high figure here is a route where the money you spend buys an unusual
-        amount of damage. It is not the same as an expensive route, and the two
-        lists rarely match. Sea routes tend to land near 1.00 for a dull
-        reason. Sea happens to cost about $0.008 a tonne-kilometre and emit
-        about 0.008 kg. The ratio comes out at one. It is a coincidence of the
-        two factors, not a calculation going wrong.
+        A high figure is a route where the money spent buys an unusual amount
+        of carbon, which is not the same as an expensive route.{% if sea_listed %}
+        Sea lands near 1.00 because it costs about $0.008 and emits about
+        0.008 kg a tonne-kilometre, a coincidence of the two factors.{% endif %}
       </p>
     </div>
     <div>
@@ -245,19 +155,19 @@
         </table>
       </div>
       <p class="source">
-        These are the routes where spending more would do least harm, which is
-        the other half of the same question and the one nobody asks.
+        The routes where spending more would do least harm.
       </p>
     </div>
   </div>
+  {% endif %}
 </section>
 
 <section class="panel prose" id="concentration">
   <h3>How concentrated the damage is</h3>
+  {% if stats.lane_count >= 4 %}
   <p class="sub">
-    A curve hugging the diagonal means every route costs about the same and
-    there is no shortcut. A curve pushed into the corner means a few routes
-    carry nearly all of it, and a handful of decisions move the total.
+    A curve on the diagonal means every route costs about the same. A curve
+    pushed into the corner means a few routes carry nearly all of it.
   </p>
 
   <div class="chart-wrap">
@@ -276,12 +186,13 @@
     <span><i class="swatch carbon-swatch"></i>Carbon</span>
     <span><i class="swatch even-swatch"></i>Perfectly even</span>
   </p>
+  {% endif %}
 
   <p class="stat-read">
     {{ c.cost_pareto.lanes }} of your {{ stats.lane_count }} routes
-    ({{ "{:.0%}".format(c.cost_pareto.share_of_lanes) }}) carry
+    ({{ "{:.0%}".format(c.cost_pareto.share_of_lanes) }}) carr{{ "ies" if c.cost_pareto.lanes == 1 else "y" }}
     {{ "{:.0%}".format(c.cost_pareto.share_of_total) }} of the cost.
-    On carbon it is {{ c.co2e_pareto.lanes }} routes for
+    On carbon it is {{ c.co2e_pareto.lanes }} route{{ "s" if c.co2e_pareto.lanes != 1 }} for
     {{ "{:.0%}".format(c.co2e_pareto.share_of_total) }}.
     That is the practical answer to how long the fix list needs to be.
   </p>
@@ -310,7 +221,9 @@
     </table>
   </div>
 </section>
+{% endif %}
 
+{% if un.baseline %}
 <section class="panel prose" id="uncertainty">
   <h3>How wrong the recoverable figure could be</h3>
   <p class="sub">
@@ -398,6 +311,7 @@
   </p>
   {% endif %}
 </section>
+{% endif %}
 
 <section class="panel prose" id="outliers">
   <h3>Routes priced unlike the rest</h3>
@@ -412,17 +326,14 @@
 
   {% if not stats.outliers.cost and not stats.outliers.co2e %}
   <p class="stat-read">
-    Nothing in this network crosses the threshold, on either measure. That is
-    a result rather than an empty table: every route is priced and emitting in
-    line with the rest once size is taken out, so there is no single odd
-    contract or mispriced lane hiding in here. The savings are in the mode
-    choices, which is where the rest of the tool is already looking.
-  </p>
-  <p class="source">
-    The medians it was measured against: ${{ "%.2f"|format(stats.outliers.cost_median) }}
-    per tonne-kilometre on cost and
-    {{ "%.3f"|format(stats.outliers.co2e_median) }} kg CO2e per tonne-kilometre
-    on carbon.
+    {% if stats.outliers.cost_median is defined %}
+    No route crosses the threshold on either measure: once size is taken out,
+    every route is priced and emits in line with the rest. The medians were
+    ${{ "%.2f"|format(stats.outliers.cost_median) }} and
+    {{ "%.3f"|format(stats.outliers.co2e_median) }} kg CO2e per tonne-kilometre.
+    {% else %}
+    With fewer than three routes there is nothing to compare a route against.
+    {% endif %}
   </p>
   {% endif %}
 
@@ -671,13 +582,11 @@
     </table>
   </div>
 
+  {% if stats.modes|length > 1 %}
   <p class="caveat">
-    <strong>A mode carrying a small share of tonne-kilometres and a large
-    share of carbon is the whole thesis in one row.</strong> Read the two
-    share columns against each other before you read the rates. A mode moving
-    a few percent of the weight-distance and a third of the emissions is where
-    the argument is. That is the line to take to whoever signs off the freight
-    budget.
+    <strong>Read the two share columns against each other.</strong> A mode
+    carrying a small share of tonne-kilometres and a large share of carbon is
+    where a mode change pays most.
   </p>
+  {% endif %}
 </section>
-</details>

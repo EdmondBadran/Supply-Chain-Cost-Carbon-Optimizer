@@ -1,39 +1,41 @@
 {% extends "base.html" %}
 
-{% block title %}Your data{% endblock %}
+{% block title %}{% if report %}Your analysis is ready{% else %}Upload your shipping data{% endif %}{% endblock %}
+{% block main_class %}page page-upload{% endblock %}
+
+{% from "parts/_ui.html" import icon with context %}
 
 {% block content %}
 
 {#
-  Upload first, because a visitor's own file is what they came for. The two
-  samples sit underneath as a glimpse, one line each, for anybody not ready
-  to share a file yet.
+  The upload answers five questions before anyone has to ask them: what file,
+  which columns, what happens next, whether the file is kept, and what happens
+  if something is missing. After a successful upload the page becomes the
+  result of it, with one way forward.
 #}
 
-{% if error %}
-<div class="notice error">{{ error }}</div>
-{% endif %}
-
 {% if report %}
-<div class="notice ok">
-  {{ "{:,}".format(report.orders_loaded) }} of
-  {{ "{:,}".format(report.rows_in_file) }}
-  order{{ "s" if report.rows_in_file != 1 }} processed into
-  {{ report.edges }} route{{ "s" if report.edges != 1 }}.
-  <a href="{{ url_for('report_page') }}">Read the report</a>
-</div>
-{% set ingest = report %}
-{% set open_issues = True %}
-<div class="upload-check">{% include "parts/data_check.html" %}</div>
-{% endif %}
+<section class="ready" aria-labelledby="ready-title">
+  <p class="ready-status">{{ icon("check") }}Upload complete</p>
+  <h1 id="ready-title">Your analysis is ready</h1>
+  <p class="lede">
+    {{ "{:,}".format(report.orders_loaded) }} of {{ "{:,}".format(report.rows_in_file) }}
+    order{{ "s" if report.rows_in_file != 1 }} were included and grouped into
+    {{ report.edges }} route{{ "s" if report.edges != 1 }}.{% if report.rows_skipped %}
+    {{ "{:,}".format(report.rows_skipped) }} could not be used; they are listed below.{% endif %}
+  </p>
+  <a class="btn btn-primary btn-large" href="{{ url_for('report_page') }}">See your results{{ icon("arrow-right") }}</a>
+  {% set ingest = report %}
+  {% set open_issues = True %}
+  <div class="upload-check">{% include "parts/data_check.html" %}</div>
+</section>
+{% else %}
 
-<section class="data-head">
-  <p class="eyebrow">Your data</p>
-  <h1>Upload your orders</h1>
-  <p class="sub">
-    A CSV export of a year of order lines is all it needs. Rows that cannot be
-    read are listed by line number and the rest still loads.
-    <a href="{{ url_for('privacy') }}">Nothing you upload is stored.</a>
+<section class="upload-head" aria-labelledby="upload-title">
+  <h1 id="upload-title">Upload your shipping orders</h1>
+  <p class="lede">
+    Upload a CSV of completed shipping orders. We need where each shipment
+    started, where it ended, its weight, and how it travelled.
   </p>
 </section>
 
@@ -41,112 +43,158 @@
 <section class="loaded-bar" aria-label="Loaded right now">
   <p class="loaded-what">
     <span class="loaded-label">Loaded now</span>
-    {% if loaded_sample %}{{ samples[loaded_sample].label }}, sample data{% else %}Your own file{% endif %}
+    {% if loaded_sample %}{{ samples[loaded_sample].label }} (example data){% else %}Your own file{% endif %}
   </p>
   <p class="loaded-fact"><span>Orders</span><strong>{{ "{:,}".format(summary.orders) }}</strong></p>
   <p class="loaded-fact"><span>Routes</span><strong>{{ summary.edges }}</strong></p>
-  <p class="loaded-fact"><span>Shipped</span><strong>{{ "{:,.0f}".format(summary.weight_kg) }} kg</strong></p>
   <div class="loaded-actions">
-    <a class="btn btn-small" href="{{ url_for('report_page') }}">Read the report</a>
-    <a class="btn btn-small btn-quiet" href="{{ url_for('findings_csv') }}">Download CSV</a>
+    <a class="btn btn-secondary btn-small" href="{{ url_for('report_page') }}">See results</a>
     <form method="post" action="{{ url_for('clear') }}">
-      <button class="btn btn-small btn-quiet" type="submit">Clear this data</button>
+      <button class="btn btn-ghost btn-small" type="submit">Clear this data</button>
     </form>
   </div>
 </section>
 {% endif %}
 
-<section class="panel upload-panel">
-  <form method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data">
-    <label for="orders">Orders file, required</label>
-    <input id="orders" type="file" name="orders" accept=".csv" required>
+{% if error %}
+<div class="alert alert-error" role="alert">
+  {{ icon("alert") }}
+  <div>
+    <p class="alert-title">{{ error.title }}</p>
+    <p>{{ error.advice }}</p>
+    {% if error.missing %}
+    <ul class="alert-list">
+      {% for name, meaning in error.missing %}
+      <li><code>{{ name }}</code>{% if meaning %}: {{ meaning|lower }}{% endif %}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <p class="alert-detail">Details: {{ error.detail }}</p>
+  </div>
+</div>
+{% endif %}
 
-    <p class="upload-needs">
-      <span class="upload-needs-label">Five columns are enough</span>
-      <code>origin_name</code> <code>origin_city</code> <code>dest_city</code>
-      <code>weight_kg</code> <code>mode</code>
-    </p>
+<div class="upload-layout">
+  <form class="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" data-upload>
+    <label class="dropzone" for="orders" data-dropzone>
+      <span class="dropzone-icon">{{ icon("upload") }}</span>
+      <span class="dropzone-title" data-drop-title>Drop your orders CSV here, or <span class="dropzone-browse">choose a file</span></span>
+      <span class="dropzone-hint" data-drop-hint>CSV only, up to 32 MB, one row per order</span>
+      <input id="orders" class="dropzone-input" type="file" name="orders" accept=".csv,text/csv" required>
+    </label>
+    <p class="field-error" data-drop-error role="alert" hidden></p>
 
-    <details class="upload-more">
-      <summary>Add a warehouse or supplier file</summary>
-      <label for="warehouses">Warehouse costs, optional</label>
-      <input id="warehouses" type="file" name="warehouses" accept=".csv">
-
-      <label for="suppliers">Suppliers, optional</label>
-      <input id="suppliers" type="file" name="suppliers" accept=".csv">
+    <details class="disclosure optional">
+      <summary>
+        <span>Optional details</span>
+        <span class="disclosure-hint">Warehouse and supplier files</span>
+      </summary>
+      <div class="disclosure-body">
+        <p class="disclosure-lede">
+          Add these and the analysis covers inbound freight and warehouse
+          energy too. Without them it works from your orders alone.
+        </p>
+        <label class="field" for="warehouses">
+          <span class="field-label">Warehouse costs and energy</span>
+          <span class="field-hint">Needs <code>name</code>. Optional: <code>storage_cost_annual</code>, <code>energy_kwh_annual</code>, <code>grid_intensity</code>, <code>capacity_kg</code>.</span>
+          <input id="warehouses" type="file" name="warehouses" accept=".csv,text/csv">
+        </label>
+        <label class="field" for="suppliers">
+          <span class="field-label">Suppliers</span>
+          <span class="field-hint">Needs <code>name</code>, <code>city</code>, <code>supplies</code> (the warehouse it feeds), <code>mode</code> and <code>annual_weight_kg</code>. Optional: <code>country</code>, <code>shipments_per_year</code>, <code>annual_cost</code>, <code>lead_time_days</code>, <code>min_order_qty</code>, <code>on_time_rate</code>.</span>
+          <input id="suppliers" type="file" name="suppliers" accept=".csv,text/csv">
+        </label>
+      </div>
     </details>
 
-    <button class="btn btn-strong upload-go" type="submit">Upload and analyse</button>
+    <button class="btn btn-primary btn-large upload-go" type="submit" data-upload-submit>Analyze my shipping data</button>
+    <p class="upload-privacy">
+      {{ icon("lock") }}
+      <span>Your file is used to create this analysis. It is not stored, and the results are cleared after {{ idle_hours }} hours without activity. <a href="{{ url_for('privacy') }}">What happens to your file</a></span>
+    </p>
   </form>
 
-  <details class="format">
-    <summary>Which columns each file needs</summary>
-    <p>
-      <strong>Orders, required:</strong> <code>origin_name</code>,
-      <code>origin_city</code>, <code>dest_city</code>, <code>weight_kg</code>,
-      <code>mode</code>. Optional: <code>order_ref</code> (or <code>order_id</code>),
-      <code>order_date</code>, <code>customer_id</code>,
-      <code>origin_country</code>, <code>dest_country</code>,
-      <code>units</code>, <code>product_category</code>,
-      <code>order_value</code>, <code>returned</code>. Add
-      <code>origin_lat</code> / <code>origin_lon</code> /
-      <code>dest_lat</code> / <code>dest_lon</code> for anywhere too small for
-      the city lookup.
+  <aside class="upload-guide" aria-labelledby="guide-title">
+    <h2 id="guide-title">What your file needs</h2>
+    <p class="guide-lede">Five columns, named like this. Extra columns are fine.</p>
+    <div class="table-scroll">
+      <table class="grid fields">
+        <thead><tr><th>Column</th><th>What it means</th><th>Example</th></tr></thead>
+        <tbody>
+          {% for name, meaning, example in required_fields %}
+          <tr><td><code>{{ name }}</code></td><td>{{ meaning }}</td><td class="fields-example">{{ example }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <p class="guide-actions">
+      <a class="btn btn-secondary btn-small" href="{{ url_for('example_orders') }}" download>{{ icon("download") }}Download an example CSV</a>
     </p>
-    <p>
-      <strong>Warehouses, optional:</strong> <code>name</code> plus
-      <code>storage_cost_annual</code>, <code>energy_kwh_annual</code>,
-      <code>grid_intensity</code> and <code>capacity_kg</code>. Give a site a
-      capacity and closing its neighbour is tested against what it can really
-      hold. Leave it out and an assumption stands in instead, which the result
-      tells you it has used.
-    </p>
-    <p>
-      <strong>Suppliers, optional:</strong> <code>name</code>,
-      <code>city</code>, <code>supplies</code> (the warehouse it feeds),
-      <code>mode</code> and <code>annual_weight_kg</code>, plus
-      <code>country</code>, <code>shipments_per_year</code>,
-      <code>annual_cost</code>, <code>lead_time_days</code>,
-      <code>min_order_qty</code> and <code>on_time_rate</code>. Add it and the
-      chain runs end to end instead of starting at your warehouses.
-    </p>
-    <p>
-      Transport modes are <code>road</code>, <code>rail</code>,
-      <code>sea</code> and <code>air</code>. Aliases like truck, ground, ship
-      and plane are read as the right mode. City names can be spelled properly:
-      Malmö and Jönköping resolve the same as Malmoe and Joenkoeping.
-    </p>
-  </details>
-</section>
 
-<section class="sample-strip" aria-labelledby="samples-title">
-  <h2 id="samples-title">No file to hand? Try a sample</h2>
-  <p class="sub">
-    Two example companies with problems built into their data. Loading one
-    runs the full analysis on it.
-  </p>
-  <p class="sample-note">
-    <span class="sample-note-tag">Sample data</span>
-    <span>Neither company is real. Their data is generated to follow realistic patterns.</span>
-  </p>
+    <details class="disclosure disclosure-inline">
+      <summary>Optional order columns</summary>
+      <div class="disclosure-body">
+        <p class="guide-text">
+          <code>order_ref</code> (or <code>order_id</code>), <code>order_date</code>,
+          <code>customer_id</code>, <code>origin_country</code>, <code>dest_country</code>,
+          <code>units</code>, <code>product_category</code>, <code>order_value</code>
+          and <code>returned</code>. A country makes each city unambiguous. For a
+          place too small for the city lookup, add <code>origin_lat</code>,
+          <code>origin_lon</code>, <code>dest_lat</code> and <code>dest_lon</code>.
+        </p>
+        <p class="guide-text">
+          Truck, ground, ship and plane are read as road, road, sea and air.
+          Accented city names work either way: Malmö and Malmoe are the same place.
+        </p>
+      </div>
+    </details>
 
+    <h3>What happens next</h3>
+    <ol class="next-steps">
+      <li>We check every row and tell you anything we could not read.</li>
+      <li>Orders on the same route are grouped, and each route is priced on realistic alternatives.</li>
+      <li>You get a ranked list of changes, usually within a few seconds.</li>
+    </ol>
+
+    <h3>What if a column is missing?</h3>
+    <p class="guide-text">
+      We tell you which column is missing and what it should contain, and
+      nothing is analyzed until it is there. Rows we cannot read are listed by
+      line number, and the rest of the file still loads.
+    </p>
+  </aside>
+</div>
+
+<section class="samples" aria-labelledby="samples-title">
+  <h2 id="samples-title">No file to hand? Explore an example</h2>
+  <p class="samples-lede">
+    Two invented companies with realistic shipping patterns. Choosing one runs
+    the full analysis on it.
+  </p>
   <ul class="sample-list">
     {% for key, spec in samples.items() %}
     {% set fact = facts[key] %}
     <li class="sample-item{{ ' is-loaded' if key == loaded_sample }}">
-      <p class="sample-item-text">
+      <div class="sample-item-text">
         <strong>{{ spec.label }}</strong>
-        <span>{{ "{:,}".format(fact.orders) }} orders &middot; {{ fact.routes }} routes &middot; {{ fact.problems }} opportunit{{ "ies" if fact.problems != 1 else "y" }}</span>
-      </p>
+        <span>{{ spec.blurb }}</span>
+        <span class="sample-facts">{{ "{:,}".format(fact.orders) }} orders &middot; {{ fact.routes }} routes &middot; {{ fact.problems }} change{{ "s" if fact.problems != 1 }} found</span>
+      </div>
       <form method="post" action="{{ url_for('sample') }}">
         <input type="hidden" name="sample" value="{{ key }}">
-        <button class="btn btn-small btn-quiet" type="submit"{{ ' disabled' if key == loaded_sample }}>
-          {{ "Loaded now" if key == loaded_sample else "Try this sample" }}
+        <button class="btn btn-secondary btn-small" type="submit"{{ ' disabled' if key == loaded_sample }}>
+          {{ "Loaded now" if key == loaded_sample else "Explore this example" }}
         </button>
       </form>
     </li>
     {% endfor %}
   </ul>
+  <p class="sample-foot">Neither company is real. Their data is generated to follow realistic patterns.</p>
 </section>
+{% endif %}
 
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='upload.js') }}" defer></script>
 {% endblock %}

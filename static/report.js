@@ -57,6 +57,29 @@ if (rail.length && steps.length) {
     update();
 }
 
+// A link to something folded inside a disclosure (the stage editor after a
+// save, the data check, a section of the statistics) opens every disclosure
+// around it on the way, so the reader lands on the thing rather than on a
+// closed heading.
+const reveal = (hash) => {
+    if (!hash || hash === "#") return;
+    let target;
+    try {
+        target = document.querySelector(hash);
+    } catch {
+        return;
+    }
+    for (let node = target && target.parentElement; node; node = node.parentElement) {
+        if (node.tagName === "DETAILS") node.open = true;
+    }
+};
+
+document.addEventListener("click", (event) => {
+    const link = event.target.closest('a[href^="#"]');
+    if (link) reveal(link.getAttribute("href"));
+});
+reveal(location.hash);
+
 /* Landing on the right step, and staying there.
  *
  * Three separate things used to move the page out from under a link to a

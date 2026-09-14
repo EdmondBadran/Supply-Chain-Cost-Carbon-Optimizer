@@ -3,18 +3,53 @@
 {% block title %}How it works{% endblock %}
 
 {% from "parts/how_it_works.html" import how_it_works with context %}
+{% from "parts/_ui.html" import pct, icon with context %}
 
 {% block content %}
 
-<section class="hiw-head">
-  <p class="eyebrow">How it works</p>
-  <h1>How Overlap works</h1>
-  <p class="sub">
+<section class="page-head" aria-labelledby="hiw-title">
+  <h1 id="hiw-title">How Overlap works</h1>
+  <p class="lede">
     Two parts: what it works out for every route, and how it decides which
-    changes to recommend.
+    changes to recommend. The terms used in your results are explained below.
   </p>
 </section>
 
 {{ how_it_works() }}
+
+<section class="glossary" aria-labelledby="glossary-title">
+  <h2 id="glossary-title">Terms used in your results</h2>
+  <dl>
+    <div>
+      <dt>CO₂e</dt>
+      <dd>Carbon dioxide equivalent. Every greenhouse gas is counted as the amount of CO₂ with the same warming effect, so emissions can be added up.</dd>
+    </div>
+    <div>
+      <dt>Route</dt>
+      <dd>All the orders that travel between the same two places by the same transport mode, added up over the file.</dd>
+    </div>
+    <div>
+      <dt>Estimated annual saving</dt>
+      <dd>What a route costs or emits today, minus what it would on the proposed mode, treating the file as one year of orders. A planning estimate, not a quote.</dd>
+    </div>
+    <div>
+      <dt>Re-runs, or stress test</dt>
+      <dd>Each route change is worked out again {{ confidence_checks }} times with the cost and emission rates varied up to {{ pct(factor_spread) }} either way, to see whether it still cuts both.</dd>
+    </div>
+    <div>
+      <dt>Confidence</dt>
+      <dd>High: the change held up in at least {{ pct(confidence_high) }} of re-runs. Moderate: at least {{ pct(confidence_moderate) }}. Low: fewer. Not stress-tested: a change that is not a transport mode switch, which says what its figure depends on.</dd>
+    </div>
+    <div>
+      <dt>Recommended now, worth reviewing, needs more data</dt>
+      <dd>How ready a change is to act on. Recommended now means high confidence. Worth reviewing means moderate confidence, or worked out from your data without a stress test. Needs more data means low confidence, or a figure that depends on something your file does not contain.</dd>
+    </div>
+  </dl>
+</section>
+
+<section class="closing closing-compact">
+  <h2>Try it on your own orders</h2>
+  <a class="btn btn-primary btn-large" href="{{ url_for('start_upload') }}">{{ icon("upload") }}Analyze my shipping data</a>
+</section>
 
 {% endblock %}

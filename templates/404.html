@@ -2,17 +2,19 @@
 
 {% block title %}Page not found{% endblock %}
 
+{% from "parts/_ui.html" import icon %}
+
 {% block content %}
-<section class="hero">
-  <div>
-    <h1>That page does not exist<span class="split">but the network does</span></h1>
-    <p>
-      Nothing lives at that address. Go back to the start to load some data or
-      open the report.
-    </p>
-    <form method="get" action="{{ url_for('index') }}">
-      <button class="primary" type="submit">Back to the start</button>
-    </form>
+<section class="page-head notfound" aria-labelledby="notfound-title">
+  <p class="hero-kicker">Error 404</p>
+  <h1 id="notfound-title">That page does not exist</h1>
+  <p class="lede">
+    Nothing lives at that address. Your results, if you have loaded any, are
+    still where you left them.
+  </p>
+  <div class="hero-actions">
+    <a class="btn btn-primary btn-large" href="{{ url_for('report_page') }}">Go to results{{ icon("arrow-right") }}</a>
+    <a class="btn btn-secondary btn-large" href="{{ url_for('index') }}">Back to the start</a>
   </div>
 </section>
 {% endblock %}

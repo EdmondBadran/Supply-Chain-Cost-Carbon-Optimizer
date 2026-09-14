@@ -17,36 +17,42 @@ and wasted carbon overlap.
 
 ## How it reads
 
-**The report** opens on the short answer: how many opportunities there are,
-what they are worth in money and in carbon, how sure to be, the top three as
-cards, and one line saying whether every order in the file was used.
+**The front page** says what the tool does before it shows anything: find
+shipping changes that cut cost and carbon, upload a year of orders or explore
+an example, three steps, and one example result.
 
-Below that come four parts, each opening on the one question it answers.
-Your network today is the baseline: what the chain costs and emits, drawn as
-a river whose band thickens wherever cost is added. What to change is the
-ranked list, and each line opens to what to do, what it is worth, what to
-check and the calculation. Each opportunity is described there and nowhere
-else. On the map shows where the routes run, with the what-if for closing or
-opening a warehouse folded away underneath. How sure to be gives the plain
-answer first, then the data check, the limits, and the factors and formulas,
-with the statistics one click further.
+**The upload** asks for five columns and says what each one means, with an
+example file to copy. Optional warehouse and supplier files sit behind a
+disclosure. A file that cannot be read gets a plain explanation of what to
+fix, with the loader's own message underneath.
 
-**Investigate and test** happen in a side panel that leaves the report where
-it was. Investigate shows current against proposed, why the route was
-flagged, the warnings, the factors and the full arithmetic. Test scenario
-changes the mode or the serving warehouse and recalculates on the server,
-clearly marked as a scenario, and a few alternatives can be pinned side by
-side. The map follows whichever route is open.
+**The results** open on the decision: how many changes are worth reviewing,
+what they could save a year in cost and CO2e, one button into the top change,
+and three cards. A short strip says how much of the file was used, how
+confident to be, and that these are planning estimates. A row of section
+links follows the reader down the page.
 
-**Exports** are a two page executive summary, the full report as a PDF laid
-out for presenting (a cover, the short answer, then a page per part), and a
-CSV with one row per opportunity, plain column names with units, and current
-and proposed figures side by side.
+**Recommendations** lists every change as a card, grouped by how ready it is
+to act on. Recommended now means the change held up when every cost and
+emission rate was redrawn; worth reviewing and needs more data say why not.
+Each card states what would change, the estimated annual saving, why it is
+recommended and how sure to be, and opens a decision view: today against
+proposed, what to check before acting, Mark for review, Export this
+recommendation as a one-page brief, and, folded away, the full calculation
+and a what-if that recalculates on the server.
 
-**How it works** is two boxes: what the tool works out, and how it decides
-what to recommend. The full method, with every formula and source, is a
-document sent on request. The factors, formulas and assumptions behind a
-report are also in its fourth part, so no number has to be taken on faith.
+**Network** is the baseline and the map, which follows whichever change is
+open and labels it before and after. The chain picture, effort ratings and a
+what-if for closing or opening a warehouse are one click down.
+
+**Data & assumptions** answers four questions in a sentence each: how much of
+the data was usable, how reliable the changes are, which assumptions matter,
+and what the analysis leaves out. Factors, formulas and the full statistics
+are behind their own disclosures.
+
+**Exports** are an executive summary for leadership, an Excel workbook for
+analysts with every change, route, check and assumption, and a CSV for other
+systems. The whole page also prints as a designed PDF.
 
 ## What it does
 
@@ -91,7 +97,8 @@ follow realistic patterns, and every page showing their figures says so.
     /                 the landing page, with live results on the loaded data
     /report           the report: the short answer, four parts, route panel, exports
     /report/summary   the executive summary, ready to print
-    /findings.csv     every opportunity as a spreadsheet
+    /findings.xlsx    the findings as a formatted workbook
+    /findings.csv     every opportunity as plain data
     /method           how it works, in two boxes
     /data             upload your own CSV, or try a sample
     /privacy          what happens to a file you upload
@@ -233,7 +240,7 @@ No build step, no frontend framework, no API keys. It runs offline.
 ## Layout
 
 ```
-app.py              routes, JSON endpoints, the CSV and the summary
+app.py              routes, JSON endpoints and the summary
 optimizer/
   geo.py            city lookup and great-circle distance
   distance.py       distance by transport mode
@@ -245,13 +252,15 @@ optimizer/
   chain.py          the value chain stages and their problem checks
   diagnosis.py      the written report: diagnosis, method and plan
   stats.py          concentration, correlation and the uncertainty band
+  exports.py        the workbook and the CSV
+  xlsx.py           a small .xlsx writer on the standard library
   store.py          one in-memory workspace per visitor
 static/
   dashboard.js      the map and the ranked routes
   workspace.js      the route panel, scenarios and comparison
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              161 tests: loading, thresholds, statistics and the routes
+tests/              180 tests: loading, thresholds, statistics, exports and the routes
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -297,7 +306,12 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-161 of them, stdlib unittest, no test dependency.
+180 of them, stdlib unittest, no test dependency.
+
+`tests/test_exports.py` covers the workbook writer for the things that make
+Excel refuse a file without saying why: a control character in an uploaded
+name, a column past Z, a formula written without its value. It also checks
+that uploaded text cannot run as a formula when the CSV is opened.
 
 `tests/test_ingest.py` and `tests/test_recommendations.py` exist because
 routes from different origins into one city were once merged into one. They

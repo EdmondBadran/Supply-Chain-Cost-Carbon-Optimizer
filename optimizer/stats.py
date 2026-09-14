@@ -306,6 +306,16 @@ def overlap(lanes):
             }
             for lane, ratio in intensity[-3:][::-1]
         ],
+        # On a network small enough that the two lists above would share
+        # routes, the page shows this one instead: every route, once.
+        "ranked": [
+            {
+                "name": f"{lane['origin_name']} to {lane['dest_name']}",
+                "mode": lane["mode"],
+                "kg_per_dollar": ratio,
+            }
+            for lane, ratio in intensity
+        ],
     }
 
 

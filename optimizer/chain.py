@@ -115,6 +115,25 @@ def build(conn):
     return ordered
 
 
+def pictured(stages):
+    """The stages worth drawing for the data that is loaded.
+
+    A built-in stage the file gives nothing to is left out of the picture
+    rather than drawn as a zero: without a supplier file there are no
+    suppliers and no inbound freight, and a file with no returns has no
+    returns stage. A stage somebody added stays, because they put it there.
+    """
+    return [
+        stage
+        for stage in stages
+        if not stage.get("builtin", True)
+        or stage["headline"]
+        or stage["cost"]
+        or stage["co2e"]
+        or stage["problem_count"]
+    ]
+
+
 def _custom_stage(key):
     """A stage somebody added themselves.
 

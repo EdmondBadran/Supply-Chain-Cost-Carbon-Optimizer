@@ -1,189 +1,130 @@
 {% extends "base.html" %}
 
-{% block title %}Find the routes where cost and carbon can both be cut{% endblock %}
+{% block title %}Find shipping changes that cut cost and carbon{% endblock %}
+{% block main_class %}page page-landing{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import rec_card, usd, sample_note %}
-{% from "parts/how_it_works.html" import how_it_works with context %}
+{% from "parts/_ui.html" import usd, icon, rec_headline, group_badge, sample_note, pct with context %}
 
 {% block content %}
 
-<section class="lp-hero">
-  <h1>
-    Find the routes where you can
-    <span class="lp-accent">cut <span class="cost-ink">cost</span> and <span class="carbon-ink">carbon</span> at the same time.</span>
-  </h1>
-  <p class="lp-lede">
-    Overlap reads a year of shipping orders and ranks the routes where
-    changing transport mode could reduce both cost and CO2e.
+{#
+  Built to be understood in ten seconds: what it does, what to upload, what
+  comes back. The value comes first and the example result second, so nobody
+  has to decode a report before knowing why they would want one.
+#}
+
+<section class="hero" aria-labelledby="hero-title">
+  <p class="hero-kicker">For operations, logistics and sustainability teams</p>
+  <h1 id="hero-title">Find shipping changes that cut cost and carbon.</h1>
+  <p class="hero-lede">
+    Upload a year of shipping orders. We'll identify realistic route changes
+    and estimate what each could save in cost and CO₂e.
   </p>
-  <div class="lp-actions">
-    <a class="lp-primary" href="{{ url_for('start_upload') }}">
-      Upload my orders
-    </a>
-    <a class="lp-secondary" href="{{ url_for('report_page') }}">
-      See a sample report first
-    </a>
+  <div class="hero-actions">
+    <a class="btn btn-primary btn-large" href="{{ url_for('start_upload') }}">{{ icon("upload") }}Analyze my shipping data</a>
+    {% if using_sample %}
+    <a class="btn btn-secondary btn-large" href="{{ url_for('report_page') }}">Explore an example</a>
+    {% else %}
+    <form method="post" action="{{ url_for('sample') }}">
+      <input type="hidden" name="sample" value="{{ default_sample }}">
+      <button class="btn btn-secondary btn-large" type="submit">Explore an example</button>
+    </form>
+    {% endif %}
   </div>
-  <p class="lp-note">
-    No sign up. Nothing you upload is stored.
-  </p>
+  <p class="hero-note">{{ icon("lock") }}No sign-up. Your file is used to create your analysis and is not stored.</p>
+</section>
+
+<section class="steps" aria-labelledby="steps-title">
+  <h2 id="steps-title" class="section-title">How it works</h2>
+  <ol class="steps-list">
+    <li>
+      <span class="step-num" aria-hidden="true">1</span>
+      <h3>Upload your orders</h3>
+      <p>A CSV of completed shipments: where each one started, where it ended, its weight and how it travelled.</p>
+    </li>
+    <li>
+      <span class="step-num" aria-hidden="true">2</span>
+      <h3>We find viable route changes</h3>
+      <p>Each route is priced on realistic alternatives, like sea instead of air on a long route. Only changes that cut both cost and CO₂e by at least {{ pct(flag_threshold) }} are kept.</p>
+    </li>
+    <li>
+      <span class="step-num" aria-hidden="true">3</span>
+      <h3>Review savings and export your plan</h3>
+      <p>See what each change could save a year, how sure to be and what to check, then share a summary or a workbook.</p>
+    </li>
+  </ol>
 </section>
 
 {% if report and report.problems %}
-<section class="lp-found" data-reveal>
-  <div class="lp-found-head">
-    <p class="eyebrow">{% if using_sample %}Live result on sample data{% else %}Live result on your data{% endif %}</p>
-    <h2>
-      {{ report.problems|length }} opportunities worth
-      <span class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</span>
-      and
-      <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO2e</span>
-      a year
-    </h2>
-    <p class="lp-found-sub">
-      Produced just now by the same engine your file would go through.
+{% set count = report.problems|length %}
+<section class="example" aria-labelledby="example-title">
+  <div class="example-intro">
+    <h2 id="example-title" class="section-title">{% if using_sample %}What you get back{% else %}Your latest results{% endif %}</h2>
+    <p>
+      {% if using_sample %}
+      A ranked list of changes, each with its estimated annual saving, how
+      confident to be and what to check first. This one is from an example
+      company.
+      {% else %}
+      The results from the file you uploaded, ranked by combined cost and
+      carbon impact.
+      {% endif %}
     </p>
     {% if using_sample %}{{ sample_note(subject) }}{% endif %}
   </div>
 
-  <div class="rec-grid">
-    {% for problem in report.problems[:3] %}
-    {{ rec_card(
-      problem,
-      loop.index,
-      with_actions=False,
-      link=(url_for('report_page') ~ '?investigate=' ~ problem.edge_id) if problem.route else url_for('report_page') ~ '#step-2'
-    ) }}
-    {% endfor %}
+  <div class="example-card">
+    <p class="example-headline">We found {{ count }} change{{ "s" if count != 1 }} worth reviewing</p>
+    <p class="example-figures">
+      An estimated <strong class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</strong>
+      and <strong class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO₂e</strong>
+      a year.
+    </p>
+    <ol class="example-list">
+      {% for problem in report.problems[:3] %}
+      <li>
+        <span class="example-rank" aria-hidden="true">{{ loop.index }}</span>
+        <span class="example-title">{{ rec_headline(problem) }}</span>
+        <span class="example-impact">
+          {% if problem.cost_at_stake %}Save {{ usd(problem.cost_at_stake) }}{% else %}No direct cost saving{% endif %}
+          {% if problem.co2e_at_stake and not problem.co2e_line %}and {{ co2e(problem.co2e_at_stake) }} CO₂e{% endif %} a year
+        </span>
+        {{ group_badge(groups.by_rank[loop.index]) }}
+      </li>
+      {% endfor %}
+    </ol>
+    <a class="btn btn-secondary" href="{{ url_for('report_page') }}">{% if using_sample %}See the full example{% else %}See your results{% endif %}{{ icon("arrow-right") }}</a>
   </div>
-
-  <p class="lp-found-more">
-    <a class="lp-primary" href="{{ url_for('report_page') }}">
-      Open the full report
-    </a>
-  </p>
 </section>
 {% endif %}
 
-<section class="lp-box" data-reveal>
-  <div class="lp-box-head">
-    <p class="eyebrow">How it works</p>
-    <h2>From a spreadsheet to a decision</h2>
-  </div>
-  {{ how_it_works(level=3) }}
-</section>
-
-<section class="lp-versus" data-reveal>
-  <h2>How this is different from what already exists</h2>
-  <p class="lp-versus-lede">
-    Most tools show what freight costs or what it emits, not both. Getting
-    both normally means a network modelling project. This screens a
-    spreadsheet you already have and ranks the routes worth a closer look.
-  </p>
-  <div class="lp-versus-grid">
-    <article>
-      <p class="lp-versus-who">Carbon reporting tools</p>
-      <p>Show what a route emits, not what it costs, so they cannot say which is worth fixing first.</p>
-    </article>
-    <article>
-      <p class="lp-versus-who">Freight spend analytics</p>
-      <p>Show what a route costs from real invoices, and leave carbon out.</p>
-    </article>
-    <article>
-      <p class="lp-versus-who">Network design software</p>
-      <p>Does both with an optimisation solver, but needs the data, setup and expertise of a full modelling project.</p>
-    </article>
-    <article class="lp-versus-us">
-      <p class="lp-versus-who">This</p>
-      <p>Screens a CSV export and ranks routes where cost and carbon can both be cut, in about a second.</p>
-    </article>
-  </div>
-
-  <figure class="lp-versus-table">
-    <table>
-      <thead>
-        <tr>
-          <th scope="col"></th>
-          <th scope="col">Shows cost</th>
-          <th scope="col">Shows carbon</th>
-          <th scope="col">Ranks routes by both</th>
-          <th scope="col">Time to that list</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <th scope="row">Carbon reporting tools</th>
-          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
-          <td class="lp-dim">Not applicable</td>
-        </tr>
-        <tr>
-          <th scope="row">Freight spend analytics</th>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
-          <td class="lp-no"><span aria-hidden="true">&#8722;</span><span class="visually-hidden">No</span></td>
-          <td class="lp-dim">Not applicable</td>
-        </tr>
-        <tr>
-          <th scope="row">Network design software</th>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-dim">Months</td>
-        </tr>
-        <tr class="lp-versus-us-row">
-          <th scope="row">This</th>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-yes"><span aria-hidden="true">&#10003;</span><span class="visually-hidden">Yes</span></td>
-          <td class="lp-yes">Seconds</td>
-        </tr>
-      </tbody>
-    </table>
-    <figcaption>
-      A screen, not an optimiser: it tells you which routes to look at, fast.
-    </figcaption>
-  </figure>
-</section>
-
-<section class="lp-trust" data-reveal>
-  <h2>Why you can check it</h2>
-  <ul class="lp-trust-grid">
+<section class="trust" aria-labelledby="trust-title">
+  <h2 id="trust-title" class="section-title">Why you can check the numbers</h2>
+  <ul class="trust-list">
     <li>
-      <strong>Published factors</strong>
-      <span>Emissions per tonne-km come from the DEFRA and GLEC ranges, the basis of most freight carbon reporting.</span>
+      <h3>Published emission factors</h3>
+      <p>CO₂e is estimated with DEFRA and GLEC factors per tonne-kilometre, the basis of most freight carbon reporting.</p>
     </li>
     <li>
-      <strong>Confidence on every change</strong>
-      <span>Every factor is redrawn thousands of times, and each recommendation says how often it still held.</span>
+      <h3>Route changes are stress-tested</h3>
+      <p>Each one is re-run {{ confidence_checks }} times with different cost and emission rates, and says how often it held up.</p>
     </li>
     <li>
-      <strong>Every calculation shown</strong>
-      <span>Open any route to see the arithmetic behind it. The report lists every factor with its source, and the full method is <a href="{{ url_for('method') }}">available on request</a>.</span>
+      <h3>Calculations you can open</h3>
+      <p>Every change shows its arithmetic, and every assumption is listed beside the results.</p>
     </li>
     <li>
-      <strong>Nothing lost, nothing kept</strong>
-      <span>Every row is either processed or listed with the reason it was not, and the file is dropped after the analysis. <a href="{{ url_for('privacy') }}">What happens to your file</a>.</span>
+      <h3>Nothing stored</h3>
+      <p>Your file is analyzed in memory and cleared after {{ idle_hours }} hours without activity. <a href="{{ url_for('privacy') }}">What happens to your file</a></p>
     </li>
   </ul>
 </section>
 
-<section class="lp-close" data-reveal>
-  <h2>Run it on your own orders</h2>
-  <p>
-    A CSV export of a year of orders is enough. Not ready to share one? Look
-    at a sample report first.
-  </p>
-  <div class="lp-actions">
-    <a class="lp-primary" href="{{ url_for('start_upload') }}">Upload my orders</a>
-    <a class="lp-secondary" href="{{ url_for('report_page') }}">See a sample report</a>
-  </div>
-  <p class="lp-built">
-    One runtime dependency, no build step, {{ "{:,}".format(34135) }} bundled
-    cities so it runs offline, and automated tests on the arithmetic.
-  </p>
+<section class="closing" aria-labelledby="closing-title">
+  <h2 id="closing-title">Ready to check your own shipping data?</h2>
+  <p>A CSV export of a year of completed orders is enough.</p>
+  <a class="btn btn-primary btn-large" href="{{ url_for('start_upload') }}">{{ icon("upload") }}Analyze my shipping data</a>
 </section>
 
 {% endblock %}

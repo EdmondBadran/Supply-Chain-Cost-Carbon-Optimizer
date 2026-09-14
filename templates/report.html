@@ -1,38 +1,38 @@
 {% extends "base.html" %}
 
-{% block title %}Cost and carbon opportunities{% endblock %}
+{% block title %}{% if report and report.problems %}{{ report.problems|length }} change{{ "s" if report.problems|length != 1 }} worth reviewing{% else %}Your results{% endif %}{% endblock %}
+{% block main_class %}page page-report{% endblock %}
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import rec_card, usd, usd_short, meter, sample_note %}
+{% from "parts/_ui.html" import usd, pct, meter, icon, sample_note, rec_detail, confidence_summary with context %}
 
 {% block content %}
 
 {#
-  One page in four parts, each answering one question, with the short answer
-  above them. Anything past that answer a reader might skip is folded away,
-  and every opportunity is described once, in part two, rather than again in
-  every part. The route panel investigates and tests any route without
-  losing the reader's place.
+  One page, in the order a decision is made. The overview says what was found
+  and what to do first. Recommendations groups every change by how ready it is
+  to act on, and each opens into a decision view. Network shows where the
+  routes run, Data & assumptions says how far to trust the figures, and Export
+  hands them on. A section with nothing to show for the data loaded is left
+  out rather than shown empty.
 #}
+
+{% macro group_phrase(key, n) -%}
+{%- if key == "now" -%}{{ n }} recommended now
+{%- elif key == "review" -%}{{ n }} worth reviewing
+{%- else -%}{{ n }} need{{ "s" if n == 1 }} more data
+{%- endif -%}
+{%- endmacro %}
 
 {% set problems = report.problems if report else [] %}
 {% set count = problems|length %}
-{% set steps = [
-  ("step-1", "Your network today", "What it costs and emits",
-   "What does the supply chain cost and emit today, and where?"),
-  ("step-2", "What to change", "{} opportunit{}, ranked".format(count, "y" if count == 1 else "ies"),
-   "Which changes cut cost and carbon together, and what is each one worth?"),
-  ("step-3", "On the map", "Where the routes run",
-   "Where do these routes run, and what if the network were shaped differently?"),
-  ("step-4", "How sure to be", "Confidence, data and sources",
-   "How far can these figures be trusted?"),
-] %}
+{% set ov = report.overview if report else None %}
+{% set sections = [("overview", "Overview")] %}
+{% if count %}{% set sections = sections + [("recommendations", "Recommendations")] %}{% endif %}
+{% set sections = sections + [("network", "Network"), ("data", "Data & assumptions"), ("export", "Export")] %}
 
-{#
-  Print only. The dark cover, and the footer line every printed page carries.
-  The subject and date are written into the page rule here because the
-  stylesheet has no way to know them.
-#}
+{# Print only: the running footer names the subject and date, which the
+   stylesheet has no way to know. #}
 <style media="print">
   @page report { @bottom-left { content: "Overlap, {{ subject }}, {{ generated }}"; } }
 </style>
@@ -44,251 +44,256 @@
   </div>
 
   <div class="pc-title">
-    <p class="pc-kicker">Supply chain screening &middot; Full analysis</p>
-    <h1>Where cost and carbon can be cut together</h1>
+    <p class="pc-kicker">Shipping cost and carbon review</p>
+    <h1>Shipping changes that cut cost and carbon</h1>
     <p class="pc-subject">{{ subject }} &middot; {{ generated }}</p>
     {% if using_sample %}{{ sample_note(subject) }}{% endif %}
   </div>
 
-  {% if report and problems %}
+  {% if report %}
   <div class="pc-headline">
-    <p class="pc-label">The short answer</p>
+    <p class="pc-label">What we found</p>
+    {% if count %}
     <p class="pc-figure">
-      {{ count }} opportunit{{ "ies" if count != 1 else "y" }} worth
-      <span class="cost-ink">{{ usd(report.overview.recoverable_cost) }}</span>
-      and <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO2e</span>
-      a year
+      {{ count }} change{{ "s" if count != 1 }} worth an estimated
+      <span class="cost-ink">{{ usd(ov.recoverable_cost) }}</span>
+      and <span class="carbon-ink">{{ co2e(ov.recoverable_co2e) }} CO₂e</span> a year
     </p>
+    {% else %}
+    <p class="pc-figure">No changes found that cut both cost and carbon</p>
+    {% endif %}
     <p class="pc-note">
-      Out of {{ report.overview.routes }} route{{ "s" if report.overview.routes != 1 }}
-      costing {{ usd(report.overview.cost) }} and emitting
-      {{ co2e(report.overview.co2e) }} CO2e a year, from
-      {{ "{:,}".format(summary.orders) }} orders.
+      From {{ "{:,}".format(summary.orders) }} orders on {{ ov.routes }}
+      route{{ "s" if ov.routes != 1 }} that cost {{ usd(ov.cost) }} and emit
+      {{ co2e(ov.co2e) }} CO₂e a year. Planning estimates, not quotes.
     </p>
   </div>
   {% endif %}
 
   <ol class="pc-contents">
-    <li><span class="pc-number">00</span><span class="pc-part">The short answer</span><span class="pc-blurb">The opportunities worth investigating</span></li>
-    {% for key, name, blurb, question in steps %}
-    <li><span class="pc-number">{{ "%02d"|format(loop.index) }}</span><span class="pc-part">{{ name }}</span><span class="pc-blurb">{{ blurb }}</span></li>
+    {% for key, label in sections if key != "export" %}
+    <li><span class="pc-number">{{ "%02d"|format(loop.index) }}</span><span class="pc-part">{{ label }}</span></li>
     {% endfor %}
   </ol>
 
   <p class="pc-foot">
     A screening estimate, not a network optimisation or a quote. Emission
-    factors from DEFRA and GLEC, distances from GeoNames with per-mode
-    screening multipliers. Nothing uploaded to produce this report was stored.
+    factors from DEFRA and GLEC, distances from GeoNames with an allowance for
+    each transport mode. Nothing uploaded to produce this report was stored.
     Questions go to Overlap's creator, {{ contact_email }}.
   </p>
 </header>
 
-{% if report %}
-<a class="oppbar" href="#overview" data-oppbar hidden>
-  <span class="oppbar-label">{{ count }} opportunit{{ "ies" if count != 1 else "y" }}</span>
-  <span class="cost-ink">{{ usd_short(report.overview.recoverable_cost) }}</span>
-  <span class="carbon-ink">{{ co2e(report.overview.recoverable_co2e) }} CO2e</span>
-  <span class="oppbar-back">Back to the short answer</span>
-</a>
-{% endif %}
-
 <div class="report-layout">
 
-  <nav class="rail" aria-label="Report sections">
+  <nav class="section-nav" aria-label="Report sections">
     <ol>
+      {% for key, label in sections %}
       <li>
-        <a href="#overview" data-rail="overview">
-          <span class="rail-number">00</span>
-          <span class="rail-text">
-            <span class="rail-name">The short answer</span>
-            <span class="rail-blurb">
-              {% if report %}{{ count }} opportunit{{ "ies" if count != 1 else "y" }} &middot; {{ usd_short(report.overview.recoverable_cost) }}{% else %}Nothing loaded{% endif %}
-            </span>
-          </span>
-        </a>
-      </li>
-      {% for key, name, blurb, question in steps %}
-      <li>
-        <a href="#{{ key }}" data-rail="{{ key }}">
-          <span class="rail-number">{{ "%02d"|format(loop.index) }}</span>
-          <span class="rail-text">
-            <span class="rail-name">{{ name }}</span>
-            <span class="rail-blurb">{{ blurb }}</span>
-          </span>
-        </a>
+        <a href="#{{ key }}" data-rail="{{ key }}">{{ label }}{% if key == "recommendations" %}<span class="section-count" aria-label="{{ count }} changes">{{ count }}</span>{% endif %}</a>
       </li>
       {% endfor %}
     </ol>
-    <p class="rail-foot">
-      <a href="{{ url_for('findings_csv') }}">Download CSV</a>
-      <a href="#export">Export report</a>
-      <a href="{{ url_for('method') }}">How it works</a>
-    </p>
   </nav>
 
   <div class="report-body">
 
+    {# ------------------------------------------------------------ Overview #}
     <section class="overview" id="overview" data-step="overview" aria-labelledby="overview-title">
-      <p class="eyebrow">
-        {% if using_sample %}Sample data{% else %}Your data{% endif %}
-        &middot; {{ subject }}
-        &middot; {{ "{:,}".format(summary.orders) }} orders
-        &middot; {{ summary.edges }} routes
+      <p class="context-line">
+        <span>{% if using_sample %}Example report{% else %}Your results{% endif %}</span>
+        <span>{{ subject }}</span>
+        {% if summary %}
+        <span>{{ "{:,}".format(summary.orders) }} order{{ "s" if summary.orders != 1 }} on {{ summary.edges }} route{{ "s" if summary.edges != 1 }}</span>
+        {% if summary.first_order and summary.last_order %}
+        <span>Orders dated {{ summary.first_order|nice_date }} to {{ summary.last_order|nice_date }}</span>
+        {% endif %}
+        {% endif %}
       </p>
-      {% if using_sample %}{{ sample_note(subject) }}{% endif %}
 
-      {% if report and problems %}
-      {% set ov = report.overview %}
-      {% set sure = report.confidence %}
-      <div class="overview-head">
-        <div class="overview-lead">
-          <p class="overview-kicker">The short answer</p>
-          <h1 id="overview-title">
-            {{ count }} opportunit{{ "ies" if count != 1 else "y" }} worth investigating
-          </h1>
-          <p class="overview-sub">
-            {{ ov.route_changes }} {{ "is a route" if ov.route_changes == 1 else "are route" }} mode
-            change{{ "s" if ov.route_changes != 1 }}, out of {{ ov.routes }} routes that cost
-            {{ usd(ov.cost) }} and emit {{ co2e(ov.co2e) }} CO2e a year.
-          </p>
-        </div>
-        <dl class="overview-figures">
-          <div>
-            <dt>Annual cost opportunity</dt>
-            <dd class="cost-ink">{{ usd(ov.recoverable_cost) }}</dd>
-            <span>{{ "{:.0%}".format(ov.cost_share) }} of chain cost</span>
-          </div>
-          <div>
-            <dt>Annual CO2e reduction</dt>
-            <dd class="carbon-ink">{{ co2e(ov.recoverable_co2e) }}</dd>
-            <span>{{ "{:.0%}".format(ov.co2e_share) }} of chain carbon</span>
-          </div>
-          <div>
-            <dt>Confidence</dt>
-            <dd class="overview-conf">{{ meter(sure.level) }}{{ (sure.level or "not tested")|title }}</dd>
-            <span>
-              {% if sure.tested %}weakest route change held in {{ "{:.0%}".format(sure.lowest) }} of simulations{% else %}no route changes to simulate{% endif %}
-            </span>
-          </div>
-        </dl>
+      {% if using_sample %}
+      <div class="example-banner">
+        {{ sample_note(subject) }}
+        <a class="btn-link" href="{{ url_for('start_upload') }}">Analyze your own data{{ icon("arrow-right") }}</a>
+      </div>
+      {% endif %}
+
+      {% if count %}
+      <h1 id="overview-title">We found {{ count }} change{{ "s" if count != 1 }} worth reviewing</h1>
+      <p class="overview-figure">
+        {{ "Together they" if count != 1 else "It" }} could save an estimated
+        <strong class="cost-ink">{{ usd(ov.recoverable_cost) }}</strong>
+        and <strong class="carbon-ink">{{ co2e(ov.recoverable_co2e) }} CO₂e</strong>
+        a year.
+      </p>
+      <p class="overview-lede">
+        {% if groups.all_cut_both %}
+        {{ "Each one reduces" if count != 1 else "It reduces" }} both cost and
+        emissions, based on the {{ "{:,}".format(summary.orders) }} orders in this file.
+        {% else %}
+        Each change shows what it saves in cost and in CO₂e, based on the
+        {{ "{:,}".format(summary.orders) }} orders in this file.
+        {% endif %}
+        These are planning estimates, not quotes.
+      </p>
+
+      <div class="overview-actions">
+        <button type="button" class="btn btn-primary btn-large" data-open-change="1">Review the top recommendation{{ icon("arrow-right") }}</button>
+        {% if count > 1 %}<a class="btn-link" href="#recommendations">See all {{ count }} changes</a>{% endif %}
       </div>
 
-      <div class="rec-grid">
-        {% for problem in problems[:3] %}
-        {{ rec_card(problem, loop.index) }}
-        {% endfor %}
+      <div class="summary-cards">
+        <article class="summary-card">
+          <h2 class="summary-label">Potential annual cost saving</h2>
+          <p class="summary-value cost-ink">{{ usd(ov.recoverable_cost) }}</p>
+          <p class="summary-unit">a year &middot; estimate</p>
+          <p class="summary-note">{{ pct(ov.cost_share) }} of the {{ usd(ov.cost) }} a year these orders cost to ship, store, pack and return.</p>
+        </article>
+        <article class="summary-card">
+          <h2 class="summary-label">Potential annual CO₂e reduction</h2>
+          <p class="summary-value carbon-ink">{{ co2e(ov.recoverable_co2e) }}</p>
+          <p class="summary-unit">CO₂e a year &middot; estimate</p>
+          <p class="summary-note">{{ pct(ov.co2e_share) }} of the {{ co2e(ov.co2e) }} CO₂e a year from shipping, storing, packing and returning them.</p>
+        </article>
+        <article class="summary-card">
+          <h2 class="summary-label">Recommended changes</h2>
+          <p class="summary-value">{{ count }}</p>
+          <p class="summary-unit">ranked by combined impact</p>
+          <ul class="summary-groups">
+            {% for group in groups.groups %}
+            <li><a href="#group-{{ group.key }}">{{ icon({"now": "check", "review": "search"}.get(group.key, "alert")) }}{{ group_phrase(group.key, group.ranks|length) }}</a></li>
+            {% endfor %}
+          </ul>
+        </article>
       </div>
       {% else %}
-      <h1 id="overview-title">No route changes cut both cost and carbon</h1>
-      <p class="overview-sub">
-        {% if report %}{{ report.overview.truth }}{% else %}Nothing is loaded yet.{% endif %}
+      <h1 id="overview-title">We found no changes that cut both cost and carbon</h1>
+      <p class="overview-lede">
+        {% if report %}{{ ov.truth }}{% else %}Nothing is loaded yet.{% endif %}
       </p>
+      <div class="overview-actions">
+        <a class="btn btn-primary btn-large" href="#network">Explore your network{{ icon("arrow-right") }}</a>
+        <a class="btn-link" href="{{ url_for('start_upload') }}">Upload a different file</a>
+      </div>
       {% endif %}
 
-      <div class="overview-foot">
+      <ul class="trust-strip" aria-label="How far to trust these results">
         {% if ingest %}
         {% set troubled = ingest.rows_skipped or ingest.warnings %}
-        <p class="data-status{{ ' has-issues' if troubled }}">
-          <span aria-hidden="true">{{ "&#9888;"|safe if troubled else "&#10003;"|safe }}</span>
+        <li class="{{ 'is-caution' if troubled else 'is-ok' }}">
+          {{ icon("alert" if troubled else "check") }}
           <span>
+            <strong>Data check:</strong>
             {{ "{:,}".format(ingest.orders_loaded) }} of {{ "{:,}".format(ingest.rows_in_file) }}
-            orders used{% if ingest.rows_skipped %}, {{ "{:,}".format(ingest.rows_skipped) }} excluded{% endif %}{% if ingest.warnings %}, {{ ingest.warnings|length }} data warning{{ "s" if ingest.warnings|length != 1 }}{% endif %}.
+            orders were included{% if ingest.rows_skipped %}, {{ "{:,}".format(ingest.rows_skipped) }} could not be used{% endif %}{% if ingest.warnings %}, {{ ingest.warnings|length }} warning{{ "s" if ingest.warnings|length != 1 }} to review{% endif %}.
           </span>
-          <a href="#data-check">{{ "Review the data check" if troubled else "See the data check" }}</a>
-        </p>
+        </li>
         {% endif %}
-        <div class="overview-links">
-          {% if count > 3 %}<a class="btn btn-quiet" href="#step-2">See all {{ count }}, ranked</a>{% endif %}
-          <a class="btn btn-quiet" href="#export">Export</a>
-        </div>
-      </div>
+        {% if report and report.confidence.tested %}
+        <li class="is-{{ report.confidence.level }}">
+          {{ meter(report.confidence.level) }}
+          <span><strong>{{ report.confidence.level|capitalize }} confidence:</strong> {{ confidence_summary(report.confidence) }}</span>
+        </li>
+        {% endif %}
+        <li class="is-caution">
+          {{ icon("info") }}
+          <span><strong>Important:</strong> these are planning estimates. Confirm carrier pricing and operational constraints before changing routes.</span>
+        </li>
+      </ul>
+      <p class="trust-more"><a class="btn-link" href="#data">How we checked your data and estimates</a></p>
     </section>
 
-    {% for key, name, blurb, question in steps %}
-    <section class="step" id="{{ key }}" data-step="{{ key }}" aria-labelledby="{{ key }}-title">
-      <header class="step-head">
-        <span class="step-number">Part {{ "%02d"|format(loop.index) }}</span>
-        <h2 id="{{ key }}-title">{{ name }}</h2>
-        <p class="step-question">{{ question }}</p>
+    {# ----------------------------------------------------- Recommendations #}
+    {% if count %}
+    <section class="report-section" id="recommendations" data-step="recommendations" aria-labelledby="recommendations-title">
+      {% include "parts/recommendations.html" %}
+    </section>
+    {% endif %}
+
+    {# ------------------------------------------------------------- Network #}
+    <section class="report-section" id="network" data-step="network" aria-labelledby="network-title">
+      {% include "parts/network.html" %}
+    </section>
+
+    {# -------------------------------------------------- Data & assumptions #}
+    <section class="report-section" id="data" data-step="data" aria-labelledby="data-title">
+      {% include "parts/assumptions.html" %}
+    </section>
+
+    {# -------------------------------------------------------------- Export #}
+    <section class="report-section export" id="export" data-step="export" aria-labelledby="export-title">
+      <header class="section-head">
+        <h2 id="export-title">Export</h2>
+        <p class="section-lede">
+          Share your plan. Every file uses exactly the figures on this
+          page{% if using_sample %}, and says the company is not real{% endif %}.
+        </p>
       </header>
-
-      {% if key == "step-1" %}{% include "parts/step1_network.html" %}
-      {% elif key == "step-2" %}{% include "parts/step2_change.html" %}
-      {% elif key == "step-3" %}{% include "parts/step3_map.html" %}
-      {% elif key == "step-4" %}{% include "parts/step4_confidence.html" %}
-      {% endif %}
-
-      {% if not loop.last %}
-      <a class="step-next" href="#{{ steps[loop.index0 + 1][0] }}">
-        <span class="step-next-label">Next</span>
-        <span class="step-next-name">
-          {{ "%02d"|format(loop.index + 1) }} {{ steps[loop.index0 + 1][1] }}
-        </span>
-        <span class="step-next-blurb">{{ steps[loop.index0 + 1][3] }}</span>
-      </a>
-      {% endif %}
-    </section>
-    {% endfor %}
-
-    <section class="export" id="export" aria-labelledby="export-title">
-      <p class="eyebrow">Export</p>
-      <h2 id="export-title">Take it to the next conversation</h2>
       <div class="export-grid">
         <article class="export-card">
+          <span class="export-icon">{{ icon("file") }}</span>
           <h3>Executive summary</h3>
-          <p>Two pages: the headline, the top changes, what to check first and how sure to be.</p>
-          <a class="btn" href="{{ url_for('summary_page') }}" target="_blank" rel="noopener">Open the summary</a>
+          <p class="export-for">For leadership</p>
+          <p>Two pages: what we found, the top changes and what to check before acting. Print it or save it as a PDF.</p>
+          <a class="btn btn-secondary" href="{{ url_for('summary_page') }}" target="_blank" rel="noopener">Open the executive summary{{ icon("arrow-right") }}</a>
         </article>
         <article class="export-card">
-          <h3>Full analysis</h3>
-          <p>This whole report as a PDF laid out for presenting: a cover, the short answer, then one part at a time.</p>
-          <button type="button" class="btn" data-print>Save as PDF</button>
+          <span class="export-icon">{{ icon("table") }}</span>
+          <h3>Recommendation workbook</h3>
+          <p class="export-for">For analysts and finance</p>
+          <p>An Excel workbook with {% if count %}every change, {% endif %}every route, the data check and all assumptions, with formulas you can audit.</p>
+          <a class="btn btn-secondary" href="{{ url_for('findings_xlsx') }}">{{ icon("download") }}Download workbook (.xlsx)</a>
         </article>
+        {% if count %}
         <article class="export-card">
-          <h3>Route opportunities CSV</h3>
-          <p>One row per opportunity with plain column names and units, ready to open in Excel.</p>
-          <a class="btn" href="{{ url_for('findings_csv') }}">Download CSV</a>
+          <span class="export-icon">{{ icon("download") }}</span>
+          <h3>CSV</h3>
+          <p class="export-for">For other systems</p>
+          <p>One row per change as plain data, ready to import into a planning or reporting tool.</p>
+          <a class="btn btn-secondary" href="{{ url_for('findings_csv') }}">{{ icon("download") }}Download CSV</a>
         </article>
+        {% endif %}
       </div>
+      <p class="export-foot">
+        Need everything on this page on paper?
+        <button type="button" class="btn-link" data-print>{{ icon("print") }}Save the full report as a PDF</button>
+      </p>
     </section>
 
-    <section class="panel next-step quiet">
+    {% if using_sample %}
+    <section class="next-cta" aria-labelledby="next-title">
       <div>
-        <h2>Run it on your own numbers</h2>
-        <p class="sub">
-          {% if using_sample %}
-          Everything above is sample data, not a real company. Upload a CSV
-          export and the whole report rebuilds around your own chain.
-          {% else %}
-          Replace what is loaded, or add supplier and warehouse files to fill
-          out the chain.
-          {% endif %}
-        </p>
+        <h2 id="next-title">Ready to check your own shipping data?</h2>
+        <p>Everything above is example data. Upload a CSV of your orders and the whole report rebuilds around your network.</p>
       </div>
-      <a class="btn" href="{{ url_for('start_upload') }}">Upload a CSV</a>
+      <a class="btn btn-secondary btn-large" href="{{ url_for('start_upload') }}">{{ icon("upload") }}Analyze my shipping data</a>
     </section>
+    {% endif %}
 
   </div>
 </div>
 
 <aside id="drawer" class="drawer" aria-labelledby="drawer-title" hidden>
   <div class="drawer-bar">
-    <div class="drawer-views" role="group" aria-label="Route panel view">
-      <button type="button" class="drawer-view" data-view="investigate" aria-pressed="true">Investigate</button>
-      <button type="button" class="drawer-view" data-view="scenario" aria-pressed="false">Test scenario</button>
-    </div>
-    <button type="button" class="drawer-close" data-close aria-label="Close the route panel">&times;</button>
+    <p class="drawer-kicker">Change details</p>
+    <button type="button" class="drawer-close" data-close aria-label="Close change details">{{ icon("close") }}</button>
   </div>
   <div class="drawer-body" id="drawer-body"></div>
 </aside>
 
+{% for problem in problems %}
+{{ rec_detail(problem, loop.index, groups.by_rank[loop.index], ov.routes, count) }}
+{% endfor %}
+
 <script id="network-data" type="application/json">{{ network | tojson }}</script>
 <script id="recs-data" type="application/json">{{ recommendations | tojson }}</script>
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
 <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
 <script src="{{ url_for('static', filename='chain.js') }}"></script>
-<script src="{{ url_for('static', filename='workspace.js') }}" defer></script>
-<script src="{{ url_for('static', filename='report.js') }}" defer></script>
-
+<script src="{{ url_for('static', filename='workspace.js') }}"></script>
+<script src="{{ url_for('static', filename='report.js') }}"></script>
 {% endblock %}

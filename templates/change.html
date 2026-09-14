@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Recommendation brief: priority {{ rank }}{% endblock %}
+
+{% from "parts/_units.html" import co2e %}
+{% from "parts/_ui.html" import usd, pct, days, mode, icon, sample_note, rec_headline, group_badge, impact, confidence_plain, audit, estimate_tag with context %}
+
+{% block content %}
+
+{#
+  One change on a page of its own, to print or save as a PDF and hand to
+  whoever has to act on it. It uses the executive summary's sheet, so it
+  prints the same way. Every figure is the report's own.
+#}
+
+{% set route = problem.route %}
+{% set total = report.problems|length %}
+
+<article class="es brief">
+  <nav class="es-tools" aria-label="Brief actions">
+    <a class="btn btn-ghost" href="{{ url_for('report_page', open=rank) }}">{{ icon("arrow-left") }}Back to results</a>
+    <button type="button" class="btn btn-primary" data-print>{{ icon("print") }}Print or save as PDF</button>
+  </nav>
+
+  <section class="es-sheet" aria-label="Recommendation brief">
+    <header class="es-head">
+      <div class="es-head-top">
+        <p class="es-eyebrow">Overlap &middot; Recommendation brief</p>
+        {{ group_badge(group) }}
+      </div>
+      <h1>{{ rec_headline(problem) }}</h1>
+      <p class="es-meta">
+        Priority {{ rank }} of {{ total }} &middot; {{ subject }} &middot;
+        {{ "{:,}".format(summary.orders) }} orders &middot; Generated {{ generated }}
+      </p>
+      {% if using_sample %}{{ sample_note(subject) }}{% endif %}
+    </header>
+
+    <section class="brief-impact" aria-labelledby="brief-impact-title">
+      <h2 id="brief-impact-title">Expected annual impact {{ estimate_tag() }}</h2>
+      {{ impact(problem) }}
+      {% if route %}
+      <p class="brief-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route, treating the file as one year of orders.</p>
+      {% endif %}
+    </section>
+
+    {% if route %}
+    <div class="table-scroll">
+      <table class="grid brief-compare">
+        <thead><tr><th></th><th class="num">Today</th><th class="num">Proposed</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Transport mode</th><td class="num">{{ mode(route.now.mode) }}</td><td class="num">{{ mode(route.proposed.mode) }}</td></tr>
+          <tr><th scope="row">Cost a year</th><td class="num">{{ usd(route.now.cost) }}</td><td class="num">{{ usd(route.proposed.cost) }}</td></tr>
+          <tr><th scope="row">CO₂e a year</th><td class="num">{{ co2e(route.now.co2e) }}</td><td class="num">{{ co2e(route.proposed.co2e) }}</td></tr>
+          <tr><th scope="row">Transit</th><td class="num">{{ days(route.now.days) }}</td><td class="num">{{ days(route.proposed.days) }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="brief-what"><strong>What would change:</strong> {{ problem.action }}</p>
+    {% endif %}
+
+    <div class="es-pair">
+      <section class="es-panel" aria-labelledby="brief-why">
+        <h2 id="brief-why">Why this helps</h2>
+        <p class="brief-text">{{ problem.happening }} {{ problem.why }}</p>
+        <h2 class="brief-sub">Confidence</h2>
+        {{ confidence_plain(problem, group) }}
+      </section>
+
+      <section class="es-panel es-checks" aria-labelledby="brief-checks">
+        <h2 id="brief-checks"><span class="es-mark" aria-hidden="true">!</span>What to check before acting</h2>
+        <ol>
+          {% for item in problem.checks %}
+          <li><p class="es-check-text">{{ item }}</p></li>
+          {% endfor %}
+        </ol>
+        {% if problem.alternatives %}
+        <p class="brief-text"><strong>If that is not possible:</strong> {{ problem.alternatives|join(" ") }}</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <section class="es-panel brief-working" aria-labelledby="brief-working">
+      <h2 id="brief-working">How the figures were worked out</h2>
+      {% if route %}
+      {{ audit(route) }}
+      {% else %}
+      <p class="brief-text">{{ problem.note }}</p>
+      {% endif %}
+    </section>
+
+    <footer class="es-foot">
+      <p class="es-ref">
+        A planning estimate, not a quote. Emission factors from DEFRA and GLEC;
+        cost rates are industry defaults, not contract prices. Every factor and
+        assumption is listed in the full report under Data &amp; assumptions.
+      </p>
+      <p class="es-ref">
+        <span>Creator</span> {{ contact_email }}
+      </p>
+    </footer>
+  </section>
+</article>
+
+{% endblock %}

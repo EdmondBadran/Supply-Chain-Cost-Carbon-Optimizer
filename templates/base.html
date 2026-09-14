@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{% block title %}Supply chain cost and carbon screener{% endblock %} &middot; Overlap</title>
-<meta name="description" content="Overlap reads a year of shipping orders and ranks the routes where changing transport mode could cut both cost and CO2e.">
+<title>{% block title %}Find shipping changes that cut cost and carbon{% endblock %} &middot; Overlap</title>
+<meta name="description" content="Upload a year of shipping orders. Overlap finds realistic route changes that cut both cost and CO2e, estimates what each could save, and says how sure to be.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23121110'/><circle cx='12' cy='16' r='8' fill='none' stroke='%23f2913d' stroke-width='2.4'/><circle cx='20' cy='16' r='8' fill='none' stroke='%233fcf8e' stroke-width='2.4'/><path d='M16 9.07A8 8 0 0 1 16 22.93A8 8 0 0 1 16 9.07Z' fill='%23f3f0ea'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="theme-color" content="#121110">
 </head>
@@ -17,42 +17,46 @@
 
 <header class="topbar">
   <div class="topbar-inner">
-  <a class="brand" href="{{ url_for('index') }}">
-    {% include "parts/mark.html" %}
-    <span class="brand-name">Overlap</span>
-    <span class="brand-tag">cost and carbon screener</span>
-  </a>
-  <nav class="topnav">
-    {% set here = request.endpoint %}
-    {% for endpoint, label in [
-      ('report_page', 'The report'),
-      ('method', 'How it works'),
-      ('upload_page', 'Your data'),
-    ] %}
-    <a href="{{ url_for(endpoint) }}"{% if endpoint == here %} aria-current="page"{% endif %}>{{ label }}</a>
-    {% endfor %}
-  </nav>
+    <a class="brand" href="{{ url_for('index') }}" aria-label="Overlap, home">
+      {% include "parts/mark.html" %}
+      <span class="brand-name">Overlap</span>
+      <span class="brand-tag">Cost and carbon screener</span>
+    </a>
+    <nav class="topnav" aria-label="Main">
+      {% set here = request.endpoint %}
+      {% for endpoint, label in [
+        ('report_page', 'Results'),
+        ('upload_page', 'Upload data'),
+        ('method', 'How it works'),
+      ] %}
+      <a href="{{ url_for(endpoint) }}"{% if endpoint == here %} aria-current="page"{% endif %}>{{ label }}</a>
+      {% endfor %}
+    </nav>
   </div>
 </header>
 
-<main id="main">
+<main id="main" class="{% block main_class %}page{% endblock %}">
 {% block content %}{% endblock %}
 </main>
 
 <footer class="foot">
-  <p>
-    <strong>Overlap</strong> screens a year of orders for the routes where cost
-    and carbon can be cut together. Emission factors from DEFRA and GLEC,
-    distances from GeoNames. <a href="{{ url_for('method') }}">How it works</a>.
-    Nothing you upload is stored:
-    <a href="{{ url_for('privacy') }}">what happens to your file</a>.
-  </p>
-  <p class="foot-sample">
-    The sample companies are not real. Their data is generated to follow
-    realistic patterns, so the results behave like a real network's without
-    describing one.
-  </p>
+  <div class="foot-inner">
+    <p>
+      <strong>Overlap</strong> finds shipping changes that cut cost and carbon
+      together. Emission factors from DEFRA and GLEC, distances from GeoNames.
+    </p>
+    <p class="foot-links">
+      <a href="{{ url_for('method') }}">How it works</a>
+      <a href="{{ url_for('privacy') }}">What happens to your file</a>
+    </p>
+    <p class="foot-sample">
+      The example companies are not real. Their data is generated to follow
+      realistic patterns, so the results behave like a real network's without
+      describing one.
+    </p>
+  </div>
 </footer>
 <script src="{{ url_for('static', filename='motion.js') }}" defer></script>
+{% block scripts %}{% endblock %}
 </body>
 </html>
