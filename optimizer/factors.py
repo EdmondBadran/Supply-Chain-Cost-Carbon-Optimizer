@@ -63,6 +63,39 @@ DEFAULT_GRID_INTENSITY = 0.35  # kg CO2e per kWh, world average-ish
 EXPEDITE_SHARE_OF_LATE = 0.5
 
 
+# How much further freight actually travels than the straight line between its
+# two ends, by mode. SCREENING ASSUMPTIONS, not constants: the real figure
+# depends on the route, and a proper road, rail or sea router would replace
+# these (see distance.py, which is the one place that applies them).
+#
+# Road 1.25 and rail 1.42 follow the median European circuity in Heinold and
+# Makowski, "Driving the Extra Mile", Networks and Spatial Economics (2026):
+# 1.25 for road (range 1.15 to 1.77) and 1.43 for rail (1.13 to 2.07).
+#
+# Air 1.05 is a flat allowance for routing and approach. GLEC v3 instead adds
+# a fixed 95 km to the airport-to-airport great circle, which is about 1.01 on
+# long haul and over 1.2 on a short hop, so this is generous on long routes.
+#
+# Sea 1.60 is the weakest of the four and no single figure fits. Routed sea
+# distance against great circle measured on the routes in both samples ran
+# from about 0.9 to 2.8, median about 1.3: Helsinki to Stockholm about 1.07,
+# Shanghai to Stockholm about 2.8. So 1.6 overstates short sea crossings and
+# understates routes that round a continent or take a canal.
+#
+# Before 2026-09-13 every mode used 1.0, which understated the slower modes
+# most, and those are the ones the tool recommends switching to.
+CIRCUITY = {
+    "road": 1.25,
+    "rail": 1.42,
+    "sea": 1.60,
+    "air": 1.05,
+}
+
+
+def circuity(mode):
+    return CIRCUITY[normalise_mode(mode)]
+
+
 def emission_factor(mode):
     return EMISSION_FACTORS[normalise_mode(mode)]
 

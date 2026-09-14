@@ -1,4 +1,5 @@
 import csv
+import json
 
 from . import db, factors, geo
 
@@ -96,8 +97,22 @@ def read_warehouse_rows(path):
         return list(reader)
 
 
+def _error(file, line, field, exc):
+    """One row that could not be used, saying which file, line and field."""
+    problem = str(exc)
+    if field and field not in problem:
+        problem = f"{field}: {problem}"
+    return {"file": file, "line": line, "field": field, "problem": problem}
+
+
 def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
-    """Load a CSV into the node/edge graph. Bad rows are reported, not fatal."""
+    """Load a CSV into the node/edge graph.
+
+    A bad row is reported, never fatal and never silent: every row in the
+    orders file ends up either loaded or listed with its line, field and
+    reason, and the totals are checked against the file before anything is
+    handed on to be analysed.
+    """
     rows = read_rows(orders_path)
     warehouse_rows = read_warehouse_rows(warehouses_path) if warehouses_path else None
     supplier_rows = read_supplier_rows(suppliers_path) if suppliers_path else None
@@ -106,13 +121,29 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
     db.reset(conn)
 
     errors = []
+    warnings = []
     nodes = {}
     orders = []
+    weight_in_file = 0.0
+    first_seen = {}
+    repeats = []
 
-    def register(name, node_type, city, country, point):
-        node = nodes.get(name)
+    def register(label, node_type, city, country, point):
+        """Record a place and return the key that identifies it.
+
+        A place is its name and its city together, never the name on its own.
+        A file that ships from ten cities under one company name describes ten
+        origins, and keying on the name alone folded all of them into whichever
+        one happened to be read first: every lane then inherited that city's
+        coordinates, so road freight between two German cities was priced as
+        the distance from Shanghai. Nothing about that is visible in the
+        output, which is what makes it worth spelling out here.
+        """
+        key = (label, city)
+        node = nodes.get(key)
         if node is None:
-            nodes[name] = {
+            nodes[key] = {
+                "label": label,
                 "node_type": node_type,
                 "city": city,
                 "country": country,
@@ -121,26 +152,41 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
             }
         elif node["node_type"] == "customer" and node_type == "warehouse":
             node["node_type"] = "warehouse"
-        return name
+        return key
 
     for position, row in enumerate(rows, start=2):
+        # Weight is added up for every row whose weight can be read, whether
+        # or not the rest of the row is usable, so the report can say how
+        # much weight the excluded rows took with them.
+        try:
+            readable = _number(row.get("weight_kg"), field="weight_kg")
+        except ValidationError:
+            readable = None
+        if readable and readable > 0:
+            weight_in_file += readable
+
+        field = "weight_kg"
         try:
             weight = _number(row.get("weight_kg"), field="weight_kg")
             if weight is None or weight <= 0:
                 raise ValidationError("weight_kg must be a positive number")
 
+            field = "mode"
             mode = factors.normalise_mode(row.get("mode"))
 
+            field = "origin_name"
             origin_name = _clean(row.get("origin_name"))
             if not origin_name:
                 raise ValidationError("origin_name is blank")
 
+            field = "origin_city"
             origin_city = _clean(row.get("origin_city"))
             origin_country = _clean(row.get("origin_country"))
             origin_point = _resolve_point(
                 origin_city, origin_country, row.get("origin_lat"), row.get("origin_lon")
             )
 
+            field = "dest_city"
             dest_city = _clean(row.get("dest_city"))
             dest_country = _clean(row.get("dest_country"))
             dest_point = _resolve_point(
@@ -148,16 +194,20 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
             )
             dest_name = f"{dest_city}, {dest_country}" if dest_country else dest_city
 
-            register(origin_name, "warehouse", origin_city, origin_country, origin_point)
-            register(dest_name, "customer", dest_city, dest_country, dest_point)
+            origin_key = register(
+                origin_name, "warehouse", origin_city, origin_country, origin_point
+            )
+            dest_key = register(
+                dest_name, "customer", dest_city, dest_country, dest_point
+            )
 
             orders.append(
                 {
                     "order_ref": _clean(row.get("order_ref")) or None,
                     "order_date": _clean(row.get("order_date")) or None,
                     "customer_id": _clean(row.get("customer_id")) or None,
-                    "origin": origin_name,
-                    "dest": dest_name,
+                    "origin": origin_key,
+                    "dest": dest_key,
                     "units": int(_number(row.get("units"), 1, field="units")),
                     "weight_kg": weight,
                     "mode": mode,
@@ -167,38 +217,158 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
                 }
             )
         except (ValidationError, ValueError, geo.GeocodeError) as exc:
-            errors.append({"line": position, "problem": str(exc)})
+            errors.append(_error("orders", position, field, exc))
+            continue
+
+        # A repeated row is kept, because two identical orders are entirely
+        # possible, but it is pointed out, because an export run twice is
+        # more likely still.
+        ref = _clean(row.get("order_ref"))
+        key = ("ref", ref) if ref else tuple(
+            sorted((name, _clean(value)) for name, value in row.items() if name)
+        )
+        if key in first_seen:
+            repeats.append({"line": position, "same_as": first_seen[key]})
+        else:
+            first_seen[key] = position
+
+    order_errors = len(errors)
 
     if not orders:
         first = errors[0]["problem"] if errors else "file was empty"
         raise ValidationError(f"no usable rows. First problem: {first}")
+
+    if repeats:
+        warnings.append(
+            {
+                "kind": "duplicates",
+                "count": len(repeats),
+                "lines": repeats[:10],
+                "message": (
+                    f"{len(repeats)} row{'s' if len(repeats) != 1 else ''} "
+                    "repeat an earlier row or order_ref. They were counted as "
+                    "separate orders. Remove them if they are duplicates."
+                ),
+            }
+        )
 
     if warehouse_rows is not None:
         _apply_warehouse_details(nodes, warehouse_rows, errors)
 
     inbound = []
     if supplier_rows is not None:
-        inbound = _apply_suppliers(nodes, supplier_rows, errors)
+        inbound = _apply_suppliers(nodes, supplier_rows, errors, warnings)
 
     node_ids = _write_nodes(conn, nodes)
     _write_orders(conn, orders, node_ids)
-    edge_count = _build_edges(conn)
-    edge_count += _write_inbound_edges(conn, inbound, node_ids, nodes)
+    lane_count = _build_edges(conn)
+    _reconcile(conn, orders, lane_count)
+    edge_count = lane_count + _write_inbound_edges(conn, inbound, node_ids, nodes)
     conn.commit()
 
-    return {
+    weight_loaded = sum(order["weight_kg"] for order in orders)
+    fields = {error["field"] for error in errors if error["file"] == "orders"}
+    report = {
+        "rows_in_file": len(rows),
         "orders_loaded": len(orders),
-        "rows_skipped": len(errors),
+        "rows_skipped": order_errors,
+        "weight_in_file_kg": weight_in_file,
+        "weight_loaded_kg": weight_loaded,
+        "weight_excluded_kg": max(weight_in_file - weight_loaded, 0.0),
+        "lanes": lane_count,
         "nodes": len(node_ids),
         "edges": edge_count,
         "suppliers": len(inbound),
+        "error_count": len(errors),
         "errors": errors[:MAX_REPORTED_ERRORS],
+        "warnings": warnings,
+        "checks": {
+            "weights_readable": "weight_kg" not in fields,
+            "modes_recognised": "mode" not in fields,
+            "origins_found": not fields & {"origin_name", "origin_city"},
+            "destinations_found": "dest_city" not in fields,
+        },
+    }
+    db.set_meta(conn, "ingest", json.dumps(report))
+    return report
+
+
+def _reconcile(conn, orders, lane_count):
+    """Check the routes still add up to the orders they were built from.
+
+    Grouping is where records have gone missing before: routes keyed on too
+    little collapse into each other, and nothing downstream can tell. So
+    before anything is analysed, the order count, the weight and the number
+    of distinct origin, destination and mode combinations are read back out of
+    the routes and compared with what was loaded. A mismatch stops the load
+    rather than producing a report built on it.
+    """
+    row = conn.execute(
+        "SELECT COALESCE(SUM(order_count), 0) AS orders, "
+        "COALESCE(SUM(total_weight_kg), 0) AS weight FROM edges"
+    ).fetchone()
+    expected_lanes = len({(o["origin"], o["dest"], o["mode"]) for o in orders})
+    expected_weight = sum(order["weight_kg"] for order in orders)
+
+    if (
+        row["orders"] != len(orders)
+        or abs(row["weight"] - expected_weight) > 1e-6 * max(expected_weight, 1.0)
+        or lane_count != expected_lanes
+    ):
+        raise ValidationError(
+            f"the loaded orders did not reconcile with the routes built from "
+            f"them ({len(orders)} orders and {expected_lanes} routes expected, "
+            f"{row['orders']} orders and {lane_count} routes found), so no "
+            f"report was produced"
+        )
+
+
+def _resolve_label(nodes, label):
+    """The node a warehouse or supplier file means when it names a site.
+
+    Sites are keyed by name and city, so a bare name is only unambiguous while
+    the orders file uses it for one place. Where it is used for several, this
+    says so rather than attaching the costs of one site to another.
+    """
+    matches = [key for key in nodes if key[0] == label]
+    if not matches:
+        return None
+    if len(matches) > 1:
+        cities = ", ".join(sorted(key[1] for key in matches))
+        raise ValidationError(
+            f"the orders file uses the name {label} for more than one place "
+            f"({cities}), so it is not clear which one this row is about"
+        )
+    return matches[0]
+
+
+def _display_names(nodes):
+    """What each node is called once every place is known.
+
+    A name used for one city stays as it is, which is the ordinary case and
+    keeps a file that names its sites properly reading the way it was written.
+    A name used for several gets the city attached, because on a map and in a
+    ranked list those are different places and have to be told apart.
+    """
+    cities = {}
+    for label, city in nodes:
+        cities.setdefault(label, set()).add(city)
+
+    return {
+        (label, city): (label if len(cities[label]) == 1 else f"{label}, {city}")
+        for label, city in nodes
     }
 
 
-def _apply_suppliers(nodes, supplier_rows, errors):
-    """Add supplier nodes and the inbound lanes feeding each warehouse."""
-    inbound = []
+def _apply_suppliers(nodes, supplier_rows, errors, warnings):
+    """Add supplier nodes and the inbound lanes feeding each warehouse.
+
+    Two rows describing the same supplier, warehouse and mode are one route,
+    so their weight, shipments and spend are added together. The second row
+    used to be dropped by the database without a word.
+    """
+    inbound = {}
+    combined = []
     for position, row in enumerate(supplier_rows, start=2):
         try:
             name = _clean(row.get("name"))
@@ -206,7 +376,8 @@ def _apply_suppliers(nodes, supplier_rows, errors):
                 raise ValidationError("supplier name is blank")
 
             feeds = _clean(row.get("supplies"))
-            if feeds not in nodes:
+            feeds_key = _resolve_label(nodes, feeds)
+            if feeds_key is None:
                 raise ValidationError(
                     f"supplies {feeds or '(blank)'}, which has no orders in the "
                     "orders file"
@@ -220,7 +391,21 @@ def _apply_suppliers(nodes, supplier_rows, errors):
             if weight is None or weight <= 0:
                 raise ValidationError("annual_weight_kg must be a positive number")
 
-            nodes[name] = {
+            existing = nodes.get((name, city))
+            if existing is not None and existing["node_type"] != "supplier":
+                raise ValidationError(
+                    f"{name} in {city} is already a site in the orders file, so "
+                    "it cannot also be a supplier under the same name"
+                )
+
+            mode = factors.normalise_mode(row.get("mode"))
+            shipments = int(
+                _number(row.get("shipments_per_year"), 12, field="shipments_per_year")
+            )
+            value = _number(row.get("annual_cost"), 0.0, field="annual_cost")
+
+            nodes[(name, city)] = {
+                "label": name,
                 "node_type": "supplier",
                 "city": city,
                 "country": country or None,
@@ -234,21 +419,39 @@ def _apply_suppliers(nodes, supplier_rows, errors):
                 ),
                 "on_time_rate": _rate(row.get("on_time_rate"), "on_time_rate"),
             }
-            inbound.append(
-                {
-                    "supplier": name,
-                    "warehouse": feeds,
-                    "mode": factors.normalise_mode(row.get("mode")),
+            lane_key = ((name, city), feeds_key, mode)
+            lane = inbound.get(lane_key)
+            if lane is None:
+                inbound[lane_key] = {
+                    "supplier": (name, city),
+                    "warehouse": feeds_key,
+                    "mode": mode,
                     "weight_kg": weight,
-                    "shipments": int(
-                        _number(row.get("shipments_per_year"), 12, field="shipments_per_year")
-                    ),
-                    "value": _number(row.get("annual_cost"), 0.0, field="annual_cost"),
+                    "shipments": shipments,
+                    "value": value,
                 }
-            )
+            else:
+                lane["weight_kg"] += weight
+                lane["shipments"] += shipments
+                lane["value"] += value
+                combined.append(position)
         except (ValidationError, ValueError, geo.GeocodeError) as exc:
-            errors.append({"line": position, "problem": f"supplier row: {exc}"})
-    return inbound
+            errors.append(_error("suppliers", position, None, f"supplier row: {exc}"))
+
+    if combined:
+        warnings.append(
+            {
+                "kind": "supplier_rows_combined",
+                "count": len(combined),
+                "lines": [{"line": line} for line in combined[:10]],
+                "message": (
+                    f"{len(combined)} supplier row{'s' if len(combined) != 1 else ''} "
+                    "described a supplier, warehouse and mode already listed. "
+                    "Their weight was added to that route."
+                ),
+            }
+        )
+    return list(inbound.values())
 
 
 def _write_inbound_edges(conn, inbound, node_ids, nodes):
@@ -275,7 +478,7 @@ def _write_inbound_edges(conn, inbound, node_ids, nodes):
         )
     conn.executemany(
         """
-        INSERT OR IGNORE INTO edges
+        INSERT INTO edges
             (origin_id, dest_id, mode, order_count, total_weight_kg,
              total_value, return_count, distance_km)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -288,13 +491,21 @@ def _write_inbound_edges(conn, inbound, node_ids, nodes):
 def _apply_warehouse_details(nodes, warehouse_rows, errors):
     for position, row in enumerate(warehouse_rows, start=2):
         name = _clean(row.get("name"))
-        node = nodes.get(name)
+        try:
+            key = _resolve_label(nodes, name)
+        except ValidationError as exc:
+            errors.append(_error("warehouses", position, None, f"warehouse {exc}"))
+            continue
+
+        node = nodes.get(key) if key else None
         if node is None:
             errors.append(
-                {
-                    "line": position,
-                    "problem": f"warehouse {name or '(blank)'} has no orders, ignored",
-                }
+                _error(
+                    "warehouses",
+                    position,
+                    None,
+                    f"warehouse {name or '(blank)'} has no orders, ignored",
+                )
             )
             continue
         try:
@@ -319,12 +530,13 @@ def _apply_warehouse_details(nodes, warehouse_rows, errors):
                 raise ValidationError("capacity_kg must be a positive number")
             node["capacity_kg"] = capacity
         except ValidationError as exc:
-            errors.append({"line": position, "problem": f"{name}: {exc}"})
+            errors.append(_error("warehouses", position, None, f"{name}: {exc}"))
 
 
 def _write_nodes(conn, nodes):
+    names = _display_names(nodes)
     ids = {}
-    for name, node in nodes.items():
+    for key, node in nodes.items():
         cursor = conn.execute(
             """
             INSERT INTO nodes
@@ -334,7 +546,7 @@ def _write_nodes(conn, nodes):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                name,
+                names[key],
                 node["node_type"],
                 node["city"],
                 node["country"] or None,
@@ -349,7 +561,7 @@ def _write_nodes(conn, nodes):
                 node.get("capacity_kg"),
             ),
         )
-        ids[name] = cursor.lastrowid
+        ids[key] = cursor.lastrowid
     return ids
 
 

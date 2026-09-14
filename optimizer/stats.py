@@ -367,7 +367,7 @@ def uncertainty(lanes):
         "spread": FACTOR_SPREAD,
         "trials": TRIALS,
         "histogram": _histogram(results, baseline),
-        "always_flagged": _always_flagged(lanes, rng),
+        "always_flagged": confidence(lanes),
         "typical_flagged": counts.most_common(1)[0][0] if counts else 0,
         "flag_range": (min(flagged_counts), max(flagged_counts))
         if flagged_counts
@@ -442,20 +442,28 @@ def _transport_co2e(lane, mode, rates):
     return emissions["transport"] + emissions["returns"]
 
 
-def _always_flagged(lanes, rng):
-    """Lanes that stay worth changing under every draw of the factors.
+CONFIDENCE_CHECKS = 200
 
-    These are the recommendations that do not depend on the numbers being
-    right, only on the ordering being right, and they are the ones to open a
-    conversation with.
+
+def confidence(lanes):
+    """How often each flagged route stays worth changing when the factors are
+    redrawn.
+
+    A route at 100% does not depend on the numbers being right, only on the
+    ordering being right, and those are the ones to open a conversation with.
+
+    Keyed by route id. It used to be keyed by "origin to destination", which
+    folded a road route and a rail route between the same two places into one
+    entry and reported whichever came last for both.
+
+    Seeded on its own rather than continuing the band's generator, so the
+    report can ask for this without running the whole band first and still get
+    the same answer the statistics show.
     """
-    survivors = {
-        f"{lane['origin_name']} to {lane['dest_name']}": lane
-        for lane in lanes
-        if lane["flagged"]
-    }
+    rng = random.Random(SEED + 1)
+    survivors = {lane["id"]: lane for lane in lanes if lane["flagged"]}
     counts = defaultdict(int)
-    checks = 200
+    checks = CONFIDENCE_CHECKS
     for _ in range(checks):
         cost_rates = {
             mode: value * _triangular(rng)
@@ -465,7 +473,7 @@ def _always_flagged(lanes, rng):
             mode: value * _triangular(rng)
             for mode, value in factors.EMISSION_FACTORS.items()
         }
-        for name, lane in survivors.items():
+        for edge_id, lane in survivors.items():
             current_cost = _transport_cost(lane, lane["mode"], cost_rates)
             current_co2e = _transport_co2e(lane, lane["mode"], emission_rates)
             for mode in scoring.plausible_modes(lane):
@@ -477,17 +485,18 @@ def _always_flagged(lanes, rng):
                     min(cut_cost / (lane["cost"] or 1.0), cut_co2e / (lane["co2e"] or 1.0))
                     >= scoring.FLAG_THRESHOLD
                 ):
-                    counts[name] += 1
+                    counts[edge_id] += 1
                     break
     return sorted(
         (
             {
-                "name": name,
-                "mode": survivors[name]["mode"],
-                "switch": survivors[name]["switch"]["mode"],
-                "confidence": counts[name] / checks,
+                "edge_id": edge_id,
+                "name": f"{lane['origin_name']} to {lane['dest_name']}",
+                "mode": lane["mode"],
+                "switch": lane["switch"]["mode"],
+                "confidence": counts[edge_id] / checks,
             }
-            for name in survivors
+            for edge_id, lane in survivors.items()
         ),
         key=lambda item: -item["confidence"],
     )
@@ -514,7 +523,9 @@ def outliers(lanes):
         return {"cost": [], "co2e": [], "threshold": OUTLIER_Z}
 
     def per_tonne_km(lane, key):
-        return lane[key] / ((lane["total_weight_kg"] / 1000.0) * lane["distance_km"])
+        return lane[key] / analysis.tonne_km(
+            lane["total_weight_kg"], lane["distance_km"], lane["mode"]
+        )
 
     cost_rates = [per_tonne_km(lane, "cost") for lane in priced]
     co2e_rates = [per_tonne_km(lane, "co2e") for lane in priced]
@@ -698,7 +709,9 @@ def by_mode(lanes):
         lambda: {"lanes": 0, "tonne_km": 0.0, "cost": 0.0, "co2e": 0.0}
     )
     for lane in lanes:
-        tonne_km = (lane["total_weight_kg"] / 1000.0) * lane["distance_km"]
+        tonne_km = analysis.tonne_km(
+            lane["total_weight_kg"], lane["distance_km"], lane["mode"]
+        )
         row = groups[lane["mode"]]
         row["lanes"] += 1
         row["tonne_km"] += tonne_km

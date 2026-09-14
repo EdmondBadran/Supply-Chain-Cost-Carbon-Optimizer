@@ -10,11 +10,45 @@ from the loaded data, so an empty chain says so and a clean chain says that
 instead of inventing something to worry about.
 """
 
-from . import analysis, chain, factors, scoring
+from . import analysis, chain, distance, factors, scoring, stats
 
 # How many problems make it into the report. Below five it stops looking like
 # a diagnosis, above ten nobody reads to the end.
 REPORT_LIMIT = 8
+
+# What share of factor redraws a recommendation has to survive to be called
+# high or moderate confidence. Labels for a manager, not a statistical test:
+# "high" means the recommendation held in at least nine draws out of ten.
+CONFIDENCE_HIGH = 0.9
+CONFIDENCE_MODERATE = 0.6
+
+
+def confidence_label(share):
+    if share is None:
+        return None
+    if share >= CONFIDENCE_HIGH:
+        return "high"
+    if share >= CONFIDENCE_MODERATE:
+        return "moderate"
+    return "low"
+
+
+def _levels(lanes, key):
+    """Each route's position by cost or carbon, as a word a manager can use."""
+    ordered = sorted(lanes, key=lambda lane: -lane[key])
+    count = len(ordered)
+    words = {}
+    for index, lane in enumerate(ordered):
+        share = (index + 1) / count
+        if share <= 0.10:
+            words[lane["id"]] = "Very high"
+        elif share <= 0.25:
+            words[lane["id"]] = "High"
+        elif share <= 0.50:
+            words[lane["id"]] = "Medium"
+        else:
+            words[lane["id"]] = "Low"
+    return words
 
 # A single problem holding this much of everything recoverable is worth
 # calling out on its own, because it changes what the reader should do first.
@@ -39,7 +73,7 @@ def tonnes(kg):
     """
     if kg < 1000:
         return f"{kg:,.0f} kg"
-    text = f"{kg / 1000:,.1f}" if kg < 10000 else f"{kg / 1000:,.0f}"
+    text = f"{kg / 1000:,.1f}" if kg < 1000000 else f"{kg / 1000:,.0f}"
     return f"{text} tonne" if text in ("1", "1.0") else f"{text} tonnes"
 
 
@@ -59,11 +93,19 @@ def build(conn, limit=REPORT_LIMIT):
 
     stages = chain.build(conn)
     totals = analysis.totals(conn)
-    everything = _problems(lanes, stages, totals)
+    context = {
+        "confidence": {
+            row["edge_id"]: row["confidence"] for row in stats.confidence(lanes)
+        },
+        "cost_level": _levels(lanes, "cost"),
+        "carbon_level": _levels(lanes, "co2e"),
+    }
+    everything = _problems(lanes, stages, totals, context)
     problems = everything[:limit]
 
     return {
         "overview": _overview(lanes, totals, problems, len(everything)),
+        "confidence": _confidence_summary(problems),
         "flow": _flow(stages),
         "problems": problems,
         "method": _method(),
@@ -73,6 +115,25 @@ def build(conn, limit=REPORT_LIMIT):
             "Each of these is one decision, and each one cuts cost and carbon "
             "together rather than trading one against the other."
         ),
+    }
+
+
+def _confidence_summary(problems):
+    """One answer to "how sure", for the recommendations that were tested.
+
+    The level is the weakest of them rather than an average, so a single
+    fragile recommendation cannot hide behind strong ones.
+    """
+    tested = [p for p in problems if p["confidence"] is not None]
+    if not tested:
+        return {"level": None, "tested": 0, "high": 0, "lowest": None, "untested": len(problems)}
+    lowest = min(p["confidence"] for p in tested)
+    return {
+        "level": confidence_label(lowest),
+        "tested": len(tested),
+        "high": sum(1 for p in tested if p["confidence"] >= CONFIDENCE_HIGH),
+        "lowest": lowest,
+        "untested": len(problems) - len(tested),
     }
 
 
@@ -147,6 +208,8 @@ def _overview(lanes, totals, problems, total_found):
         "routes": len(lanes),
         "flagged_routes": len(flagged),
         "tonne_km": totals["tonne_km"],
+        "opportunities": len(problems),
+        "route_changes": sum(1 for p in problems if p["kind"] == "mode_switch"),
     }
 
 
@@ -265,16 +328,105 @@ def _flow(stages):
     return {"stages": lines, "note": note}
 
 
-def _mode_switch_problem(lane, totals):
+def _side(lane, mode, costs, emissions):
+    """One side of a mode switch, current or proposed, with every input the
+    audit needs to reproduce its totals."""
+    straight = lane["distance_km"]
+    fixed_cost = lane["handling_cost"] or 0.0
+    fixed_co2e = (lane["packaging_co2e"] or 0.0) + (lane["warehouse_co2e"] or 0.0)
+    return {
+        "mode": mode,
+        "circuity": factors.circuity(mode),
+        "route_km": distance.by_mode(straight, mode),
+        "tonne_km": analysis.tonne_km(lane["total_weight_kg"], straight, mode),
+        "days": analysis.lane_transit_days(straight, mode),
+        "cost_factor": factors.cost_factor(mode),
+        "emission_factor": factors.emission_factor(mode),
+        "freight_cost": costs["transport"],
+        "returns_cost": costs["returns"],
+        "fixed_cost": fixed_cost,
+        "cost": costs["transport"] + costs["returns"] + fixed_cost,
+        "freight_co2e": emissions["transport"],
+        "returns_co2e": emissions["returns"],
+        "fixed_co2e": fixed_co2e,
+        "co2e": emissions["transport"] + emissions["returns"] + fixed_co2e,
+    }
+
+
+def _route(lane, context):
+    """Everything the recommendation card, the route panel and the audit
+    show for one mode switch. Worked out once, here, from the engine, so no
+    template or script does arithmetic of its own."""
+    switch = lane["switch"]
+    args = (lane["total_weight_kg"], lane["distance_km"])
+    counts = (lane["order_count"], lane["return_count"])
+    now = _side(
+        lane,
+        lane["mode"],
+        {
+            "transport": lane["transport_cost"],
+            "returns": lane["returns_cost"],
+        },
+        {
+            "transport": lane["transport_co2e"],
+            "returns": lane["returns_co2e"],
+        },
+    )
+    proposed = _side(
+        lane,
+        switch["mode"],
+        analysis.lane_costs(*args, switch["mode"], *counts),
+        analysis.lane_emissions(*args, switch["mode"], *counts),
+    )
+    share = context["confidence"].get(lane["id"])
+    return {
+        "edge_id": lane["id"],
+        "origin": lane["origin_name"],
+        "dest": lane["dest_name"],
+        "leg": lane["leg"],
+        "weight_t": lane["total_weight_kg"] / 1000.0,
+        "orders": lane["order_count"],
+        "returns": lane["return_count"],
+        "straight_km": lane["distance_km"],
+        "now": now,
+        "proposed": proposed,
+        "saved_cost": now["cost"] - proposed["cost"],
+        "saved_co2e": now["co2e"] - proposed["co2e"],
+        "cost_pct": (now["cost"] - proposed["cost"]) / now["cost"] if now["cost"] else 0.0,
+        "co2e_pct": (now["co2e"] - proposed["co2e"]) / now["co2e"] if now["co2e"] else 0.0,
+        "extra_days": proposed["days"] - now["days"],
+        "threshold": scoring.FLAG_THRESHOLD,
+        "confidence": share,
+        "confidence_label": confidence_label(share),
+        "cost_level": context["cost_level"].get(lane["id"]),
+        "carbon_level": context["carbon_level"].get(lane["id"]),
+    }
+
+
+def _mode_switch_problem(lane, totals, context):
     """A route that would be cheaper and cleaner on a different mode."""
     switch = lane["switch"]
     from_mode, to_mode = lane["mode"], switch["mode"]
+    route = _route(lane, context)
 
     cost_ratio = factors.cost_factor(from_mode) / factors.cost_factor(to_mode)
     co2e_ratio = factors.emission_factor(from_mode) / factors.emission_factor(to_mode)
 
-    before_days = analysis.lane_transit_days(lane["distance_km"], from_mode)
-    after_days = analysis.lane_transit_days(lane["distance_km"], to_mode)
+    before_days = route["now"]["days"]
+    after_days = route["proposed"]["days"]
+
+    checks = [
+        f"Transit goes from {days(before_days)} to {days(after_days)}",
+        "Supplier can ship this way" if lane["leg"] == "inbound"
+        else "Customer delivery promises on this route",
+        "Stock to cover the longer transit (inventory cost is not modelled)",
+        f"A {to_mode} carrier with capacity on this route",
+    ]
+    if to_mode in ("sea", "rail"):
+        checks.append(
+            f"{to_mode.title()} distance is a screening estimate, "
+            f"{factors.circuity(to_mode):.2f} times the straight line"
+        )
 
     moved = tonnes(lane["total_weight_kg"])
     return _problem(
@@ -282,7 +434,7 @@ def _mode_switch_problem(lane, totals):
         title=f"{lane['origin_name']} to {lane['dest_name']}",
         happening=(
             f"{moved} a year {'travel' if moved.endswith('tonnes') else 'travels'} "
-            f"{lane['distance_km']:,.0f} km by {from_mode}."
+            f"about {route['now']['route_km']:,.0f} km by {from_mode}."
         ),
         why=(
             f"Per tonne carried one kilometre, {from_mode} costs about "
@@ -293,6 +445,10 @@ def _mode_switch_problem(lane, totals):
         cost_at_stake=switch["saved_cost"],
         co2e_at_stake=switch["saved_co2e"],
         totals=totals,
+        kind="mode_switch",
+        change=f"{from_mode.title()} to {to_mode.title()}",
+        checks=checks,
+        route=route,
         action=f"Move this route from {from_mode} to {to_mode}.",
         note=(
             f"Transit time goes from {days(before_days)} to {days(after_days)}, "
@@ -306,13 +462,13 @@ def _mode_switch_problem(lane, totals):
     )
 
 
-def _problems(lanes, stages, totals):
+def _problems(lanes, stages, totals, context):
     """Every problem across the chain, ranked so they can be compared."""
     found = []
 
     for lane in lanes:
         if lane["flagged"] and lane["switch"]:
-            found.append(_mode_switch_problem(lane, totals))
+            found.append(_mode_switch_problem(lane, totals, context))
 
     by_key = {stage["key"]: stage for stage in stages}
 
@@ -339,6 +495,14 @@ def _problems(lanes, stages, totals):
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
+                kind="supplier_on_time",
+                change="Enforce on-time delivery",
+                checks=[
+                    f"Assumes {factors.EXPEDITE_SHARE_OF_LATE:.0%} of late "
+                    "deliveries are flown in",
+                    "A contract conversation, not a freight change",
+                    "Your own expedite records would sharpen the figure",
+                ],
                 action=(
                     "Put this supplier's on-time rate into the contract, or "
                     "hold enough stock to absorb a late delivery without air."
@@ -367,6 +531,12 @@ def _problems(lanes, stages, totals):
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
+                kind="warehouse_grid",
+                change="Cleaner power at this site",
+                checks=[
+                    "Price of a renewable tariff at this site",
+                    "Room at a cleaner site before moving any volume",
+                ],
                 action=(
                     "Move this site onto cleaner electricity, or shift volume "
                     "to one of your cleaner sites."
@@ -393,6 +563,12 @@ def _problems(lanes, stages, totals):
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
+                kind="cost_to_serve",
+                change="Serve from a nearer site",
+                checks=[
+                    "The nearer site has the space and the stock",
+                    "Carbon change is not estimated",
+                ],
                 action="Serve this destination from your nearest other warehouse.",
                 note=(
                     "Check the nearer site has the space and the stock. Moving "
@@ -423,6 +599,12 @@ def _problems(lanes, stages, totals):
                 cost_at_stake=item["cost_at_stake"],
                 co2e_at_stake=item["co2e_at_stake"],
                 totals=totals,
+                kind="returns",
+                change="Fix why goods come back",
+                checks=[
+                    "The cause: sizing, listing, photographs or transit damage",
+                    "Changing transport mode here fixes little",
+                ],
                 action=(
                     "Find out why goods come back on this route before "
                     "touching its freight."
@@ -485,10 +667,20 @@ def _problem(
     edge_id=None,
     effort=None,
     co2e_line=None,
+    kind=None,
+    change=None,
+    checks=None,
+    route=None,
 ):
     cost_share = cost_at_stake / totals["cost"] if totals["cost"] else 0.0
     co2e_share = co2e_at_stake / totals["co2e"] if totals["co2e"] else 0.0
     return {
+        "kind": kind,
+        "change": change,
+        "checks": checks or [],
+        "route": route,
+        "confidence": route["confidence"] if route else None,
+        "confidence_label": route["confidence_label"] if route else None,
         "stage": stage,
         "title": title,
         "happening": happening,
@@ -532,6 +724,14 @@ def _step(number, problem):
 
     return {
         "number": number,
+        "kind": problem["kind"],
+        "change": problem["change"],
+        "checks": problem["checks"],
+        "route": problem["route"],
+        "confidence": problem["confidence"],
+        "confidence_label": problem["confidence_label"],
+        "cost_at_stake": problem["cost_at_stake"],
+        "co2e_at_stake": problem["co2e_at_stake"],
         "stage": problem["stage"],
         "title": problem["title"],
         "action": problem["action"],
@@ -599,18 +799,16 @@ def _method():
                 "of orders become a handful of decisions.",
             ),
             (
-                "Distances are straight lines",
-                "Distance is measured point to point across the earth. Real "
-                "freight does not travel that way, and how far it strays "
-                "depends on the mode: aircraft fly close to the straight "
-                "line, road runs about a quarter longer, rail about 40 "
-                "percent, and a ship routing around land or through a canal "
-                "can travel twice the straight-line distance. Measuring every "
-                "mode the same way therefore understates the slower modes "
-                "most, and those are the ones suggested here. Which route to "
-                "change is rarely affected, because sea and rail win by so "
-                "much per tonne carried. How much it saves is optimistic. "
-                "Read the savings as an upper bound.",
+                "Distances are screening estimates",
+                "Each route's straight-line distance is multiplied by a "
+                "per-mode allowance for how far freight really travels: "
+                + ", ".join(
+                    f"{mode} {value:.2f}" for mode, value in factors.CIRCUITY.items()
+                )
+                + ". A candidate mode is always measured over the route's own "
+                "two ends with its own multiplier. These are assumptions, not "
+                "routed distances, and sea in particular varies widely from "
+                "route to route.",
             ),
             (
                 "Only sensible mode changes are offered",
@@ -640,11 +838,10 @@ def _method():
             ),
         ],
         "limits": [
-            "Savings are an upper bound. Distance is measured as a straight "
-            "line for every mode, but a ship rounding a continent or taking a "
-            "canal can travel twice that, and rail runs further than road. "
-            "The slower modes are the ones suggested here, so their cost and "
-            "carbon are understated more than the modes they replace.",
+            "Distances are screening estimates: the straight line times a "
+            "multiplier per mode, not a real road, rail or sea route. A sea "
+            "route rounding a continent can be nearly three times the "
+            "straight line, well above the multiplier used.",
             "Inventory is not modelled. Slower shipping ties up more working "
             "capital in stock, and that cost is not counted here.",
             "Warehouse capacity is not modelled. Moving volume to another site "

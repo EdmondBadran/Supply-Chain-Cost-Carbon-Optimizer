@@ -8,7 +8,7 @@ the chain the cost and carbon land rather than by geography.
 
 from statistics import median
 
-from . import analysis, factors, scoring
+from . import analysis, distance, factors, scoring
 
 # A warehouse burning this much more carbon per tonne than the median is
 # usually sitting on a dirty grid rather than being badly run.
@@ -303,8 +303,8 @@ def _suppliers_stage(suppliers, inbound):
         problems.append(
             _problem(
                 lane["origin_name"],
-                f"Ships to {lane['dest_name']} by {lane['mode']} over "
-                f"{round(lane['distance_km']):,} km",
+                f"Ships to {lane['dest_name']} by {lane['mode']} over about "
+                f"{round(distance.by_mode(lane['distance_km'], lane['mode'])):,} km",
                 0.0,
                 0.0,
                 lane["id"],
@@ -334,7 +334,8 @@ def _freight_stage(key, name, blurb, lanes):
         problems.append(
             _problem(
                 f"{lane['origin_name']} to {lane['dest_name']}",
-                f"{round(lane['distance_km']):,} km by {lane['mode']}, "
+                f"about {round(distance.by_mode(lane['distance_km'], lane['mode'])):,} km "
+                f"by {lane['mode']}, "
                 f"{round(lane['total_weight_kg'] / 1000):,} t a year",
                 switch["saved_cost"],
                 switch["saved_co2e"],

@@ -5,15 +5,22 @@ tonne-km moved, orders shipped, returns handled, and each lane's share of the
 warehouse it ships from.
 """
 
-from . import factors
+from . import distance, factors
+
+
+def tonne_km(weight_kg, straight_km, mode):
+    """Tonnes times the distance this mode covers over the route."""
+    return (weight_kg / 1000.0) * distance.by_mode(straight_km, mode)
 
 
 def lane_costs(weight_kg, distance_km, mode, order_count, return_count, rate=None):
-    """Cost of one lane. `rate` overrides the published cost factor for the
-    mode, which is how the uncertainty run in stats.py re-prices the network
+    """Cost of one lane. `distance_km` is the route's straight-line distance;
+    the modal distance is worked out here for `mode`, so a candidate mode is
+    always priced over its own ground. `rate` overrides the published cost
+    factor, which is how the uncertainty run in stats.py re-prices the network
     without a second copy of this arithmetic."""
-    tonne_km = (weight_kg / 1000.0) * distance_km
-    transport = tonne_km * (factors.cost_factor(mode) if rate is None else rate)
+    moved = tonne_km(weight_kg, distance_km, mode)
+    transport = moved * (factors.cost_factor(mode) if rate is None else rate)
     packaging = order_count * factors.PACKAGING_COST_PER_ORDER
 
     returns = 0.0
@@ -28,10 +35,9 @@ def lane_costs(weight_kg, distance_km, mode, order_count, return_count, rate=Non
 
 
 def lane_emissions(weight_kg, distance_km, mode, order_count, return_count, rate=None):
-    """Emissions of one lane. `rate` overrides the published emission factor,
-    for the same reason as lane_costs above."""
-    tonne_km = (weight_kg / 1000.0) * distance_km
-    transport = tonne_km * (factors.emission_factor(mode) if rate is None else rate)
+    """Emissions of one lane. Distance and `rate` work as in lane_costs."""
+    moved = tonne_km(weight_kg, distance_km, mode)
+    transport = moved * (factors.emission_factor(mode) if rate is None else rate)
     packaging = order_count * factors.PACKAGING_KG_CO2E_PER_ORDER
 
     returns = 0.0
@@ -59,20 +65,24 @@ def expedite_penalty(weight_kg, distance_km, mode, on_time_rate):
         return None
 
     share = (1.0 - on_time_rate) * factors.EXPEDITE_SHARE_OF_LATE
-    tonne_km = (weight_kg / 1000.0) * distance_km * share
+    weight = weight_kg * share
+    # Air and the usual mode cover different distances over the same route,
+    # so each side is priced over its own.
+    by_air = tonne_km(weight, distance_km, "air")
+    usual = tonne_km(weight, distance_km, mode)
     return {
         "share": share,
-        "cost": tonne_km * (factors.cost_factor("air") - factors.cost_factor(mode)),
-        "co2e": tonne_km
-        * (factors.emission_factor("air") - factors.emission_factor(mode)),
+        "cost": by_air * factors.cost_factor("air") - usual * factors.cost_factor(mode),
+        "co2e": by_air * factors.emission_factor("air")
+        - usual * factors.emission_factor(mode),
     }
 
 
 def lane_transit_days(distance_km, mode):
     """Rough door-to-door days for a lane, so a mode switch can be priced in
-    lead time as well as money and carbon."""
+    lead time as well as money and carbon. Takes the straight-line distance."""
     return (
-        distance_km / factors.transit_km_per_day(mode)
+        distance.by_mode(distance_km, mode) / factors.transit_km_per_day(mode)
         + factors.transit_fixed_days(mode)
     )
 
@@ -148,8 +158,13 @@ def run(conn):
 
 
 def totals(conn):
+    # Tonne-km is summed over each route's modal distance, the same distance
+    # its cost and carbon were priced over.
+    circuity = " ".join(
+        f"WHEN '{mode}' THEN {value}" for mode, value in factors.CIRCUITY.items()
+    )
     row = conn.execute(
-        """
+        f"""
         SELECT
             SUM(transport_cost + handling_cost + returns_cost) AS cost,
             SUM(transport_co2e + packaging_co2e + warehouse_co2e + returns_co2e) AS co2e,
@@ -160,7 +175,8 @@ def totals(conn):
             SUM(packaging_co2e) AS packaging_co2e,
             SUM(warehouse_co2e) AS warehouse_co2e,
             SUM(returns_co2e) AS returns_co2e,
-            SUM(total_weight_kg * distance_km / 1000.0) AS tonne_km
+            SUM(total_weight_kg * distance_km / 1000.0
+                * CASE mode {circuity} ELSE 1.0 END) AS tonne_km
         FROM edges
         """
     ).fetchone()

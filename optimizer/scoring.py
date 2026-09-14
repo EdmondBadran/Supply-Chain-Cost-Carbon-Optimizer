@@ -7,7 +7,7 @@ ones where a single change pays twice, and those are what this ranks.
 
 from statistics import median
 
-from . import analysis, factors, geo
+from . import analysis, distance, factors, geo
 
 FLAG_THRESHOLD = 0.25
 
@@ -535,12 +535,48 @@ def simulate_network(conn, closed_ids=(), added=None):
     }
 
 
+def feasibility(straight_km, current_mode, mode):
+    """Why `mode` may not be a real option on this route, or None.
+
+    The ranking never suggests these, because of the gates in plausible_modes.
+    A scenario lets somebody try anything, so it says when the answer they are
+    looking at rests on a route that may not exist.
+    """
+    mode = factors.normalise_mode(mode)
+    if mode == current_mode:
+        return None
+    if mode == "sea" and straight_km < SEA_MINIMUM_KM:
+        return f"Under {SEA_MINIMUM_KM:,} km apart, sea is not a realistic option."
+    if mode == "sea" and current_mode in ("road", "rail"):
+        return "This route runs over land today, so there may be no sea route."
+    if (
+        mode in ("road", "rail")
+        and current_mode in ("air", "sea")
+        and straight_km > SURFACE_RANGE_KM
+    ):
+        return (
+            f"Over {SURFACE_RANGE_KM:,} km apart there may be no {mode} route "
+            "between these two places."
+        )
+    return None
+
+
 def simulate(conn, edge_id, mode=None, origin_id=None):
-    """Recalculate one lane under a different mode or warehouse."""
+    """Recalculate one lane under a different mode or warehouse.
+
+    Before and after are the whole route: freight and returns, which move with
+    the change, plus its share of warehouse and packaging, which is held where
+    it is. The saving is the same either way, but a before figure that matches
+    the route's cost everywhere else on the page is one nobody has to wonder
+    about.
+    """
     edge = conn.execute(
         """
-        SELECT e.*, o.lat AS origin_lat, o.lon AS origin_lon
-        FROM edges e JOIN nodes o ON o.id = e.origin_id
+        SELECT e.*, o.name AS origin_name, d.name AS dest_name,
+               d.lat AS dest_lat, d.lon AS dest_lon
+        FROM edges e
+        JOIN nodes o ON o.id = e.origin_id
+        JOIN nodes d ON d.id = e.dest_id
         WHERE e.id = ?
         """,
         (edge_id,),
@@ -550,49 +586,83 @@ def simulate(conn, edge_id, mode=None, origin_id=None):
 
     edge = dict(edge)
     new_mode = factors.normalise_mode(mode) if mode else edge["mode"]
-    distance = edge["distance_km"]
+    straight = edge["distance_km"]
+    origin_name = edge["origin_name"]
+    moved_origin = False
 
     if origin_id and origin_id != edge["origin_id"]:
         origin = conn.execute(
-            "SELECT lat, lon FROM nodes WHERE id = ?", (origin_id,)
+            "SELECT name, lat, lon, node_type FROM nodes WHERE id = ?", (origin_id,)
         ).fetchone()
-        dest = conn.execute(
-            "SELECT lat, lon FROM nodes WHERE id = ?", (edge["dest_id"],)
-        ).fetchone()
-        if origin is None:
+        if origin is None or origin["node_type"] != "warehouse":
             raise ValueError("no such warehouse")
-        distance = geo.distance_km(
-            origin["lat"], origin["lon"], dest["lat"], dest["lon"]
+        # Distance belongs to the origin and destination actually being
+        # tested, so it is measured again rather than borrowed from the route.
+        straight = distance.straight_km(
+            (origin["lat"], origin["lon"]), (edge["dest_lat"], edge["dest_lon"])
         )
+        origin_name = origin["name"]
+        moved_origin = True
 
     costs = analysis.lane_costs(
         edge["total_weight_kg"],
-        distance,
+        straight,
         new_mode,
         edge["order_count"],
         edge["return_count"],
     )
     emissions = analysis.lane_emissions(
         edge["total_weight_kg"],
-        distance,
+        straight,
         new_mode,
         edge["order_count"],
         edge["return_count"],
     )
 
-    before_cost = edge["transport_cost"] + edge["returns_cost"]
-    before_co2e = edge["transport_co2e"] + edge["returns_co2e"]
-    after_cost = costs["transport"] + costs["returns"]
-    after_co2e = emissions["transport"] + emissions["returns"]
+    fixed_cost = edge["handling_cost"] or 0.0
+    fixed_co2e = (edge["packaging_co2e"] or 0.0) + (edge["warehouse_co2e"] or 0.0)
+    before_freight_cost = edge["transport_cost"] + edge["returns_cost"]
+    before_freight_co2e = edge["transport_co2e"] + edge["returns_co2e"]
+    after_freight_cost = costs["transport"] + costs["returns"]
+    after_freight_co2e = emissions["transport"] + emissions["returns"]
+
+    before = {
+        "mode": edge["mode"],
+        "origin_name": edge["origin_name"],
+        "straight_km": edge["distance_km"],
+        "route_km": distance.by_mode(edge["distance_km"], edge["mode"]),
+        "days": analysis.lane_transit_days(edge["distance_km"], edge["mode"]),
+        "cost": before_freight_cost + fixed_cost,
+        "co2e": before_freight_co2e + fixed_co2e,
+        "freight_cost": before_freight_cost,
+        "freight_co2e": before_freight_co2e,
+    }
+    after = {
+        "mode": new_mode,
+        "origin_name": origin_name,
+        "straight_km": straight,
+        "route_km": distance.by_mode(straight, new_mode),
+        "days": analysis.lane_transit_days(straight, new_mode),
+        "cost": after_freight_cost + fixed_cost,
+        "co2e": after_freight_co2e + fixed_co2e,
+        "freight_cost": after_freight_cost,
+        "freight_co2e": after_freight_co2e,
+    }
+    saved = {"cost": before["cost"] - after["cost"], "co2e": before["co2e"] - after["co2e"]}
 
     return {
         "edge_id": edge_id,
         "mode": new_mode,
-        "distance_km": distance,
-        "before": {"cost": before_cost, "co2e": before_co2e},
-        "after": {"cost": after_cost, "co2e": after_co2e},
-        "saved": {
-            "cost": before_cost - after_cost,
-            "co2e": before_co2e - after_co2e,
+        "distance_km": straight,
+        "origin_name": origin_name,
+        "dest_name": edge["dest_name"],
+        "changed": new_mode != edge["mode"] or moved_origin,
+        "before": before,
+        "after": after,
+        "saved": saved,
+        "saved_pct": {
+            "cost": saved["cost"] / before["cost"] if before["cost"] else 0.0,
+            "co2e": saved["co2e"] / before["co2e"] if before["co2e"] else 0.0,
         },
+        "note": feasibility(straight, edge["mode"], new_mode),
     }

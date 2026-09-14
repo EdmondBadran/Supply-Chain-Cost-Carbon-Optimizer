@@ -1,3 +1,4 @@
+import json
 import sqlite3
 from pathlib import Path
 
@@ -139,6 +140,12 @@ def set_meta(conn, key, value):
 def get_meta(conn, key, default=None):
     row = conn.execute("SELECT value FROM meta WHERE key = ?", (key,)).fetchone()
     return row["value"] if row else default
+
+
+def ingest_report(conn):
+    """What the last load read, kept, excluded and why, or None."""
+    raw = get_meta(conn, "ingest")
+    return json.loads(raw) if raw else None
 
 
 def summary(conn):

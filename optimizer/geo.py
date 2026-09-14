@@ -64,6 +64,13 @@ EXONYMS = {
     "beograd": "belgrade",
     "bucuresti": "bucharest",
     "athina": "athens",
+    # Not translations. These are the names people actually type for places the
+    # table files under something else, and every one of them was an order
+    # thrown out of the analysis with "no match" against it.
+    "new york": "new york city",
+    "bombay": "mumbai",
+    "bangalore": "bengaluru",
+    "saigon": "ho chi minh city",
 }
 
 
