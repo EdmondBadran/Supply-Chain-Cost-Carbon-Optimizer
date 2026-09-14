@@ -161,8 +161,8 @@ class Routes(unittest.TestCase):
         response = self.client.get("/report/summary")
         self.assertEqual(response.status_code, 200)
         body = response.get_data(as_text=True)
-        for text in ("Executive summary", "Top recommendations", "Check before acting",
-                     "How sure to be", "Major assumptions"):
+        for text in ("Executive summary", "Biggest opportunities", "Check before acting",
+                     "How confident", "Important assumptions", "Data health"):
             with self.subTest(text=text):
                 self.assertIn(text, body)
 
