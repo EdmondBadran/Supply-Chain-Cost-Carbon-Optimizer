@@ -22,9 +22,14 @@ shipping changes that cut cost and carbon, upload a year of orders or explore
 an example, three steps, and one example result.
 
 **The upload** asks for five columns and says what each one means, with an
-example file to copy. Optional warehouse and supplier files sit behind a
-disclosure. A file that cannot be read gets a plain explanation of what to
-fix, with the loader's own message underneath.
+example file to copy. It also recognises common alternative headings (Ship
+From City, Weight (kg), Transport Mode, and so on), and if a column it needs
+still isn't there under a name it knows, it reads the file's own heading row
+in the browser and asks which of your columns holds it, before anything is
+sent. Optional warehouse and supplier files sit behind a disclosure, and an
+optional company name is printed on the results and exports. A file that
+cannot be read gets a plain explanation of what to fix, with the loader's own
+message underneath.
 
 **The results** open on the decision: how many changes are worth reviewing,
 what they could save a year in cost and CO2e, one button into the top change,
@@ -108,7 +113,10 @@ to the matching part of the report.
 
 ## Your own data
 
-The orders file needs these columns:
+The orders file needs these columns, or a heading that means the same
+thing (`Shipper` for `origin_name`, `Weight (kg)` for `weight_kg`, and so
+on). Anything still unrecognised gets matched by hand on the upload page
+before the file is sent:
 
 | Column | What it is |
 | --- | --- |
@@ -121,6 +129,12 @@ The orders file needs these columns:
 These are optional and make the results better: `origin_country`,
 `dest_country`, `order_ref` (or `order_id`), `order_date`, `customer_id`,
 `units`, `product_category`, `order_value`, `returned`.
+
+The file can be comma or semicolon separated, and a semicolon file's decimal
+commas (`1.000,5`) are read as `1000.5`. It can be saved as UTF-8 or in the
+Windows encoding Excel writes by default. Mode also reads truck, LTL, ocean
+freight, air cargo and a few other everyday names, not just road, rail, sea
+and air.
 
 Cities are resolved against a bundled GeoNames table, 34,135 cities across
 244 countries, so it works anywhere and does not call out to a geocoding API.
