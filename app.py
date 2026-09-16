@@ -666,6 +666,21 @@ def start_upload():
     return redirect(url_for("upload_page"))
 
 
+@app.route("/healthz")
+def healthz():
+    """Alive, without touching anything.
+
+    Point an uptime check here rather than at the front page. Every visitor
+    without a cookie gets a workspace, and the front page fills it with the
+    sample so it never opens empty, so a monitor polling `/` every thirty
+    seconds would mint a new in-memory database and a full sample dataset on
+    every poll and push real visitors out of the registry.
+
+    Nothing here opens a workspace, reads the session, or renders a template.
+    """
+    return Response("ok", mimetype="text/plain")
+
+
 @app.route("/method")
 def method():
     """How it works, in two boxes. The full method is a document sent on

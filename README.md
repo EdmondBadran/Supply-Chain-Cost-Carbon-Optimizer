@@ -110,19 +110,68 @@ Reloading and debugging are separate on purpose, because they want opposite
 defaults: you always want the first locally and never want the second
 anywhere else.
 
-On a real address, set two things in the environment first:
+Every form post carries a CSRF token, every response carries a content
+security policy, and uploads, the JSON endpoints and the exports each have
+their own per visitor rate limit. State changes are written to the
+`overlap.audit` log as JSON, with counts rather than content: no city,
+customer, company or filename.
+
+## Deploying it
+
+`app.py` is the development server. A deployment runs `wsgi.py`, which serves
+the same app under waitress:
+
+```
+python wsgi.py
+```
+
+There is a `Procfile` for platforms that read one. Set these first:
 
 | Variable | Why |
 | --- | --- |
-| `SECRET_KEY` | Signs the session cookie. Without it a restart signs everybody out, and the app refuses to start once `HTTPS_ONLY` is set. |
-| `HTTPS_ONLY=1` | Marks the cookie secure and sends HSTS. |
+| `SECRET_KEY` | Signs the session cookie. Without it every restart signs everybody out and loses what they uploaded. The app refuses to start without it once `HTTPS_ONLY` is set. |
+| `HTTPS_ONLY=1` | Marks the cookie secure and sends HSTS. Set it once TLS is in front. |
+| `PORT` | Defaults to 5000. Most platforms set this for you. |
+| `HOST` | Defaults to `0.0.0.0`. |
+| `THREADS` | Defaults to 8. |
+| `BEHIND_PROXY=1` | Makes the rate limiter read `X-Forwarded-For`. Only safe when something in front actually sets it. |
 
-`BEHIND_PROXY=1` makes the rate limiter read `X-Forwarded-For`, which is only
-safe when something in front of the app actually sets it. Every form post
-carries a CSRF token, every response carries a content security policy, and
-uploads, the JSON endpoints and the exports each have their own per visitor
-rate limit. State changes are written to the `overlap.audit` log as JSON, with
-counts rather than content: no city, customer, company or filename. Both sample companies are invented: their data is generated to
+**Run one process, and scale it with threads.** Every visitor's workspace lives
+in this process's memory, and so do the rate limit counters, so the app is safe
+across threads (it locks) and wrong across processes: a second worker would
+hand visitors an empty workspace at random. Waitress is one process with a
+thread pool, which is that shape exactly. Do not put gunicorn in front of this
+with `-w 2`. Scaling past one process means making the workspaces shared
+first, and that is a different design.
+
+**Point your health check at `/healthz`**, not at `/`. Every visitor without a
+cookie gets a workspace and the front page fills it with the sample so it never
+opens empty, so a monitor polling `/` would mint a database and a copy of the
+sample on every poll. `/healthz` touches nothing and sets no cookie.
+
+One process holds at most 64 workspaces and drops anything idle for two hours,
+so the ceiling is roughly 64 people reading results at once. That is a
+deliberate consequence of keeping uploads out of any database, not an oversight.
+
+## What it is not
+
+A screening tool, not a routing engine and not a quote. Before telling anyone
+the figures are theirs, know these:
+
+- **Sea distance is a flat 1.60 times great circle.** Measured against the
+  sample routes it runs 0.9 to 2.8 times, so short crossings are overstated and
+  routes around a continent understated. Rankings did not move under measured
+  distances; transit times roughly doubled on long sea routes, so the days in
+  transit are the softest figures on the page.
+- **No cost factor has a citable source.** Emission factors follow DEFRA and
+  GLEC. The cost side is the author's defaults, and air at 0.19 per tonne-km
+  puts air at 24 times sea where 10 to 15 is commonly cited. This is why
+  `/improve` exists: a customer's own rates replace the guess.
+- **Carrier availability, lane contracts, capacity and border constraints are
+  not modelled.** A change marked Ready to act still has to clear those with
+  whoever runs the lane.
+
+The tool says all of this on the page as well, under Data and assumptions. Both sample companies are invented: their data is generated to
 follow realistic patterns, and every page showing their figures says so.
 
     /                 the landing page, with live results on the loaded data
@@ -349,7 +398,9 @@ textbook, and numpy would buy nothing but a wheel to install.
 
 ## Built with
 
-Python, Flask and SQLite, with D3 for the map. Flask is the only dependency.
+Python, Flask and SQLite, with D3 for the map. Flask is the only thing the
+analysis needs; waitress serves it in production and nothing imports it
+otherwise.
 No build step, no frontend framework, no API keys. It runs offline.
 
 ## Layout
