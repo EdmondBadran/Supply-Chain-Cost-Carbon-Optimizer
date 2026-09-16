@@ -261,5 +261,109 @@ class RowsThatLoadButAreWorthALook(unittest.TestCase):
         self.assertEqual(self.warnings(report, "distance"), [])
 
 
+def load_bytes(data, columns=None):
+    """Load a file given as bytes, so encodings other than UTF-8 can be tried."""
+    folder = Path(tempfile.mkdtemp(prefix="sco-test-"))
+    path = folder / "orders.csv"
+    path.write_bytes(data)
+    conn = sqlite3.connect(":memory:")
+    conn.row_factory = sqlite3.Row
+    db.init(conn)
+    return conn, ingest.load(conn, path, columns=columns)
+
+
+class FilesAsPeopleExportThem(unittest.TestCase):
+    """Headings, separators and number formats from real exports.
+
+    A file that says the same thing under different headings, or was saved by
+    Excel in a European locale, used to stop at the upload with nothing but a
+    list of column names. Each of these has to load to the same orders as the
+    plain file, and say what it did.
+    """
+
+    PLAIN = (
+        "origin_name,origin_city,dest_city,weight_kg,mode\n"
+        "Depot,Stockholm,Oslo,1000.5,road\n"
+        "Depot,Stockholm,Helsinki,250,sea\n"
+    )
+
+    def weights(self, conn):
+        return sorted(row[0] for row in conn.execute("SELECT weight_kg FROM orders"))
+
+    def test_recognised_headings_load_and_are_named(self):
+        conn, report = load(
+            "Shipper,Ship From City,Destination City,Weight (kg),Transport Mode\n"
+            "Depot,Stockholm,Oslo,1000.5,road\n"
+            "Depot,Stockholm,Helsinki,250,sea\n"
+        )
+        self.assertEqual(report["orders_loaded"], 2)
+        self.assertEqual(self.weights(conn), [250.0, 1000.5])
+        matched = {item["column"]: item["heading"] for item in report["columns_matched"]}
+        self.assertEqual(matched["origin_city"], "Ship From City")
+        self.assertEqual(matched["mode"], "Transport Mode")
+        # Weight (kg) is weight_kg once reduced, so it is not reported as a rename.
+        self.assertNotIn("weight_kg", matched)
+
+    def test_a_plain_file_reports_no_renames(self):
+        conn, report = load(self.PLAIN)
+        self.assertEqual(report["columns_matched"], [])
+
+    def test_a_heading_that_could_mean_two_things_is_not_guessed(self):
+        with self.assertRaises(ingest.ValidationError) as caught:
+            load(
+                "origin_name,origin_city,dest_city,weight,mode\n"
+                "Depot,Stockholm,Oslo,1000,road\n"
+            )
+        self.assertIn("weight_kg", str(caught.exception))
+        self.assertIn("weight", caught.exception.headings)
+
+    def test_a_column_matched_by_hand_is_used(self):
+        conn, report = load_bytes(
+            b"origin_name,origin_city,dest_city,gross,mode\n"
+            b"Depot,Stockholm,Oslo,1000,road\n",
+            columns={"weight_kg": "gross"},
+        )
+        self.assertEqual(self.weights(conn), [1000.0])
+        self.assertEqual(
+            report["columns_matched"],
+            [{"column": "weight_kg", "heading": "gross", "how": "chosen"}],
+        )
+
+    def test_a_semicolon_file_with_decimal_commas_reads_the_same(self):
+        conn, report = load(
+            "origin_name;origin_city;dest_city;weight_kg;mode\n"
+            "Depot;Stockholm;Oslo;1.000,5;road\n"
+            "Depot;Stockholm;Helsinki;250;sea\n"
+        )
+        self.assertEqual(report["orders_loaded"], 2)
+        self.assertEqual(self.weights(conn), [250.0, 1000.5])
+
+    def test_a_comma_file_keeps_thousands_separators(self):
+        conn, report = load(
+            'origin_name,origin_city,dest_city,weight_kg,mode\n'
+            'Depot,Stockholm,Oslo,"1,000",road\n'
+        )
+        self.assertEqual(self.weights(conn), [1000.0])
+
+    def test_a_windows_encoded_file_loads(self):
+        conn, report = load_bytes(
+            "origin_name,origin_city,dest_city,weight_kg,mode\n"
+            "Rösteriet,Malmö,Oslo,300,road\n".encode("cp1252")
+        )
+        self.assertEqual(report["orders_loaded"], 1)
+        name = conn.execute("SELECT name FROM nodes WHERE node_type = 'warehouse'").fetchone()[0]
+        self.assertEqual(name, "Rösteriet")
+
+    def test_everyday_mode_names_are_read(self):
+        conn, report = load(
+            "origin_name,origin_city,dest_city,weight_kg,mode\n"
+            "Depot,Stockholm,Oslo,100,LTL\n"
+            "Depot,Stockholm,Helsinki,100,Ocean Freight\n"
+            "Depot,Stockholm,Tokyo,100,air-cargo\n"
+        )
+        modes = sorted(row[0] for row in conn.execute("SELECT mode FROM orders"))
+        self.assertEqual(modes, ["air", "road", "sea"])
+
+
 if __name__ == "__main__":
     unittest.main()

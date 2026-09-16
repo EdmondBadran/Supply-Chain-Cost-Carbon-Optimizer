@@ -40,6 +40,13 @@
     {% endfor %}
   </ul>
 
+  {% if ingest.columns_matched %}
+  <p class="datacheck-weight datacheck-columns">
+    Read under your own column names:
+    {% for item in ingest.columns_matched %}{{ item.heading }} as <code>{{ item.column }}</code>{{ ", " if not loop.last }}{% endfor %}.
+  </p>
+  {% endif %}
+
   <p class="datacheck-weight">
     {{ "{:,.0f}".format(ingest.weight_loaded_kg) }} kg included of
     {{ "{:,.0f}".format(ingest.weight_in_file_kg) }} kg readable in the file{% if ingest.weight_excluded_kg > 0.5 %},

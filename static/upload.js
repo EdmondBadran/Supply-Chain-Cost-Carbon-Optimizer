@@ -1,7 +1,8 @@
 // The upload area. It names the file that was chosen or dropped, catches a
-// file that is not a CSV before it is sent, and says the analysis is running
-// while the server works. The server still checks everything; this only
-// saves a round trip for the mistakes a browser can see.
+// file that is not a CSV before it is sent, asks which column is which when
+// the file's headings are not ones the loader knows, and says the analysis is
+// running while the server works. The server still checks everything; this
+// only saves a round trip for the mistakes a browser can see.
 
 const form = document.querySelector("[data-upload]");
 
@@ -12,6 +13,16 @@ if (form) {
     const hint = form.querySelector("[data-drop-hint]");
     const error = form.querySelector("[data-drop-error]");
     const submit = form.querySelector("[data-upload-submit]");
+    const matcher = form.querySelector("[data-matcher]");
+    const matcherTitle = form.querySelector("[data-matcher-title]");
+    const matcherFields = form.querySelector("[data-matcher-fields]");
+
+    let guide = { required: [], aliases: {} };
+    try {
+        guide = JSON.parse(form.dataset.columns || "{}");
+    } catch {
+        // Without the guide the server still names any missing column.
+    }
 
     const startTitle = title.innerHTML;
     const startHint = hint.textContent;
@@ -30,9 +41,103 @@ if (form) {
         zone.classList.toggle("has-error", Boolean(message));
     };
 
-    const update = () => {
+    // The same reduction the loader applies, so Weight (kg) is weight_kg here too.
+    const key = (name) =>
+        String(name || "").trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+
+    const splitLine = (line, delimiter) => {
+        const cells = [];
+        let cell = "";
+        let quoted = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (quoted) {
+                if (ch === '"' && line[i + 1] === '"') {
+                    cell += '"';
+                    i++;
+                } else if (ch === '"') {
+                    quoted = false;
+                } else {
+                    cell += ch;
+                }
+            } else if (ch === '"') {
+                quoted = true;
+            } else if (ch === delimiter) {
+                cells.push(cell);
+                cell = "";
+            } else {
+                cell += ch;
+            }
+        }
+        cells.push(cell);
+        return cells.map((value) => value.trim());
+    };
+
+    const readHead = async (file) => {
+        const text = (await file.slice(0, 65536).text()).replace(/^﻿/, "");
+        const lines = text.split(/\r?\n/).filter((line) => line.trim());
+        const first = lines[0] || "";
+        const delimiter = [";", "\t", "|"].reduce(
+            (best, d) => (first.split(d).length > first.split(best).length ? d : best),
+            ","
+        );
+        return {
+            headings: splitLine(first, delimiter),
+            example: lines[1] ? splitLine(lines[1], delimiter) : [],
+        };
+    };
+
+    const clearMatcher = () => {
+        matcherFields.replaceChildren();
+        matcher.hidden = true;
+    };
+
+    const showMatcher = ({ headings, example }) => {
+        const keys = headings.map(key);
+        const missing = guide.required.filter(
+            ([name]) => !keys.includes(name) && !(guide.aliases[name] || []).some((alias) => keys.includes(alias))
+        );
+        matcherFields.replaceChildren();
+        if (!missing.length || !headings.some(Boolean)) {
+            matcher.hidden = true;
+            return;
+        }
+        matcherTitle.textContent = `Match ${missing.length} column${missing.length === 1 ? "" : "s"}`;
+        for (const [name, meaning] of missing) {
+            const field = document.createElement("label");
+            field.className = "field";
+
+            const label = document.createElement("span");
+            label.className = "field-label";
+            label.textContent = meaning;
+
+            const note = document.createElement("span");
+            note.className = "field-hint";
+            note.textContent = `We call this ${name}`;
+
+            const select = document.createElement("select");
+            select.name = `column_${name}`;
+            select.required = true;
+            select.add(new Option("Choose a column from your file", ""));
+            headings.forEach((heading, i) => {
+                if (!heading) return;
+                const sample = example[i] ? ` (for example ${example[i].slice(0, 40)})` : "";
+                select.add(new Option(heading + sample, heading));
+            });
+
+            field.append(label, note, select);
+            matcherFields.append(field);
+        }
+        matcher.hidden = false;
+    };
+
+    // Only the latest file chosen gets to draw the matcher.
+    let reading = 0;
+
+    const update = async () => {
         const file = input.files && input.files[0];
         zone.classList.remove("has-file");
+        clearMatcher();
         if (!file) {
             title.innerHTML = startTitle;
             hint.textContent = startHint;
@@ -48,6 +153,14 @@ if (form) {
         showError("");
         zone.classList.add("has-file");
         hint.textContent = size(file.size) + ", ready to analyze. Choose again to replace it.";
+
+        const mine = ++reading;
+        try {
+            const head = await readHead(file);
+            if (mine === reading) showMatcher(head);
+        } catch {
+            // Unreadable here is not the last word: the server reads it too.
+        }
     };
 
     input.addEventListener("change", update);

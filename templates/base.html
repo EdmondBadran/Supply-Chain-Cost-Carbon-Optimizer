@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="{% block page_kind %}{% endblock %}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="theme-color" content="#121110">
 </head>
-<body>
+<body class="{{ self.page_kind() }}">
 <a class="skip" href="#main">Skip to content</a>
 
 <header class="topbar">

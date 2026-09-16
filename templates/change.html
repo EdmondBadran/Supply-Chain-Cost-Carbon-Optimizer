@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}Recommendation brief: priority {{ rank }}{% endblock %}
+{% block page_kind %}print-sheet{% endblock %}
+
 
 {% from "parts/_units.html" import co2e %}
 {% from "parts/_ui.html" import usd, pct, days, mode, icon, sample_note, rec_headline, group_badge, impact, confidence_plain, audit, estimate_tag with context %}

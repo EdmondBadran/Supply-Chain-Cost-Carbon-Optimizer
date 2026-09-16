@@ -1584,6 +1584,13 @@ details:not(.disclosure) > summary:hover {
     color: var(--ink);
 }
 
+.field-optional {
+    margin-left: 6px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--ink-3);
+}
+
 .field-hint {
     display: block;
     margin-top: 4px;
@@ -1596,6 +1603,38 @@ details:not(.disclosure) > summary:hover {
 .upload-go {
     width: 100%;
     margin-top: 20px;
+}
+
+/* Shown only when the chosen file lacks a column under any name we know. */
+.matcher {
+    margin: 18px 0 0;
+    padding: 16px 20px 20px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-lg);
+    background: var(--panel);
+}
+
+.matcher-title {
+    padding: 0;
+    font-family: var(--sans);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+}
+
+.matcher-lede {
+    margin-top: 4px;
+    font-family: var(--sans);
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+}
+
+.matcher .field select {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 8px;
 }
 
 .upload-privacy {
@@ -4777,7 +4816,8 @@ details:not(.disclosure) > summary:hover {
     letter-spacing: -0.03em;
 }
 
-.es-head .es-meta { margin-top: 14px; font-family: var(--sans); font-size: 15px; color: var(--ink-2); }
+.es-head .es-subject { margin-top: 16px; font-family: var(--sans); font-size: 19px; font-weight: 600; color: var(--ink); }
+.es-head .es-meta { margin-top: 6px; font-family: var(--sans); font-size: 15px; color: var(--ink-2); }
 .es-head .sample-note { margin-top: 12px; }
 
 .es-metrics {
@@ -5389,7 +5429,9 @@ details:not(.disclosure) > summary:hover {
     .zoom-controls,
     .network-controls,
     .tip,
-    .trouble {
+    .trouble,
+    .ready .btn,
+    .matcher {
         display: none !important;
     }
 
@@ -5465,13 +5507,18 @@ details:not(.disclosure) > summary:hover {
     }
 }
 
-@page cover {
-    size: auto;
-    margin: 0;
-    background: #121110;
+/* The cover is the first sheet of the report page, not a page type of its
+   own. Switching page type at the very first element makes Firefox and Safari
+   start a fresh sheet there, which printed an empty first page. */
+@page report:first {
+    @top-left { content: none; }
+    @top-right { content: none; }
+    @bottom-left { content: none; }
+    @bottom-right { content: none; }
 }
 
 @media print {
+    :root.print-report,
     :root:has(.report-layout) {
         color-scheme: dark;
         --ink: #f3f0ea;
@@ -5498,12 +5545,16 @@ details:not(.disclosure) > summary:hover {
         print-color-adjust: exact;
     }
 
+    html.print-report,
+    body.print-report,
     html:has(.report-layout),
     body:has(.report-layout) {
         background: var(--page);
         color: var(--ink);
     }
 
+    html.print-report,
+    body.print-report,
     body:has(.report-layout) {
         page: report;
     }
@@ -5545,18 +5596,17 @@ details:not(.disclosure) > summary:hover {
 
     /* ---- The cover ---- */
     .print-cover {
-        page: cover;
         display: flex;
         flex-direction: column;
-        height: 100vh;
-        padding: 20mm 18mm 16mm;
+        padding: 0 4mm;
         background: #121110;
         color: var(--ink);
+        break-after: page;
     }
 
     .pc-brand { display: flex; align-items: center; gap: 3mm; font-size: 16pt; font-weight: 600; }
     .pc-brand .mark { width: 10mm; height: 10mm; }
-    .pc-title { margin-top: 34mm; }
+    .pc-title { margin-top: 22mm; }
 
     .pc-kicker,
     .pc-label {
@@ -5606,7 +5656,7 @@ details:not(.disclosure) > summary:hover {
     .pc-part { font-size: 12.5pt; font-weight: 600; }
 
     .pc-foot {
-        margin-top: auto;
+        margin-top: 12mm;
         padding-top: 4mm;
         border-top: 1px solid var(--line);
         font-family: var(--sans);
@@ -5841,6 +5891,7 @@ details:not(.disclosure) > summary:hover {
 }
 
 @media print {
+    :root.print-sheet,
     :root:has(.es) {
         color-scheme: dark;
         --ink: #f3f0ea;
@@ -5867,8 +5918,12 @@ details:not(.disclosure) > summary:hover {
         print-color-adjust: exact;
     }
 
+    html.print-sheet,
+    body.print-sheet,
     html:has(.es),
     body:has(.es) { background: var(--page); }
+    html.print-sheet,
+    body.print-sheet,
     body:has(.es) { page: es; }
     body:has(.es) main { max-width: none; padding: 0; font-size: 10pt; line-height: 1.4; }
 
@@ -5921,7 +5976,8 @@ details:not(.disclosure) > summary:hover {
     .es-head { padding-bottom: 4mm; }
     .es-head-top { margin-bottom: 3.5mm; }
     .es h1 { max-width: 32ch; font-size: 19pt; }
-    .es-head .es-meta { margin-top: 2mm; font-size: 9.5pt; }
+    .es-head .es-subject { margin-top: 3mm; font-size: 13pt; }
+    .es-head .es-meta { margin-top: 1.2mm; font-size: 9.5pt; }
 
     .es-metrics { gap: 2.5mm; margin-top: 4mm; }
     .es-metric { padding: 2.5mm 3.5mm; border-radius: 6px; }

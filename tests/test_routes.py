@@ -389,6 +389,53 @@ class Isolation(unittest.TestCase):
         self.assertIn("<code>dest_city</code>", body)
         self.assertIn("the city it was delivered to", body)
 
+    def test_a_missing_column_error_lists_the_file_s_own_columns(self):
+        client = application.app.test_client()
+        body = self.upload(client, b"nothing,useful\n1,2\n").get_data(as_text=True)
+        self.assertIn("Columns in your file: <code>nothing</code>, <code>useful</code>", body)
+
+    def test_columns_matched_on_the_page_reach_the_loader(self):
+        client = application.app.test_client()
+        response = client.post(
+            "/upload",
+            data={
+                "orders": (
+                    io.BytesIO(TINY_CSV.replace(b"weight_kg", b"gross")),
+                    "orders.csv",
+                ),
+                "column_weight_kg": "gross",
+            },
+            content_type="multipart/form-data",
+        )
+        body = response.get_data(as_text=True)
+        self.assertIn("Your analysis is ready", body)
+        self.assertIn("gross as <code>weight_kg</code>", body)
+
+    def test_a_company_name_given_with_the_file_is_what_the_report_says(self):
+        """Without one an upload is described rather than named, which is what
+        a printed copy used to carry instead of whose report it is."""
+        client = application.app.test_client()
+        client.post(
+            "/upload",
+            data={
+                "orders": (io.BytesIO(TINY_CSV), "orders.csv"),
+                "company": "  Nordic Supply AB  ",
+            },
+            content_type="multipart/form-data",
+        )
+        for path in ("/report", "/report/summary"):
+            with self.subTest(path=path):
+                self.assertIn("Nordic Supply AB", client.get(path).get_data(as_text=True))
+
+        plain = application.app.test_client()
+        self.upload(plain)
+        self.assertIn("Your own order data", plain.get("/report/summary").get_data(as_text=True))
+
+    def test_the_upload_page_carries_the_column_guide(self):
+        body = self.upload(application.app.test_client(), b"x\n").get_data(as_text=True)
+        self.assertIn("data-matcher", body)
+        self.assertIn("ship_from_city", body)
+
     def test_an_upload_with_bad_rows_says_what_was_excluded(self):
         client = application.app.test_client()
         response = self.upload(

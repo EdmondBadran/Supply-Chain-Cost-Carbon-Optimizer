@@ -151,6 +151,13 @@ def site_details():
         "expedite_share": factors.EXPEDITE_SHARE_OF_LATE,
         "idle_hours": store.IDLE_TIMEOUT_SECONDS // 3600,
         "required_fields": REQUIRED_FIELDS,
+        # What the upload page needs to spot a missing column before the file
+        # is sent: the loader's own names, meanings and aliases, so the two
+        # cannot disagree.
+        "column_guide": {
+            "required": [[name, meaning] for name, meaning, _ in REQUIRED_FIELDS],
+            "aliases": {key: list(names) for key, names in ingest.HEADER_ALIASES.items()},
+        },
         "transit_material_days": TRANSIT_MATERIAL_DAYS,
         "default_sample": DEFAULT_SAMPLE,
     }
@@ -219,9 +226,19 @@ def index():
         )
 
 
+# How long a company name may be before it stops fitting the places it is
+# printed: the summary header, the report cover and the running footer.
+MAX_COMPANY_NAME = 60
+
+
 def subject_of(conn):
+    """Whose data this is, in the words it should be printed in. A sample says
+    which company it invents; an upload says the name given with the file, and
+    falls back to a description rather than a name nobody chose."""
     sample_key = db.get_meta(conn, "sample")
-    return SAMPLES[sample_key]["label"] if sample_key in SAMPLES else "Your own order data"
+    if sample_key in SAMPLES:
+        return SAMPLES[sample_key]["label"]
+    return db.get_meta(conn, "company") or "Your own order data"
 
 
 def factor_rows():
@@ -686,6 +703,14 @@ def upload():
 
     warehouses = request.files.get("warehouses")
     suppliers = request.files.get("suppliers")
+    # Columns matched by hand on the upload page, where the file's own
+    # headings did not say which was which.
+    company = " ".join((request.form.get("company") or "").split())[:MAX_COMPANY_NAME]
+    columns = {
+        name[len("column_"):]: value
+        for name, value in request.form.items()
+        if name.startswith("column_") and value
+    }
 
     # The upload is spooled to a temporary file only long enough to parse it,
     # then removed in the finally below. What survives the request is the
@@ -712,14 +737,15 @@ def upload():
         with store.workspace() as conn:
             try:
                 report = ingest.load(
-                    conn, orders_path, warehouses_path, suppliers_path
+                    conn, orders_path, warehouses_path, suppliers_path, columns
                 )
                 analysis.run(conn)
                 summary = db.summary(conn)
                 db.set_meta(conn, "source", "upload")
                 db.set_meta(conn, "sample", "")
+                db.set_meta(conn, "company", company)
             except ingest.ValidationError as exc:
-                return render_error(str(exc))
+                return render_error(str(exc), getattr(exc, "headings", None))
             except UnicodeDecodeError:
                 return render_error("That file is not readable as UTF-8 text.")
     finally:
@@ -795,7 +821,7 @@ def network_payload(conn):
     }
 
 
-def friendly_error(message):
+def friendly_error(message, headings=None):
     """An upload problem said the way a person would say it, with what to do
     next. The loader's own words stay underneath as the detail, for whoever
     ends up fixing the file."""
@@ -807,7 +833,10 @@ def friendly_error(message):
         title = "Your file is missing {} required column{}".format(
             len(missing), "" if len(missing) == 1 else "s"
         )
-        advice = "Add or rename these columns in your spreadsheet, then upload it again."
+        advice = (
+            "Choose the file again and match these to your own columns, or "
+            "rename them in your spreadsheet and upload it again."
+        )
     elif "not a csv" in lowered:
         title = "That file is not a CSV"
         advice = (
@@ -852,10 +881,11 @@ def friendly_error(message):
         "advice": advice,
         "detail": text,
         "missing": [(name, FIELD_MEANING.get(name)) for name in missing],
+        "headings": headings or [],
     }
 
 
-def render_error(message):
+def render_error(message, headings=None):
     with store.workspace() as conn:
         return render_template(
             "index.html",
@@ -863,7 +893,7 @@ def render_error(message):
             samples=SAMPLES,
             facts=sample_facts(),
             loaded_sample=db.get_meta(conn, "sample"),
-            error=friendly_error(message),
+            error=friendly_error(message, headings),
         )
 
 

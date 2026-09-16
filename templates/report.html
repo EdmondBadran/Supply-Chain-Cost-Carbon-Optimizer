@@ -2,6 +2,8 @@
 
 {% block title %}{% if report and report.problems %}{{ report.problems|length }} change{{ "s" if report.problems|length != 1 }} worth reviewing{% else %}Your results{% endif %}{% endblock %}
 {% block main_class %}page page-report{% endblock %}
+{% block page_kind %}print-report{% endblock %}
+
 
 {% from "parts/_units.html" import co2e %}
 {% from "parts/_ui.html" import usd, pct, meter, icon, sample_note, rec_detail, confidence_summary with context %}
@@ -35,6 +37,7 @@
    stylesheet has no way to know. #}
 <style media="print">
   @page report { @bottom-left { content: "Overlap, {{ subject }}, {{ generated }}"; } }
+  @page report:first { @bottom-left { content: none; } }
 </style>
 
 <header class="print-cover">

@@ -105,20 +105,28 @@ def cost_factor(mode):
 
 
 def normalise_mode(mode):
-    key = str(mode).strip().lower()
+    key = " ".join(str(mode).strip().lower().replace("-", " ").replace("_", " ").split())
     aliases = {
         "truck": "road",
+        "trucking": "road",
         "ground": "road",
         "lorry": "road",
         "van": "road",
+        "road freight": "road",
+        "ftl": "road",
+        "ltl": "road",
         "train": "rail",
         "freight rail": "rail",
+        "rail freight": "rail",
         "ship": "sea",
         "ocean": "sea",
         "boat": "sea",
+        "sea freight": "sea",
+        "ocean freight": "sea",
         "plane": "air",
         "airfreight": "air",
         "air freight": "air",
+        "air cargo": "air",
     }
     key = aliases.get(key, key)
     if key not in EMISSION_FACTORS:

@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 {% block title %}Executive summary{% endblock %}
+{% block page_kind %}print-sheet{% endblock %}
+
 
 {% from "parts/_units.html" import co2e %}
 {% from "parts/_ui.html" import usd, usd_short, pct, days, mode, meter, icon, sample_note, confidence_summary with context %}
@@ -144,8 +146,9 @@
       {% else %}
       <h1>No changes found that cut both cost and carbon</h1>
       {% endif %}
+      <p class="es-subject">{{ subject }}</p>
       <p class="es-meta">
-        {{ subject }} &middot; {{ "{:,}".format(summary.orders) }} order{{ "s" if summary.orders != 1 }} &middot;
+        {{ "{:,}".format(summary.orders) }} order{{ "s" if summary.orders != 1 }} &middot;
         {{ summary.edges }} route{{ "s" if summary.edges != 1 }} &middot; Generated {{ generated }}
       </p>
       {% if using_sample %}{{ sample_note(subject) }}{% endif %}

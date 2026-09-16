@@ -1,5 +1,8 @@
 import csv
+import io
 import json
+import re
+from pathlib import Path
 
 from . import db, factors, geo
 
@@ -25,6 +28,47 @@ ORDER_REF_COLUMNS = ("order_ref", "order_id", "order_number")
 # Ontario arrives as London, England. Rail is allowed much further because
 # China to Europe rail freight runs past 10,000 km in a straight line.
 SURFACE_LIMIT_KM = {"road": 5000, "rail": 11000}
+
+# Headings other systems give the columns the loader reads, compared after
+# header_key. Each one names its column and nothing else: a heading that could
+# mean two things is left for the person to match on the upload page.
+HEADER_ALIASES = {
+    "origin_name": (
+        "shipper", "shipper_name", "ship_from", "ship_from_name", "sender",
+        "sender_name", "origin_site", "origin_site_name", "from_name",
+    ),
+    "origin_city": (
+        "ship_from_city", "from_city", "shipper_city", "sender_city",
+        "pickup_city", "collection_city", "departure_city", "origin_town",
+    ),
+    "origin_country": (
+        "ship_from_country", "from_country", "shipper_country",
+        "sender_country", "pickup_country", "origin_country_code",
+    ),
+    "dest_city": (
+        "destination_city", "ship_to_city", "to_city", "delivery_city",
+        "consignee_city", "receiver_city", "recipient_city", "customer_city",
+        "dest_town", "destination_town",
+    ),
+    "dest_country": (
+        "destination_country", "ship_to_country", "to_country",
+        "delivery_country", "consignee_country", "receiver_country",
+        "recipient_country", "customer_country", "dest_country_code",
+        "destination_country_code",
+    ),
+    "weight_kg": (
+        "weight_in_kg", "weight_kgs", "gross_weight_kg", "shipment_weight_kg",
+        "total_weight_kg", "kg", "kgs",
+    ),
+    "mode": (
+        "transport_mode", "shipping_mode", "shipment_mode", "freight_mode",
+        "mode_of_transport", "transport_type", "ship_mode",
+    ),
+}
+
+DELIMITERS = (",", ";", "\t", "|")
+
+DECIMAL_COMMA = re.compile(r"^\s*-?\d{1,3}(\.\d{3})*,\d+\s*$|^\s*-?\d+,\d+\s*$")
 
 
 class ValidationError(Exception):
@@ -76,45 +120,110 @@ def _resolve_point(city, country, lat, lon):
     return geo.locate(city, country or None)
 
 
-def read_rows(path):
-    with open(path, newline="", encoding="utf-8-sig") as fh:
-        reader = csv.DictReader(fh)
-        if reader.fieldnames is None:
-            raise ValidationError("the file is empty")
-        reader.fieldnames = [name.strip().lower() for name in reader.fieldnames]
-        missing = REQUIRED_COLUMNS - set(reader.fieldnames)
-        if missing:
-            raise ValidationError(
-                "missing required columns: " + ", ".join(sorted(missing))
-            )
-        rows = list(reader)
+def header_key(name):
+    """A column heading reduced to the form the loader uses: Weight (kg),
+    weight-kg and WEIGHT_KG all become weight_kg."""
+    return re.sub(r"[^a-z0-9]+", "_", str(name or "").strip().lower()).strip("_")
+
+
+def _read_table(path):
+    """The file's heading row and rows, whichever way it was saved.
+
+    Excel saves "CSV" as Windows-1252 unless told otherwise, and in much of
+    Europe it separates fields with semicolons and writes 52,46 for 52.46.
+    All three used to stop the upload or, worse, read 52,46 as 5,246. A
+    decimal comma is only rewritten in a file that does not use commas to
+    separate fields, where it cannot mean anything else.
+    """
+    raw = Path(path).read_bytes()
+    try:
+        text = raw.decode("utf-8-sig")
+    except UnicodeDecodeError:
+        text = raw.decode("cp1252", errors="replace")
+    first = text.split("\n", 1)[0]
+    delimiter = max(DELIMITERS, key=first.count) if first.strip() else ","
+    if first.count(delimiter) == 0:
+        delimiter = ","
+    reader = csv.reader(io.StringIO(text, newline=""), delimiter=delimiter)
+    headings = next(reader, None)
+    rows = [row for row in reader if row]
+    if delimiter != ",":
+        rows = [[_decimal_point(cell) for cell in row] for row in rows]
+    return headings, rows
+
+
+def _decimal_point(cell):
+    return cell.replace(".", "").replace(",", ".") if DECIMAL_COMMA.match(cell) else cell
+
+
+def _as_dicts(names, rows):
+    return [dict(zip(names, row)) for row in rows]
+
+
+def match_columns(headings, chosen=None):
+    """Which heading in the file stands for each column the loader reads.
+
+    A heading already named as the loader expects wins. Then anything the
+    person picked on the upload page, then a recognised alias. Only aliases
+    with one plausible meaning are listed, so a bare "weight", which might be
+    pounds, or "origin", which might be a site or a city, is asked about
+    rather than guessed.
+    """
+    keys = [header_key(name) for name in headings]
+    names = list(keys)
+    matched = []
+    wanted = set(REQUIRED_COLUMNS) | set(HEADER_ALIASES)
+    for column in sorted(wanted):
+        if column in keys:
+            continue
+        position, how = None, None
+        pick = header_key((chosen or {}).get(column))
+        if pick and pick in keys:
+            position, how = keys.index(pick), "chosen"
+        else:
+            for alias in HEADER_ALIASES.get(column, ()):
+                if alias in keys:
+                    position, how = keys.index(alias), "recognised"
+                    break
+        if position is None or names[position] in wanted:
+            continue
+        names[position] = column
+        matched.append({"column": column, "heading": headings[position].strip(), "how": how})
+    return names, matched
+
+
+def read_rows(path, chosen=None):
+    headings, rows = _read_table(path)
+    if not headings or not any(name.strip() for name in headings):
+        raise ValidationError("the file is empty")
+    names, matched = match_columns(headings, chosen)
+    missing = REQUIRED_COLUMNS - set(names)
+    if missing:
+        error = ValidationError("missing required columns: " + ", ".join(sorted(missing)))
+        error.headings = [name.strip() for name in headings if name.strip()]
+        raise error
     if not rows:
         raise ValidationError("the file has headers but no rows")
-    return rows
+    return _as_dicts(names, rows), matched
 
 
 def read_supplier_rows(path):
-    with open(path, newline="", encoding="utf-8-sig") as fh:
-        reader = csv.DictReader(fh)
-        names = [name.strip().lower() for name in (reader.fieldnames or [])]
-        missing = {"name", "city", "supplies", "mode", "annual_weight_kg"} - set(names)
-        if missing:
-            raise ValidationError(
-                "supplier file is missing columns: " + ", ".join(sorted(missing))
-            )
-        reader.fieldnames = names
-        return list(reader)
+    headings, rows = _read_table(path)
+    names = [header_key(name) for name in (headings or [])]
+    missing = {"name", "city", "supplies", "mode", "annual_weight_kg"} - set(names)
+    if missing:
+        raise ValidationError(
+            "supplier file is missing columns: " + ", ".join(sorted(missing))
+        )
+    return _as_dicts(names, rows)
 
 
 def read_warehouse_rows(path):
-    with open(path, newline="", encoding="utf-8-sig") as fh:
-        reader = csv.DictReader(fh)
-        if reader.fieldnames is None or "name" not in [
-            name.strip().lower() for name in reader.fieldnames
-        ]:
-            raise ValidationError("warehouse file needs a name column")
-        reader.fieldnames = [name.strip().lower() for name in reader.fieldnames]
-        return list(reader)
+    headings, rows = _read_table(path)
+    names = [header_key(name) for name in (headings or [])]
+    if "name" not in names:
+        raise ValidationError("warehouse file needs a name column")
+    return _as_dicts(names, rows)
 
 
 def _error(file, line, field, exc):
@@ -125,7 +234,7 @@ def _error(file, line, field, exc):
     return {"file": file, "line": line, "field": field, "problem": problem}
 
 
-def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
+def load(conn, orders_path, warehouses_path=None, suppliers_path=None, columns=None):
     """Load a CSV into the node/edge graph.
 
     A bad row is reported, never fatal and never silent: every row in the
@@ -133,7 +242,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
     reason, and the totals are checked against the file before anything is
     handed on to be analysed.
     """
-    rows = read_rows(orders_path)
+    rows, columns_matched = read_rows(orders_path, columns)
     warehouse_rows = read_warehouse_rows(warehouses_path) if warehouses_path else None
     supplier_rows = read_supplier_rows(suppliers_path) if suppliers_path else None
 
@@ -334,6 +443,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None):
         "nodes": len(node_ids),
         "edges": edge_count,
         "suppliers": len(inbound),
+        "columns_matched": columns_matched,
         "error_count": len(errors),
         "errors": errors[:MAX_REPORTED_ERRORS],
         "warnings": warnings,

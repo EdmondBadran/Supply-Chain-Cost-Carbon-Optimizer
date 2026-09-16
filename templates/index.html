@@ -69,13 +69,16 @@
       {% endfor %}
     </ul>
     {% endif %}
+    {% if error.headings %}
+    <p>Columns in your file: {% for heading in error.headings %}<code>{{ heading }}</code>{{ ", " if not loop.last }}{% endfor %}</p>
+    {% endif %}
     <p class="alert-detail">Details: {{ error.detail }}</p>
   </div>
 </div>
 {% endif %}
 
 <div class="upload-layout">
-  <form class="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" data-upload>
+  <form class="upload-form" method="post" action="{{ url_for('upload') }}" enctype="multipart/form-data" data-upload data-columns='{{ column_guide|tojson }}'>
     <label class="dropzone" for="orders" data-dropzone>
       <span class="dropzone-icon">{{ icon("upload") }}</span>
       <span class="dropzone-title" data-drop-title>Drop your orders CSV here, or <span class="dropzone-browse">choose a file</span></span>
@@ -83,6 +86,12 @@
       <input id="orders" class="dropzone-input" type="file" name="orders" accept=".csv,text/csv" required>
     </label>
     <p class="field-error" data-drop-error role="alert" hidden></p>
+
+    <fieldset class="matcher" data-matcher hidden>
+      <legend class="matcher-title" data-matcher-title>Match your columns</legend>
+      <p class="matcher-lede">Some columns we need are not under names we know. Pick the column in your file that holds each one. Nothing is sent until you choose Analyze.</p>
+      <div data-matcher-fields></div>
+    </fieldset>
 
     <details class="disclosure optional">
       <summary>
@@ -107,6 +116,12 @@
       </div>
     </details>
 
+    <label class="field" for="company">
+      <span class="field-label">Company or report name <span class="field-optional">optional</span></span>
+      <span class="field-hint">Printed at the top of your results, the summary and the exports, so a copy you hand on says whose it is.</span>
+      <input id="company" type="text" name="company" maxlength="60" autocomplete="organization" placeholder="Nordic Supply AB">
+    </label>
+
     <button class="btn btn-primary btn-large upload-go" type="submit" data-upload-submit>Analyze my shipping data</button>
     <p class="upload-privacy">
       {{ icon("lock") }}
@@ -116,7 +131,7 @@
 
   <aside class="upload-guide" aria-labelledby="guide-title">
     <h2 id="guide-title">What your file needs</h2>
-    <p class="guide-lede">Five columns, named like this. Extra columns are fine.</p>
+    <p class="guide-lede">Five columns. Extra columns are fine, and so are your own names: common ones like Ship From City are recognised, and you can match the rest after choosing your file.</p>
     <div class="table-scroll">
       <table class="grid fields">
         <thead><tr><th>Column</th><th>What it means</th><th>Example</th></tr></thead>
@@ -143,8 +158,13 @@
           <code>origin_lon</code>, <code>dest_lat</code> and <code>dest_lon</code>.
         </p>
         <p class="guide-text">
-          Truck, ground, ship and plane are read as road, road, sea and air.
-          Accented city names work either way: Malmö and Malmoe are the same place.
+          Truck, LTL, ocean freight and air cargo are read as road, road, sea
+          and air. Accented city names work either way: Malmö and Malmoe are
+          the same place.
+        </p>
+        <p class="guide-text">
+          Files saved from Excel work whether they use commas or semicolons,
+          and in a semicolon file 52,46 is read as 52.46.
         </p>
       </div>
     </details>
@@ -158,9 +178,9 @@
 
     <h3>What if a column is missing?</h3>
     <p class="guide-text">
-      We tell you which column is missing and what it should contain, and
-      nothing is analyzed until it is there. Rows we cannot read are listed by
-      line number, and the rest of the file still loads.
+      When you choose your file we check its columns, and ask which of yours
+      holds anything we cannot find, before it is sent. Rows we cannot read
+      are listed by line number, and the rest of the file still loads.
     </p>
   </aside>
 </div>
