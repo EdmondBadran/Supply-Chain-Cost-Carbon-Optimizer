@@ -450,17 +450,19 @@ def _sample_line(context):
     )
 
 
-def _date_window(summary):
-    first, last = summary.get("first_order"), summary.get("last_order")
-    if first and last:
+def _coverage(context):
+    """What period the orders cover, as the loader measured it."""
+    return context.get("coverage") or (context.get("ingest") or {}).get("coverage")
+
+
+def _date_window(context):
+    cover = _coverage(context)
+    if not cover:
         return (
-            f"Orders dated {first} to {last}. Every figure treats the loaded "
-            "file as one year of shipping."
+            "The period these orders cover was not measured. Every figure "
+            "treats the loaded file as one year of shipping."
         )
-    return (
-        "The file carries no order dates. Every figure treats the loaded file "
-        "as one year of shipping."
-    )
+    return f"{cover['headline']}. {cover['detail']}"
 
 
 def _title_block(sheet, context, title, subtitle, last_col, width):
@@ -526,7 +528,7 @@ def _summary_sheet(book, context, unit, contents):
         row += 1
         _merged_text(sheet, row, lead, "prose", last, full)
     row += 1
-    _merged_text(sheet, row, _date_window(summary), "prose", last, full)
+    _merged_text(sheet, row, _date_window(context), "prose", last, full)
 
     # The key figures. Shares are formulas on the figures above them.
     row += 2
@@ -1081,11 +1083,24 @@ def _data_sheet(book, context):
     if ingest.get("suppliers"):
         count("Routes from suppliers", ingest.get("suppliers"))
     count("Routes analysed", ingest.get("edges", summary["edges"]), "n_int_bold")
+    cover = _coverage(context)
     if summary.get("first_order"):
-        count("First order date", summary["first_order"], "cell_right", "Every figure treats the loaded file as one year of shipping.")
+        count("First order date", summary["first_order"], "cell_right", _date_window(context))
         count("Last order date", summary["last_order"], "cell_right")
     else:
-        count("Order dates", "None given", "cell_right", "Every figure treats the loaded file as one year of shipping.")
+        count("Order dates", "None given", "cell_right", _date_window(context))
+    if cover:
+        count("Days covered", cover.get("span_days") or 0, "n_int")
+        count(
+            "Scaled to a year by",
+            round(cover["factor"], 4),
+            "cell_right",
+            "Route weights, values, order counts and return counts are "
+            "multiplied by this so every figure describes a year. Warehouse "
+            "rent and electricity arrive annual and are not scaled."
+            if cover["scaled"]
+            else "Nothing was scaled.",
+        )
 
     checks = ingest.get("checks") or {}
     if checks:

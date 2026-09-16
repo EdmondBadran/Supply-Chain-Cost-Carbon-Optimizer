@@ -27,6 +27,7 @@
     <a class="btn btn-secondary btn-large" href="{{ url_for('report_page') }}">Explore an example</a>
     {% else %}
     <form method="post" action="{{ url_for('sample') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="hidden" name="sample" value="{{ default_sample }}">
       <button class="btn btn-secondary btn-large" type="submit">Explore an example</button>
     </form>

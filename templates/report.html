@@ -6,7 +6,7 @@
 
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import usd, pct, meter, icon, sample_note, rec_detail, confidence_summary with context %}
+{% from "parts/_ui.html" import usd, pct, meter, icon, sample_note, rec_detail, confidence_summary, period_line with context %}
 
 {% block content %}
 
@@ -190,6 +190,14 @@
             {{ "{:,}".format(ingest.orders_loaded) }} of {{ "{:,}".format(ingest.rows_in_file) }}
             orders were included{% if ingest.rows_skipped %}, {{ "{:,}".format(ingest.rows_skipped) }} could not be used{% endif %}{% if ingest.warnings %}, {{ ingest.warnings|length }} warning{{ "s" if ingest.warnings|length != 1 }} to review{% endif %}.
           </span>
+        </li>
+        {% endif %}
+        {% if ingest and ingest.coverage %}
+        {% set cover = ingest.coverage %}
+        {% set settled = cover.basis == "full_year" %}
+        <li class="{{ 'is-ok' if settled else 'is-caution' }}">
+          {{ icon("check" if settled else "alert") }}
+          <span><strong>Period covered:</strong> {{ period_line(cover) }}</span>
         </li>
         {% endif %}
         {% if report and report.confidence.tested %}

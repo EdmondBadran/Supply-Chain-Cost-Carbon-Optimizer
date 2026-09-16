@@ -4,7 +4,7 @@ import json
 import re
 from pathlib import Path
 
-from . import db, factors, geo
+from . import coverage, db, factors, geo
 
 REQUIRED_COLUMNS = {
     "origin_name",
@@ -427,6 +427,11 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None, columns=N
     _write_orders(conn, orders, node_ids)
     lane_count = _build_edges(conn)
     _reconcile(conn, orders, lane_count)
+    # Measured and applied before the supplier lanes are written. Those come
+    # from a column called annual_weight_kg and are already a year, so
+    # stretching them with everything else would count the same year twice.
+    span = coverage.measure([order["order_date"] for order in orders])
+    coverage.apply(conn, span["factor"])
     edge_count = lane_count + _write_inbound_edges(conn, inbound, node_ids, nodes)
     conn.commit()
 
@@ -444,6 +449,7 @@ def load(conn, orders_path, warehouses_path=None, suppliers_path=None, columns=N
         "edges": edge_count,
         "suppliers": len(inbound),
         "columns_matched": columns_matched,
+        "coverage": span,
         "error_count": len(errors),
         "errors": errors[:MAX_REPORTED_ERRORS],
         "warnings": warnings,

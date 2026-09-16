@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <meta name="theme-color" content="#121110">
+<meta name="csrf-token" content="{{ csrf_token }}">
 </head>
 <body class="{{ self.page_kind() }}">
 <a class="skip" href="#main">Skip to content</a>
@@ -56,6 +57,7 @@
     </p>
   </div>
 </footer>
+<script src="{{ url_for('static', filename='csrf.js') }}"></script>
 <script src="{{ url_for('static', filename='motion.js') }}" defer></script>
 {% block scripts %}{% endblock %}
 </body>

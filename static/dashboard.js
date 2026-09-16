@@ -519,10 +519,9 @@ function drawWins() {
 
 async function saveEffort(edgeId, effort) {
     try {
-        const response = await fetch("/api/effort", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ edge_id: edgeId, effort: effort }),
+        const response = await postJson("/api/effort", {
+            edge_id: edgeId,
+            effort: effort,
         });
         if (!response.ok) throw new Error(response.status);
         const fresh = (await response.json()).network;
@@ -674,14 +673,10 @@ async function runNetwork() {
     panel.innerHTML = '<p class="whatif-hint">Working it out.</p>';
     let result;
     try {
-        const response = await fetch("/api/network", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                closed: closed,
-                city: document.getElementById("new-site").value,
-                country: document.getElementById("new-site-country").value,
-            }),
+        const response = await postJson("/api/network", {
+            closed: closed,
+            city: document.getElementById("new-site").value,
+            country: document.getElementById("new-site-country").value,
         });
         result = await response.json();
         if (!response.ok) {

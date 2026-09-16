@@ -17,9 +17,13 @@ the methods are standard, and a dependency would buy nothing but a wheel to
 install.
 """
 
+import copy
+import hashlib
+import json
 import math
 import random
-from collections import Counter, defaultdict
+import threading
+from collections import Counter, defaultdict, OrderedDict
 from statistics import median
 
 from . import analysis, factors, scoring
@@ -45,6 +49,49 @@ OUTLIER_Z = 3.5
 # Wilson intervals go wide below this many shipments, which is the point: a
 # lane with four orders and one return has not told you anything yet.
 MIN_RETURNS_SAMPLE = 12
+
+
+# Two thousand reruns take a couple of seconds on a forty route network and
+# scale with the route count, and the same run was being asked for three or
+# four times per page: the report page, the summary, the map payload and both
+# exports each want it. So the answer is remembered against the routes it was
+# computed from, which makes every repeat free and means a page load and the
+# export it links to cannot disagree.
+#
+# The key is the routes themselves rather than a version counter, so anything
+# that changes a figure changes the key on its own, and nothing has to
+# remember to clear this.
+_MEMO_KEEP = 8
+_memo = OrderedDict()
+_memo_lock = threading.Lock()
+
+
+def _memo_key(name, lanes):
+    digest = hashlib.sha256(
+        json.dumps(lanes, sort_keys=True, default=str).encode("utf-8")
+    ).hexdigest()
+    return f"{name}:{digest}"
+
+
+def _remembered(name, lanes, compute):
+    key = _memo_key(name, lanes)
+    with _memo_lock:
+        if key in _memo:
+            _memo.move_to_end(key)
+            return copy.deepcopy(_memo[key])
+    value = compute()
+    with _memo_lock:
+        _memo[key] = value
+        _memo.move_to_end(key)
+        while len(_memo) > _MEMO_KEEP:
+            _memo.popitem(last=False)
+    return copy.deepcopy(value)
+
+
+def forget():
+    """Drop what has been remembered. For tests that time the work."""
+    with _memo_lock:
+        _memo.clear()
 
 
 def build(conn):
@@ -332,7 +379,12 @@ def _rho_verdict(rho):
 
 
 def uncertainty(lanes):
-    """How far the recoverable figure could be out.
+    """How far the recoverable figure could be out. Remembered per route set."""
+    return _remembered("uncertainty", lanes, lambda: _uncertainty(lanes))
+
+
+def _uncertainty(lanes):
+    """The band itself.
 
     Every saving in this tool is a difference between two factor-driven
     estimates, and the factors are published as ranges rather than constants.
@@ -456,6 +508,11 @@ CONFIDENCE_CHECKS = 200
 
 
 def confidence(lanes):
+    """How often each flagged route survives a redraw. Remembered per route set."""
+    return _remembered("confidence", lanes, lambda: _confidence(lanes))
+
+
+def _confidence(lanes):
     """How often each flagged route stays worth changing when the factors are
     redrawn.
 

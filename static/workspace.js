@@ -437,14 +437,10 @@
         refreshResult();
 
         try {
-            const response = await fetch("/api/simulate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    edge_id: state.edge,
-                    mode: state.mode,
-                    origin_id: state.origin,
-                }),
+            const response = await postJson("/api/simulate", {
+                edge_id: state.edge,
+                mode: state.mode,
+                origin_id: state.origin,
             });
             const data = await response.json();
             if (ticket !== state.request) return;

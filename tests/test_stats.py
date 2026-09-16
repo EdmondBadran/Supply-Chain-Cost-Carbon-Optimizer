@@ -263,5 +263,54 @@ class Sections(unittest.TestCase):
         small.close()
 
 
+class Remembering(unittest.TestCase):
+    """The band is two thousand reruns and was being asked for three or four
+    times a page. Remembering it has to be free, invisible, and safe to hand
+    the same answer to two callers who might both write to it."""
+
+    def setUp(self):
+        stats.forget()
+        self.conn = db.connect()
+        db.init(self.conn)
+        import app as application
+        from optimizer import ingest
+
+        ingest.load(self.conn, *application.sample_paths("roastery"))
+        analysis.run(self.conn)
+        self.lanes = scoring.rank(self.conn)
+
+    def tearDown(self):
+        stats.forget()
+        self.conn.close()
+
+    def test_the_same_routes_give_the_same_answer(self):
+        first = stats.uncertainty(self.lanes)
+        second = stats.uncertainty(scoring.rank(self.conn))
+        self.assertEqual(first, second)
+
+    def test_the_repeat_does_not_run_the_trials_again(self):
+        import time
+
+        start = time.perf_counter()
+        stats.uncertainty(self.lanes)
+        cold = time.perf_counter() - start
+
+        start = time.perf_counter()
+        stats.uncertainty(self.lanes)
+        warm = time.perf_counter() - start
+        self.assertLess(warm, cold / 10)
+
+    def test_a_caller_cannot_change_what_the_next_one_reads(self):
+        first = stats.uncertainty(self.lanes)
+        first["p50"] = -1
+        self.assertNotEqual(stats.uncertainty(self.lanes)["p50"], -1)
+
+    def test_routes_that_changed_are_not_answered_from_the_old_run(self):
+        before = stats.uncertainty(self.lanes)
+        heavier = [dict(lane) for lane in self.lanes]
+        heavier[0]["total_weight_kg"] *= 3
+        self.assertNotEqual(stats.uncertainty(heavier), before)
+
+
 if __name__ == "__main__":
     unittest.main()

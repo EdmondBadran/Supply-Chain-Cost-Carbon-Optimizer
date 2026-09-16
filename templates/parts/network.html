@@ -375,6 +375,7 @@
       {% for row in stage_settings %}
       <li class="stage-row{{ ' is-hidden' if row.hidden }}">
         <form method="post" action="{{ url_for('edit_stages') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
           <input type="hidden" name="key" value="{{ row.key }}">
           <input class="stage-name" type="text" name="name" value="{{ row.name }}"
                  required maxlength="40" aria-label="Stage name">
@@ -401,6 +402,7 @@
     </ul>
 
     <form class="stage-add" method="post" action="{{ url_for('edit_stages') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <input type="text" name="name" placeholder="Add a stage, for example Assembly"
              required maxlength="40" aria-label="New stage name">
       <input type="text" name="blurb" placeholder="What happens there"
@@ -409,6 +411,7 @@
     </form>
 
     <form method="post" action="{{ url_for('edit_stages') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
       <button type="submit" name="action" value="reset" class="stage-reset">
         Put the six default stages back
       </button>

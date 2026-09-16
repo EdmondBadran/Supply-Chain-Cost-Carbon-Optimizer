@@ -40,6 +40,20 @@
     {% endfor %}
   </ul>
 
+  {% set cover = ingest.coverage %}
+  {% if cover %}
+  {% set settled = cover.basis == "full_year" %}
+  <p class="datacheck-period {{ 'is-ok' if settled else 'is-caution' }}">
+    {{ icon("check" if settled else "alert") }}<span>
+      <strong>{{ cover.headline }}.</strong> {{ cover.detail }}
+      {% if cover.missing_months %}
+      No orders at all in {{ cover.missing_months|join(", ") }}, so the span is
+      not a continuous period of trading.
+      {% endif %}
+    </span>
+  </p>
+  {% endif %}
+
   {% if ingest.columns_matched %}
   <p class="datacheck-weight datacheck-columns">
     Read under your own column names:

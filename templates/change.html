@@ -42,7 +42,7 @@
       <h2 id="brief-impact-title">Expected annual impact {{ estimate_tag() }}</h2>
       {{ impact(problem) }}
       {% if route %}
-      <p class="brief-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route, treating the file as one year of orders.</p>
+      <p class="brief-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route over a year.</p>
       {% endif %}
     </section>
 

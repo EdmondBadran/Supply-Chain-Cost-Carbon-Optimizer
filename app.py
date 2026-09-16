@@ -1,5 +1,4 @@
 import os
-import secrets
 import tempfile
 from datetime import date
 from functools import lru_cache
@@ -26,6 +25,7 @@ from optimizer import (
     geo,
     ingest,
     scoring,
+    security,
     stats,
     store,
     xlsx,
@@ -117,19 +117,59 @@ def sample_facts():
 
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
-# A random key when none is set means cookies from one run do not work against
-# the next, which is the right way round: a restart should lose the session
-# rather than hand it to whoever still holds an old cookie.
-app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
-app.config["SESSION_COOKIE_HTTPONLY"] = True
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
-app.config["SESSION_COOKIE_SECURE"] = os.environ.get("HTTPS_ONLY") == "1"
+# Debug off, a real secret key where one is set, secure cookies behind HTTPS,
+# and a refusal to start a deployment without a key. All of it is in
+# optimizer/security.py, which is also where the reasoning is.
+security.configure(app)
 
-# In debug, never let the browser hold on to a stylesheet or a script. An
-# edit that appears not to have worked, because the page is still running the
-# previous version of the file, costs more time than the caching ever saves.
-if os.environ.get("FLASK_DEBUG", "1") != "0":
-    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
+
+# Which allowance a request is counted against. An upload rebuilds a whole
+# graph, an export runs two thousand reruns, and a page view reads what is
+# already there, so one number for all three would either throttle reading or
+# let the expensive work run unbounded.
+RATE_BUCKETS = {
+    "upload": "upload",
+    "findings_csv": "export",
+    "findings_xlsx": "export",
+    "summary_page": "export",
+    "change_brief": "export",
+}
+
+
+def rate_bucket():
+    if request.path.startswith("/api/"):
+        return "api"
+    return RATE_BUCKETS.get(request.endpoint, "page")
+
+
+@app.before_request
+def guard():
+    """Two checks every request passes before it reaches a view: it is not
+    coming faster than the allowance, and if it changes anything it proves it
+    came from a page this site served."""
+    if request.endpoint == "static":
+        return None
+
+    if not security.rate_limit(rate_bucket(), security.client_id()):
+        security.audit("rate_limited", who=security.actor(), path=request.path)
+        if request.path.startswith("/api/"):
+            return jsonify({"error": "too many requests, slow down"}), 429
+        return render_template("429.html"), 429
+
+    if not security.csrf_ok():
+        security.audit("csrf_rejected", who=security.actor(), path=request.path)
+        if request.path.startswith("/api/"):
+            return jsonify({"error": "this request could not be verified"}), 400
+        return render_error(
+            "This page had been open too long to be submitted safely. "
+            "Reload it and try again."
+        ), 400
+    return None
+
+
+@app.after_request
+def secure_headers(response):
+    return security.apply_headers(response, app.config.get("HTTPS_ONLY"))
 
 # The address of the person who built Overlap. Every page that gives it says
 # so, and it is where anybody wanting the full method is sent: the long
@@ -142,6 +182,7 @@ def site_details():
     """Details any page may quote about the tool itself. The figures are read
     from the engine, so a threshold changed there is changed on every page."""
     return {
+        "csrf_token": security.csrf_token(),
         "contact_email": CONTACT_EMAIL,
         "flag_threshold": scoring.FLAG_THRESHOLD,
         "confidence_checks": stats.CONFIDENCE_CHECKS,
@@ -395,6 +436,7 @@ def summary_page():
         report = diagnosis.build(conn)
         return render_template(
             "summary.html",
+            coverage=db.coverage(conn),
             summary=db.summary(conn),
             ingest=db.ingest_report(conn),
             report=report,
@@ -422,6 +464,7 @@ def change_brief(rank):
             return redirect(url_for("report_page"))
         return render_template(
             "change.html",
+            coverage=db.coverage(conn),
             report=report,
             problem=report["problems"][rank - 1],
             rank=rank,
@@ -503,6 +546,9 @@ def edit_stages():
         except ValueError as exc:
             error = str(exc)
 
+    security.audit(
+        "stage_edited", who=security.actor(), action=action, rejected=error
+    )
     return redirect(
         url_for("report_page", stage_error=error) + "#stage-editor"
     )
@@ -572,6 +618,7 @@ def export_context(conn, band=False):
         "totals": analysis.totals(conn),
         "subject": subject_of(conn),
         "sample": db.get_meta(conn, "source") == "sample",
+        "coverage": db.coverage(conn),
         "uncertainty": stats.uncertainty(lanes) if band and tested else None,
         "generated": date.today(),
         "contact_email": CONTACT_EMAIL,
@@ -639,6 +686,7 @@ def api_effort():
     with store.workspace() as conn:
         try:
             scoring.set_effort(conn, int(edge_id), effort)
+            security.audit("effort_set", who=security.actor(), effort=effort or "none")
             return jsonify({"network": network_payload(conn)})
         except ValueError as exc:
             return jsonify({"error": str(exc)}), 400
@@ -744,7 +792,22 @@ def upload():
                 db.set_meta(conn, "source", "upload")
                 db.set_meta(conn, "sample", "")
                 db.set_meta(conn, "company", company)
+                security.audit(
+                    "upload_loaded",
+                    who=security.actor(),
+                    orders=report["orders_loaded"],
+                    skipped=report["rows_skipped"],
+                    routes=report["edges"],
+                    coverage=report["coverage"]["basis"],
+                    scaled_by=round(report["coverage"]["factor"], 4),
+                    extra_files=sum(
+                        1 for path in (warehouses_path, suppliers_path) if path
+                    ),
+                )
             except ingest.ValidationError as exc:
+                security.audit(
+                    "upload_rejected", who=security.actor(), reason=str(exc)[:120]
+                )
                 return render_error(str(exc), getattr(exc, "headings", None))
             except UnicodeDecodeError:
                 return render_error("That file is not readable as UTF-8 text.")
@@ -768,12 +831,14 @@ def sample():
         return render_error("There is no sample by that name.")
     with store.workspace() as conn:
         load_sample(conn, key)
+    security.audit("sample_loaded", who=security.actor(), sample=key)
     return redirect(url_for("report_page"))
 
 
 @app.post("/clear")
 def clear():
     """Drop everything this visitor loaded, workspace included."""
+    security.audit("workspace_cleared", who=security.actor())
     store.discard()
     return redirect(url_for("upload_page"))
 
@@ -904,9 +969,7 @@ def _cleanup(tmpdir):
 
 
 if __name__ == "__main__":
-    # The reloader runs a second process, which makes the server awkward to
-    # stop by port. Set FLASK_DEBUG=0 when starting it from something that
-    # needs to shut it down again cleanly.
-    debug = os.environ.get("FLASK_DEBUG", "1") != "0"
+    # Debug is off unless FLASK_DEBUG=1 is set, and the reloader it turns on
+    # runs a second process, which makes the server awkward to stop by port.
     port = int(os.environ.get("PORT", "5000"))
-    app.run(debug=debug, port=port)
+    app.run(debug=app.config["DEBUG"], port=port)

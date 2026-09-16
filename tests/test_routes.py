@@ -23,8 +23,52 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from flask.testing import FlaskClient
+
 import app as application
-from optimizer import store
+from optimizer import security, store
+
+
+class Browser(FlaskClient):
+    """A test client that behaves like a browser on a page this site served.
+
+    Every form carries a CSRF token and the JSON endpoints send one as a
+    header, so a client that sends neither is testing the rejection path
+    rather than the feature. `raw_client` below is the one that sends
+    nothing, for the tests that check the rejection is real.
+    """
+
+    def open(self, *args, **kwargs):
+        if kwargs.get("method", "GET").upper() not in security.SAFE_METHODS:
+            with self.session_transaction() as saved:
+                token = saved.get(security.SESSION_KEY)
+                if not token:
+                    token = saved[security.SESSION_KEY] = "test-csrf-token"
+            headers = dict(kwargs.get("headers") or {})
+            headers.setdefault(security.HEADER, token)
+            kwargs["headers"] = headers
+        return super().open(*args, **kwargs)
+
+
+def browser():
+    """One visitor, with their own cookie jar and their own workspace."""
+    security.reset_limits()
+    application.app.config["TESTING"] = True
+    application.app.test_client_class = Browser
+    return application.app.test_client()
+
+
+def raw_browser():
+    """A visitor whose requests carry no token at all."""
+    security.reset_limits()
+    application.app.config["TESTING"] = True
+    original = application.app.test_client_class
+    application.app.test_client_class = None
+    try:
+        return application.app.test_client()
+    finally:
+        application.app.test_client_class = original
+
 
 PAGES = ("/", "/report", "/method", "/privacy", "/data")
 
@@ -72,8 +116,7 @@ def _databases():
 
 class Routes(unittest.TestCase):
     def setUp(self):
-        application.app.config["TESTING"] = True
-        self.client = application.app.test_client()
+        self.client = browser()
 
     def test_every_page_answers(self):
         for path in PAGES:
@@ -90,7 +133,7 @@ class Routes(unittest.TestCase):
         """
         for path in ("/report", "/"):
             with self.subTest(path=path):
-                fresh = application.app.test_client()
+                fresh = browser()
                 response = fresh.get(path)
                 self.assertEqual(response.status_code, 200, path)
                 self.assertNotIn(b"Redirecting", response.data)
@@ -355,8 +398,8 @@ class Isolation(unittest.TestCase):
         )
 
     def test_an_upload_does_not_reach_another_visitor(self):
-        first = application.app.test_client()
-        second = application.app.test_client()
+        first = browser()
+        second = browser()
         first.get("/")
         second.get("/")
 
@@ -368,8 +411,8 @@ class Isolation(unittest.TestCase):
         self.assertEqual(_orders_shown(second.get("/data")), 182)
 
     def test_clearing_forgets_this_visitor_and_nobody_else(self):
-        first = application.app.test_client()
-        second = application.app.test_client()
+        first = browser()
+        second = browser()
         first.get("/")
         second.get("/")
         self.upload(second)
@@ -379,7 +422,7 @@ class Isolation(unittest.TestCase):
         self.assertEqual(_orders_shown(second.get("/data")), 3)
 
     def test_a_bad_upload_is_reported_not_raised(self):
-        client = application.app.test_client()
+        client = browser()
         response = self.upload(client, b"nothing,useful\n1,2\n")
         self.assertEqual(response.status_code, 200)
         body = response.get_data(as_text=True)
@@ -390,12 +433,12 @@ class Isolation(unittest.TestCase):
         self.assertIn("the city it was delivered to", body)
 
     def test_a_missing_column_error_lists_the_file_s_own_columns(self):
-        client = application.app.test_client()
+        client = browser()
         body = self.upload(client, b"nothing,useful\n1,2\n").get_data(as_text=True)
         self.assertIn("Columns in your file: <code>nothing</code>, <code>useful</code>", body)
 
     def test_columns_matched_on_the_page_reach_the_loader(self):
-        client = application.app.test_client()
+        client = browser()
         response = client.post(
             "/upload",
             data={
@@ -414,7 +457,7 @@ class Isolation(unittest.TestCase):
     def test_a_company_name_given_with_the_file_is_what_the_report_says(self):
         """Without one an upload is described rather than named, which is what
         a printed copy used to carry instead of whose report it is."""
-        client = application.app.test_client()
+        client = browser()
         client.post(
             "/upload",
             data={
@@ -427,17 +470,17 @@ class Isolation(unittest.TestCase):
             with self.subTest(path=path):
                 self.assertIn("Nordic Supply AB", client.get(path).get_data(as_text=True))
 
-        plain = application.app.test_client()
+        plain = browser()
         self.upload(plain)
         self.assertIn("Your own order data", plain.get("/report/summary").get_data(as_text=True))
 
     def test_the_upload_page_carries_the_column_guide(self):
-        body = self.upload(application.app.test_client(), b"x\n").get_data(as_text=True)
+        body = self.upload(browser(), b"x\n").get_data(as_text=True)
         self.assertIn("data-matcher", body)
         self.assertIn("ship_from_city", body)
 
     def test_an_upload_with_bad_rows_says_what_was_excluded(self):
-        client = application.app.test_client()
+        client = browser()
         response = self.upload(
             client,
             TINY_CSV + b"Depot,Leeds,GB,Atlantis Qqq,XX,50,road\n",
@@ -452,7 +495,7 @@ class Isolation(unittest.TestCase):
     def test_sample_figures_say_they_are_not_real(self):
         """Anywhere the sample's figures appear, the page says the company is
         invented. Once a real file is loaded, it stops saying so."""
-        client = application.app.test_client()
+        client = browser()
         for path in ("/", "/report", "/report/summary"):
             with self.subTest(path=path):
                 self.assertIn("not a real company", client.get(path).get_data(as_text=True))
@@ -466,7 +509,7 @@ class Isolation(unittest.TestCase):
         and the workbook sheet that would have been empty are left out."""
         import zipfile
 
-        client = application.app.test_client()
+        client = browser()
         self.upload(client, NOTHING_CSV)
         body = client.get("/report").get_data(as_text=True)
         self.assertIn("We found no changes that cut both cost and carbon", body)
@@ -487,7 +530,7 @@ class Isolation(unittest.TestCase):
     def test_stages_without_data_are_not_drawn(self):
         """An orders file on its own has no suppliers, no inbound freight and
         here no returns, so the chain picture does not draw them as zeros."""
-        client = application.app.test_client()
+        client = browser()
         self.upload(client)
         body = client.get("/report").get_data(as_text=True)
         for missing in ("suppliers", "inbound", "returns"):
@@ -496,7 +539,7 @@ class Isolation(unittest.TestCase):
         self.assertIn('data-stage="outbound"', body)
 
     def test_a_non_csv_is_refused(self):
-        client = application.app.test_client()
+        client = browser()
         response = client.post(
             "/upload",
             data={"orders": (io.BytesIO(b"x"), "orders.xlsx")},
@@ -507,7 +550,7 @@ class Isolation(unittest.TestCase):
     def test_nothing_is_written_to_disk(self):
         """The claim the privacy page makes, checked rather than trusted."""
         before = _databases()
-        client = application.app.test_client()
+        client = browser()
         client.get("/")
         self.upload(client)
         client.get("/stats")
@@ -516,8 +559,7 @@ class Isolation(unittest.TestCase):
 
 class Samples(unittest.TestCase):
     def setUp(self):
-        application.app.config["TESTING"] = True
-        self.client = application.app.test_client()
+        self.client = browser()
 
     def test_both_samples_load(self):
         for key in application.SAMPLES:

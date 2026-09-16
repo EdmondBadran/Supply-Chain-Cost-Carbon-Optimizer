@@ -96,7 +96,23 @@ python app.py
 ```
 
 Then open http://localhost:5000. A sample dataset loads itself, so no page
-opens empty. Both sample companies are invented: their data is generated to
+opens empty. Set `FLASK_DEBUG=1` while working on it, which turns on the
+reloader and stops the browser caching the stylesheet; leave it off
+everywhere else.
+
+On a real address, set two things in the environment first:
+
+| Variable | Why |
+| --- | --- |
+| `SECRET_KEY` | Signs the session cookie. Without it a restart signs everybody out, and the app refuses to start once `HTTPS_ONLY` is set. |
+| `HTTPS_ONLY=1` | Marks the cookie secure and sends HSTS. |
+
+`BEHIND_PROXY=1` makes the rate limiter read `X-Forwarded-For`, which is only
+safe when something in front of the app actually sets it. Every form post
+carries a CSRF token, every response carries a content security policy, and
+uploads, the JSON endpoints and the exports each have their own per visitor
+rate limit. State changes are written to the `overlap.audit` log as JSON, with
+counts rather than content: no city, customer, company or filename. Both sample companies are invented: their data is generated to
 follow realistic patterns, and every page showing their figures says so.
 
     /                 the landing page, with live results on the loaded data
@@ -160,6 +176,25 @@ an orders file.
 
 Anything the loader cannot read gets reported by line number and the rest of
 the file still loads. One bad row does not cost you the import.
+
+## What "a year" means
+
+Every figure is annual, and `order_date` is what makes that a measurement
+rather than an assumption. The loader reads the span between the first and
+last order and scales the routes to a year from it, so a quarter of orders
+produces a year's cost rather than a quarter of one, and two years of orders
+produces one. A span inside 350 to 400 days is a year already and is left
+exactly as it arrived.
+
+Some files cannot be measured, and those are never stretched. Under 28 days,
+fewer than 80% of rows dated, or no dates at all, and the figures stay the
+file's own totals with the data check saying so in as many words. A part year
+that is scaled says what it was multiplied by and warns that a busy or quiet
+period carries into the annual total, and names any calendar month inside the
+span with no orders in it.
+
+Warehouse rent and electricity arrive annual on their own file and are never
+scaled. Only the routes built from orders are.
 
 ## The numbers behind it
 
@@ -320,7 +355,11 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-180 of them, stdlib unittest, no test dependency.
+244 of them, stdlib unittest, no test dependency.
+
+`tests/test_coverage.py` pins what the tool is allowed to call a year, and
+`tests/test_security.py` pins the CSRF, rate limit, header and debug defaults,
+including that a post with no token is refused and one with a token is not.
 
 `tests/test_exports.py` covers the workbook writer for the things that make
 Excel refuse a file without saying why: a control character in an uploaded

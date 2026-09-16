@@ -148,6 +148,12 @@ def ingest_report(conn):
     return json.loads(raw) if raw else None
 
 
+def coverage(conn):
+    """What period the loaded orders cover, as the loader measured it."""
+    report = ingest_report(conn)
+    return (report or {}).get("coverage")
+
+
 def summary(conn):
     """What is currently loaded, or None if the database is empty."""
     row = conn.execute(

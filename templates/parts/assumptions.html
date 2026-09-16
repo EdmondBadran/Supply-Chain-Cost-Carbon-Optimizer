@@ -1,7 +1,7 @@
 {# Data & assumptions: how far the figures can be trusted. Four short answers
    first, each in a sentence; the factors, formulas and statistics one click
    further, for whoever has to defend the numbers. #}
-{% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd, icon, confidence_summary with context %}
+{% from "parts/_ui.html" import route_name, change, confidence, meter, pct, usd, icon, confidence_summary, period_line with context %}
 
 {% set un = stats.uncertainty %}
 {% set sure = report.confidence if report else None %}
@@ -30,10 +30,7 @@
     </p>
     <p class="qa-more">
       They were grouped into {{ ingest.edges }} route{{ "s" if ingest.edges != 1 }}.
-      {% if summary.first_order and summary.last_order %}The orders are dated
-      {{ summary.first_order|nice_date }} to {{ summary.last_order|nice_date }}, and
-      every annual figure treats the file as one year.{% else %}Every annual
-      figure treats the file as one year of orders.{% endif %}
+      {{ period_line(ingest.coverage) }}
     </p>
     {% include "parts/data_check.html" %}
   </section>
@@ -107,7 +104,14 @@
       {% if report and report.problems|selectattr("kind", "equalto", "supplier_on_time")|list %}
       <li><strong>Late-delivery savings</strong> assume {{ pct(expedite_share) }} of late deliveries are flown in.</li>
       {% endif %}
-      <li><strong>The file is treated as one year</strong> of orders, whatever dates it covers.</li>
+      {% set cover = ingest.coverage if ingest else None %}
+      {% if cover and cover.basis == "scaled" %}
+      <li><strong>The figures are a year scaled from {{ cover.span_days }} days</strong> of orders, so a busy or quiet period carries into the annual total.</li>
+      {% elif cover and cover.basis == "full_year" %}
+      <li><strong>The figures are the year in the file</strong>, and assume next year ships like it.</li>
+      {% else %}
+      <li><strong>The file is treated as one year</strong> of orders, because its dates could not say what period it covers.</li>
+      {% endif %}
     </ul>
     <p class="qa-more">
       <abbr title="Carbon dioxide equivalent">CO₂e</abbr> counts every greenhouse

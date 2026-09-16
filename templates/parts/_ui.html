@@ -332,7 +332,7 @@ Reduce returns on the {{ problem.title }} route
     <h3 class="dv-label">Expected annual impact {{ estimate_tag() }}</h3>
     {{ impact(problem) }}
     {% if route %}
-    <p class="dv-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route, treating the file as one year of orders.</p>
+    <p class="dv-note">That is {{ pct(route.cost_pct) }} less cost and {{ pct(route.co2e_pct) }} less CO₂e on this route over a year.</p>
     {% endif %}
   </section>
 
@@ -385,4 +385,19 @@ Reduce returns on the {{ problem.title }} route
   <p class="dv-map"><button type="button" class="btn-link" data-go="map">{{ icon("map") }}See this route on the map</button></p>
   {% endif %}
 </template>
+{%- endmacro %}
+
+{# What period the figures describe, and whether the file could say. A basis
+   of full_year or scaled was measured from the order dates; anything else
+   means the file was read as a year without being able to prove it is one. #}
+{% macro period_line(cover) -%}
+{%- if cover -%}
+{%- if cover.basis == "full_year" -%}
+A full year of orders, {{ cover.period }}. Nothing was scaled.
+{%- elif cover.basis == "scaled" -%}
+{{ cover.headline }}. Every route figure is multiplied by {{ "%.2f"|format(cover.factor) }} to describe a year.
+{%- else -%}
+{{ cover.headline }}. Figures are this file's own totals under an annual heading.
+{%- endif -%}
+{%- endif -%}
 {%- endmacro %}

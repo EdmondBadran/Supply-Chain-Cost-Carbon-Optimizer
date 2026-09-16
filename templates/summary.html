@@ -294,7 +294,14 @@
         <li>A change is listed only if it cuts cost <strong>and</strong> CO₂e by at least {{ pct(flag_threshold) }}.</li>
         <li>Cost rates are industry defaults, not your contract prices.</li>
         <li>Distances use an allowance per transport mode, not routed distances.</li>
-        <li>Transit times are planning estimates, and the file is treated as one year.</li>
+        <li>Transit times are planning estimates.</li>
+        {% if coverage and coverage.basis == "scaled" %}
+        <li>Annual figures are scaled up from {{ coverage.span_days }} days of orders ({{ coverage.period }}), so a busy or quiet period carries into the year.</li>
+        {% elif coverage and coverage.basis == "full_year" %}
+        <li>Annual figures are the year of orders in the file, {{ coverage.period }}.</li>
+        {% else %}
+        <li>Annual figures treat the file as one year, because its dates could not say what period it covers.</li>
+        {% endif %}
         <li>Inventory cost, carrier capacity and customer service levels are not modelled.</li>
       </ul>
       <p class="es-assume-more">Factors and sources are in the full results, under Data &amp; assumptions. The full method is available from Overlap's creator, {{ contact_email }}.</p>
