@@ -255,10 +255,17 @@ def configure(app):
         SESSION_COOKIE_SAMESITE="Lax",
         SESSION_COOKIE_SECURE=https_only,
         HTTPS_ONLY=https_only,
-        # In debug, never let the browser hold on to a stylesheet or a script.
-        # An edit that appears not to have worked, because the page is still
-        # running the previous version of the file, costs more time than the
-        # caching ever saves.
-        SEND_FILE_MAX_AGE_DEFAULT=0 if debug else 3600,
+        # Caching is keyed on whether this is a deployment, not on debug.
+        #
+        # These two used to follow the debug flag, and turning debug off by
+        # default turned them off with it: a local server then held its
+        # compiled templates and served a browser an hour of stale CSS, so an
+        # edit looked like it had done nothing. The page that showed it was
+        # the old markup under the new stylesheet, which reads as a broken
+        # layout rather than as a stale process, and that is what makes it
+        # worth this many lines. Nothing about caching a template in a local
+        # run is a security property, so it is not tied to the security flag.
+        TEMPLATES_AUTO_RELOAD=not https_only,
+        SEND_FILE_MAX_AGE_DEFAULT=3600 if https_only else 0,
     )
     return app

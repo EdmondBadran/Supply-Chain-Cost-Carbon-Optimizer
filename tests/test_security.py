@@ -175,6 +175,60 @@ class Defaults(unittest.TestCase):
         console on a stack trace."""
         self.assertFalse(application.app.config["DEBUG"])
 
+    def test_a_local_run_still_reloads_its_templates(self):
+        """Debug off must not mean a server that serves yesterday's markup.
+
+        These followed the debug flag once, so turning debug off by default
+        turned them off too: a local server held its compiled templates and an
+        hour of stale CSS, and an edit looked like it had done nothing.
+        """
+        self.assertTrue(application.app.config["TEMPLATES_AUTO_RELOAD"])
+        self.assertEqual(application.app.config["SEND_FILE_MAX_AGE_DEFAULT"], 0)
+
+    def test_a_local_run_reloads_itself_but_serves_no_console(self):
+        """The two halves of the old debug flag, pulled apart.
+
+        An edit to a .py file has to be one refresh away, or a stale process
+        serves yesterday's markup and the page looks broken. An interactive
+        console on a stack trace has to stay off unless somebody asks for it.
+        Those are opposite defaults, so they cannot share a flag.
+        """
+        options = application.run_options()
+        self.assertTrue(options["use_reloader"])
+        self.assertFalse(options["use_debugger"])
+
+    def test_a_deployment_reloads_nothing(self):
+        import os
+
+        from flask import Flask
+
+        original = dict(os.environ)
+        os.environ["HTTPS_ONLY"] = "1"
+        os.environ["SECRET_KEY"] = "a" * 32
+        try:
+            security.configure(application.app)
+            self.assertFalse(application.run_options()["use_reloader"])
+        finally:
+            os.environ.clear()
+            os.environ.update(original)
+            security.configure(application.app)
+
+    def test_a_deployment_caches_what_it_serves(self):
+        import os
+
+        from flask import Flask
+
+        original = dict(os.environ)
+        os.environ["HTTPS_ONLY"] = "1"
+        os.environ["SECRET_KEY"] = "a" * 32
+        try:
+            configured = security.configure(Flask(__name__))
+            self.assertFalse(configured.config["TEMPLATES_AUTO_RELOAD"])
+            self.assertEqual(configured.config["SEND_FILE_MAX_AGE_DEFAULT"], 3600)
+        finally:
+            os.environ.clear()
+            os.environ.update(original)
+
     def test_the_session_cookie_is_not_readable_from_script(self):
         self.assertTrue(application.app.config["SESSION_COOKIE_HTTPONLY"])
         self.assertEqual(application.app.config["SESSION_COOKIE_SAMESITE"], "Lax")

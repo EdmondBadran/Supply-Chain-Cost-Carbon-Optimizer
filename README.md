@@ -95,10 +95,20 @@ pip install -r requirements.txt
 python app.py
 ```
 
-Then open http://localhost:5000. A sample dataset loads itself, so no page
-opens empty. Set `FLASK_DEBUG=1` while working on it, which turns on the
-reloader and stops the browser caching the stylesheet; leave it off
-everywhere else.
+Then open http://localhost:5000. It always runs there: if an older copy of
+itself is already on the port it stops that one first and says so, because two
+servers on one port is not an error on Windows, it is a page that quietly
+stops changing. Anything on the port that is not Overlap is left alone and
+named, and `PORT=5001 python app.py` moves out of its way.
+
+A sample dataset loads itself, so no page opens empty.
+
+Edit anything and refresh: a local run reloads templates and stylesheets on
+each request and restarts itself when a `.py` file changes. `FLASK_DEBUG=1`
+adds the interactive debugger on top, and is the only thing that flag does.
+Reloading and debugging are separate on purpose, because they want opposite
+defaults: you always want the first locally and never want the second
+anywhere else.
 
 On a real address, set two things in the environment first:
 
@@ -116,7 +126,9 @@ counts rather than content: no city, customer, company or filename. Both sample 
 follow realistic patterns, and every page showing their figures says so.
 
     /                 the landing page, with live results on the loaded data
-    /report           the report: the short answer, four parts, route panel, exports
+    /report           the results: three actions first, then every change, then the working
+    /improve          optional: your own rates, service limit and cost of capital
+    /actions          optional: who owns each change and how far along it is
     /report/summary   the executive summary, ready to print
     /findings.xlsx    the findings as a formatted workbook
     /findings.csv     every opportunity as plain data
@@ -195,6 +207,60 @@ span with no orders in it.
 
 Warehouse rent and electricity arrive annual on their own file and are never
 scaled. Only the routes built from orders are.
+
+## How it is meant to be used
+
+Upload orders, read three actions, pick one. That is the whole product, and
+everything else is optional.
+
+The results open on the three changes worth starting with. Each one says what
+it saves in money and in CO2e, how sure to be, how much longer the goods take,
+and where it stands in one of five words:
+
+| Status | What it means |
+| --- | --- |
+| **Ready to act** | Held up every time the rates were redrawn, and inside any limit you set |
+| **Needs validation** | The saving rests on something your file cannot confirm |
+| **Blocked** | A service limit you set rules it out as it stands |
+| **In progress** | Somebody owns it and is doing it |
+| **Complete** | It has been done |
+
+The first three are worked out. The last two are set by a person on the
+tracker, and they win: a change somebody is already doing is not waiting for
+more evidence, and it drops out of the three you are asked to start with.
+
+Below the three is every change grouped by the same five words, and below that
+an **Advanced** divider with the network, the assumptions, the statistics and
+the exports. None of it is needed to act.
+
+### Improve accuracy, when you want to
+
+`/improve` takes three optional inputs, all pre-filled with what the tool is
+already using:
+
+- **Your own freight rates** per tonne-km, per mode. This is the one that
+  changes the answer most, because every cost figure is built from a rate and
+  the defaults are industry averages. Enter one and every route on that mode is
+  priced again.
+- **How many extra transit days you can accept.** Most savings come from moving
+  freight to a slower mode. Say what your service promise can absorb and
+  anything that breaks it is marked Blocked instead of recommended.
+- **Your cost of capital**, which turns extra days in transit into what the
+  stock costs while it sits there. Needs an `order_value` column.
+
+Leave any of them empty and the published default is used. Clearing them puts
+the original answer back exactly, which there is a test for.
+
+### The action tracker
+
+`/actions` is a page of its own on purpose: the results answer what to do, and
+a column of empty owner fields in front of somebody reading them for the first
+time answers a question they have not asked yet. Each change takes an owner, a
+due date, a status and a note.
+
+It lives in your session like everything else and is dropped after two hours
+idle, so it downloads as a CSV. That is a deliberate limit: nothing here is
+written to disk.
 
 ## The numbers behind it
 
@@ -355,7 +421,12 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-244 of them, stdlib unittest, no test dependency.
+282 of them, stdlib unittest, no test dependency.
+
+`tests/test_progressive.py` pins the rule the interface rests on: the first
+screen is three actions and asks for nothing, and every optional input is
+reversible, so a workspace that clears one gets its original answer back
+exactly.
 
 `tests/test_coverage.py` pins what the tool is allowed to call a year, and
 `tests/test_security.py` pins the CSRF, rate limit, header and debug defaults,

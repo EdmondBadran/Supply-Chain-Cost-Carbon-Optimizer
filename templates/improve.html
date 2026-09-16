@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Improve accuracy{% endblock %}
+{% block main_class %}page page-improve{% endblock %}
+{% block page_kind %}print-sheet{% endblock %}
+
+{% from "parts/_ui.html" import icon with context %}
+
+{% block content %}
+
+{#
+  Three inputs, all optional, all pre-filled with what the tool is already
+  using. Nothing here has to be touched: a workspace that never opens this
+  page gets the same answer it always did, which is the point of it being a
+  page rather than a step.
+#}
+
+<section class="page-head" aria-labelledby="improve-title">
+  <p class="hero-kicker">Optional</p>
+  <h1 id="improve-title">Improve accuracy</h1>
+  <p class="lede">
+    Your results already work without any of this. Fill in whichever of these
+    three you know and the estimates stop being industry averages and start
+    being yours. Leave a box empty and the published default is used.
+  </p>
+  <p class="hero-actions">
+    <a class="btn btn-secondary" href="{{ url_for('report_page') }}">{{ icon("arrow-left") }}Back to results</a>
+  </p>
+</section>
+
+{% if error %}
+<div class="alert alert-error" role="alert">
+  {{ icon("alert") }}
+  <div>
+    <p class="alert-title">That could not be saved</p>
+    <p>{{ error }}</p>
+  </div>
+</div>
+{% elif saved is not none %}
+<div class="alert alert-ok" role="status">
+  {{ icon("check") }}
+  <div>
+    <p class="alert-title">Saved, and the results have been worked out again</p>
+    <p>{{ settings_line or "Everything is back to the published defaults." }}</p>
+  </div>
+</div>
+{% endif %}
+
+<form class="improve-form" method="post" action="{{ url_for('save_improve') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+  <fieldset class="improve-block">
+    <legend><h2>What your freight actually costs</h2></legend>
+    <p class="improve-why">
+      This is the one that changes the answer most. Every cost figure is built
+      from a rate per tonne-km, and the defaults below are industry averages.
+      A contract rate of your own replaces the default for that mode and every
+      route on it is priced again.
+    </p>
+    {# step is any on purpose. A fixed step is measured from min, so
+       step="0.001" against min="0.0001" makes 0.28 an invalid value and the
+       browser refuses to submit the form without saying anything. #}
+    <div class="rate-grid">
+      {% for mode, published in options.published|dictsort %}
+      <label class="field rate-field{{ ' is-used' if mode in modes_used }}" for="rate-{{ mode }}">
+        <span class="field-label">
+          {{ mode|capitalize }}
+          {% if mode in modes_used %}<span class="field-tag">used by your recommendations</span>{% endif %}
+        </span>
+        <span class="field-hint">USD per tonne-km. Published default {{ published }}.</span>
+        <input id="rate-{{ mode }}" type="number" name="rate_{{ mode }}" step="any"
+               min="{{ rate_range[0] }}" max="{{ rate_range[1] }}"
+               value="{{ options.rates[mode] if mode in options.overridden else '' }}"
+               placeholder="{{ published }}" inputmode="decimal">
+      </label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset class="improve-block">
+    <legend><h2>How much slower a delivery may get</h2></legend>
+    <p class="improve-why">
+      Most of the savings come from moving freight onto a slower mode. If your
+      service promise cannot absorb the extra days, say so here and anything
+      that breaks it is marked <strong>Blocked</strong> rather than
+      recommended. Leave it empty and nothing is blocked.
+    </p>
+    <label class="field field-narrow" for="max-extra-days">
+      <span class="field-label">Extra transit days you can accept</span>
+      <span class="field-hint">A whole number of days. Empty means no limit.</span>
+      <input id="max-extra-days" type="number" name="max_extra_days" min="0" max="365" step="1"
+             value="{{ options.max_extra_days|int if options.max_extra_days is not none else '' }}"
+             placeholder="no limit" inputmode="numeric">
+    </label>
+  </fieldset>
+
+  <fieldset class="improve-block">
+    <legend><h2>What stock in transit costs you</h2></legend>
+    <p class="improve-why">
+      A slower route ties money up in goods that are paid for and not yet
+      sold. Give your cost of capital and that is worked out per route and
+      shown beside the freight saving, so a change that saves on shipping and
+      loses it back in stock says so.
+      {% if not has_values %}
+      Your file has no <code>order_value</code> column, so there is nothing to
+      apply this to yet. Add one and it starts working.
+      {% endif %}
+    </p>
+    <label class="field field-narrow" for="capital-rate">
+      <span class="field-label">Annual cost of capital</span>
+      <span class="field-hint">A percentage. 8 and 0.08 both mean eight percent. Empty means it is not counted.</span>
+      <input id="capital-rate" type="number" name="capital_rate" min="0" max="100" step="any"
+             value="{{ (options.capital_rate * 100)|round(1) if options.capital_rate else '' }}"
+             placeholder="not counted" inputmode="decimal">
+    </label>
+  </fieldset>
+
+  <div class="improve-actions">
+    <button class="btn btn-primary btn-large" type="submit">Save and work it out again</button>
+    <a class="btn-link" href="{{ url_for('report_page') }}">Cancel</a>
+  </div>
+</form>
+
+{% if options.any_set %}
+<form class="improve-reset" method="post" action="{{ url_for('reset_improve') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <button class="btn btn-ghost btn-small" type="submit">Put the published defaults back</button>
+</form>
+{% endif %}
+
+<section class="improve-foot">
+  <h2>What this does not ask for</h2>
+  <p>
+    Carrier availability, lane contracts, capacity and border constraints are
+    not modelled, so a change this tool calls Ready to act still has to clear
+    those with whoever runs the lane. That gap is named on every
+    recommendation rather than hidden here.
+  </p>
+</section>
+
+{% endblock %}

@@ -884,7 +884,10 @@ def _routes_sheet(book, context, unit):
         for rank, problem in enumerate(report["problems"] if report else [], start=1)
         if problem["edge_id"]
     }
-    held = {row["edge_id"]: row["confidence"] for row in stats.confidence(context["lanes"])}
+    held = {
+        row["edge_id"]: row["confidence"]
+        for row in stats.confidence(context["lanes"], context.get("rates"))
+    }
     total_cost = sum(lane["cost"] for lane in lanes)
     total_co2e = sum(lane["co2e"] for lane in lanes)
     divisor = unit["divisor"]

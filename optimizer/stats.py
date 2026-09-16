@@ -26,7 +26,7 @@ import threading
 from collections import Counter, defaultdict, OrderedDict
 from statistics import median
 
-from . import analysis, factors, scoring
+from . import analysis, factors, scoring, settings
 
 # How far each published factor is allowed to wander in the uncertainty run.
 # Freight rates move with fuel, lane, contract and season, and the emission
@@ -66,15 +66,15 @@ _memo = OrderedDict()
 _memo_lock = threading.Lock()
 
 
-def _memo_key(name, lanes):
+def _memo_key(name, lanes, rates):
     digest = hashlib.sha256(
-        json.dumps(lanes, sort_keys=True, default=str).encode("utf-8")
+        json.dumps([lanes, rates], sort_keys=True, default=str).encode("utf-8")
     ).hexdigest()
     return f"{name}:{digest}"
 
 
-def _remembered(name, lanes, compute):
-    key = _memo_key(name, lanes)
+def _remembered(name, lanes, rates, compute):
+    key = _memo_key(name, lanes, rates)
     with _memo_lock:
         if key in _memo:
             _memo.move_to_end(key)
@@ -99,6 +99,7 @@ def build(conn):
     lanes = scoring.rank(conn)
     if not lanes:
         return None
+    rates = settings.rates(conn)
 
     orders = [
         dict(row)
@@ -112,7 +113,7 @@ def build(conn):
         "order_count": len(orders),
         "concentration": concentration(lanes),
         "overlap": overlap(lanes),
-        "uncertainty": uncertainty(lanes),
+        "uncertainty": uncertainty(lanes, rates),
         "outliers": outliers(lanes),
         "order_sizes": order_sizes(orders),
         "seasonality": seasonality(orders),
@@ -378,12 +379,13 @@ def _rho_verdict(rho):
     return "none, so treating them as one problem would mislead"
 
 
-def uncertainty(lanes):
+def uncertainty(lanes, rates=None):
     """How far the recoverable figure could be out. Remembered per route set."""
-    return _remembered("uncertainty", lanes, lambda: _uncertainty(lanes))
+    rates = rates or dict(factors.COST_FACTORS)
+    return _remembered("uncertainty", lanes, rates, lambda: _uncertainty(lanes, rates))
 
 
-def _uncertainty(lanes):
+def _uncertainty(lanes, rates):
     """The band itself.
 
     Every saving in this tool is a difference between two factor-driven
@@ -403,8 +405,7 @@ def _uncertainty(lanes):
 
     for _ in range(TRIALS):
         cost_rates = {
-            mode: value * _triangular(rng)
-            for mode, value in factors.COST_FACTORS.items()
+            mode: value * _triangular(rng) for mode, value in rates.items()
         }
         emission_rates = {
             mode: value * _triangular(rng)
@@ -429,7 +430,7 @@ def _uncertainty(lanes):
         "spread": FACTOR_SPREAD,
         "trials": TRIALS,
         "histogram": _histogram(results, baseline),
-        "always_flagged": confidence(lanes),
+        "always_flagged": confidence(lanes, rates),
         "typical_flagged": counts.most_common(1)[0][0] if counts else 0,
         "flag_range": (min(flagged_counts), max(flagged_counts))
         if flagged_counts
@@ -507,12 +508,13 @@ def _transport_co2e(lane, mode, rates):
 CONFIDENCE_CHECKS = 200
 
 
-def confidence(lanes):
+def confidence(lanes, rates=None):
     """How often each flagged route survives a redraw. Remembered per route set."""
-    return _remembered("confidence", lanes, lambda: _confidence(lanes))
+    rates = rates or dict(factors.COST_FACTORS)
+    return _remembered("confidence", lanes, rates, lambda: _confidence(lanes, rates))
 
 
-def _confidence(lanes):
+def _confidence(lanes, rates):
     """How often each flagged route stays worth changing when the factors are
     redrawn.
 
@@ -533,8 +535,7 @@ def _confidence(lanes):
     checks = CONFIDENCE_CHECKS
     for _ in range(checks):
         cost_rates = {
-            mode: value * _triangular(rng)
-            for mode, value in factors.COST_FACTORS.items()
+            mode: value * _triangular(rng) for mode, value in rates.items()
         }
         emission_rates = {
             mode: value * _triangular(rng)

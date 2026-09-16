@@ -6,7 +6,7 @@
 
 
 {% from "parts/_units.html" import co2e %}
-{% from "parts/_ui.html" import usd, pct, meter, icon, sample_note, rec_detail, confidence_summary, period_line with context %}
+{% from "parts/_ui.html" import usd, pct, meter, icon, days, change, sample_note, rec_detail, confidence_summary, period_line, group_badge, status_reason, top_action, STATUS_ICON with context %}
 
 {% block content %}
 
@@ -20,9 +20,11 @@
 #}
 
 {% macro group_phrase(key, n) -%}
-{%- if key == "now" -%}{{ n }} recommended now
-{%- elif key == "review" -%}{{ n }} worth reviewing
-{%- else -%}{{ n }} need{{ "s" if n == 1 }} more data
+{%- if key == "ready" -%}{{ n }} ready to act
+{%- elif key == "validate" -%}{{ n }} need{{ "s" if n == 1 }} validation
+{%- elif key == "blocked" -%}{{ n }} blocked
+{%- elif key == "doing" -%}{{ n }} in progress
+{%- else -%}{{ n }} complete
 {%- endif -%}
 {%- endmacro %}
 
@@ -32,6 +34,7 @@
 {% set sections = [("overview", "Overview")] %}
 {% if count %}{% set sections = sections + [("recommendations", "Recommendations")] %}{% endif %}
 {% set sections = sections + [("network", "Network"), ("data", "Data & assumptions"), ("export", "Export")] %}
+{% set advanced_from = "network" %}
 
 {# Print only: the running footer names the subject and date, which the
    stylesheet has no way to know. #}
@@ -92,10 +95,11 @@
   <nav class="section-nav" aria-label="Report sections">
     <ol>
       {% for key, label in sections %}
-      <li>
+      <li{{ ' class="nav-advanced-start"' if key == advanced_from }}>
         <a href="#{{ key }}" data-rail="{{ key }}">{{ label }}{% if key == "recommendations" %}<span class="section-count" aria-label="{{ count }} changes">{{ count }}</span>{% endif %}</a>
       </li>
       {% endfor %}
+      <li class="nav-away"><a href="{{ url_for('action_board') }}">{{ icon("bookmark") }}Tracker</a></li>
     </ol>
   </nav>
 
@@ -140,35 +144,39 @@
         These are planning estimates, not quotes.
       </p>
 
-      <div class="overview-actions">
-        <button type="button" class="btn btn-primary btn-large" data-open-change="1">Review the top recommendation{{ icon("arrow-right") }}</button>
-        {% if count > 1 %}<a class="btn-link" href="#recommendations">See all {{ count }} changes</a>{% endif %}
-      </div>
+      <p class="overview-scale">
+        That is {{ pct(ov.cost_share) }} of the {{ usd(ov.cost) }} a year these
+        orders cost to ship, store, pack and return, and {{ pct(ov.co2e_share) }}
+        of the {{ co2e(ov.co2e) }} CO₂e they produce.
+      </p>
 
-      <div class="summary-cards">
-        <article class="summary-card">
-          <h2 class="summary-label">Potential annual cost saving</h2>
-          <p class="summary-value cost-ink">{{ usd(ov.recoverable_cost) }}</p>
-          <p class="summary-unit">a year &middot; estimate</p>
-          <p class="summary-note">{{ pct(ov.cost_share) }} of the {{ usd(ov.cost) }} a year these orders cost to ship, store, pack and return.</p>
-        </article>
-        <article class="summary-card">
-          <h2 class="summary-label">Potential annual CO₂e reduction</h2>
-          <p class="summary-value carbon-ink">{{ co2e(ov.recoverable_co2e) }}</p>
-          <p class="summary-unit">CO₂e a year &middot; estimate</p>
-          <p class="summary-note">{{ pct(ov.co2e_share) }} of the {{ co2e(ov.co2e) }} CO₂e a year from shipping, storing, packing and returning them.</p>
-        </article>
-        <article class="summary-card">
-          <h2 class="summary-label">Recommended changes</h2>
-          <p class="summary-value">{{ count }}</p>
-          <p class="summary-unit">ranked by combined impact</p>
-          <ul class="summary-groups">
-            {% for group in groups.groups %}
-            <li><a href="#group-{{ group.key }}">{{ icon({"now": "check", "review": "search"}.get(group.key, "alert")) }}{{ group_phrase(group.key, group.ranks|length) }}</a></li>
-            {% endfor %}
-          </ul>
-        </article>
-      </div>
+      {% set top = groups.top_ranks %}
+      {% if top %}
+      <section class="top-actions-block" aria-labelledby="top-actions-title">
+        <h2 id="top-actions-title">Start with {{ "these three" if top|length == 3 else ("these two" if top|length == 2 else "this one") }}</h2>
+        <ol class="top-actions">
+          {% for rank in top %}
+          {{ top_action(report.problems[rank - 1], rank, groups.by_rank[rank]) }}
+          {% endfor %}
+        </ol>
+      </section>
+      {% endif %}
+
+      <p class="overview-more">
+        {% if count > top|length %}<a class="btn-link" href="#recommendations">See all {{ count }} changes{{ icon("arrow-right") }}</a>{% endif %}
+        <a class="btn-link" href="{{ url_for('action_board') }}">Track who is doing what</a>
+      </p>
+
+      {% set tracked_count = (groups.counts.doing or 0) + (groups.counts.done or 0) %}
+      {% if tracked_count %}
+      <p class="overview-tracked">
+        {{ icon("check") }}
+        <span>{{ tracked_count }} change{{ "s are" if tracked_count != 1 else " is" }}
+        already tracked, so {{ "they are" if tracked_count != 1 else "it is" }} left
+        out of the list above. <a href="{{ url_for('action_board') }}">Open the tracker</a>.</span>
+      </p>
+      {% endif %}
+
       {% else %}
       <h1 id="overview-title">We found no changes that cut both cost and carbon</h1>
       <p class="overview-lede">
@@ -211,7 +219,13 @@
           <span><strong>Important:</strong> these are planning estimates. Confirm carrier pricing and operational constraints before changing routes.</span>
         </li>
       </ul>
-      <p class="trust-more"><a class="btn-link" href="#data">How we checked your data and estimates</a></p>
+      <p class="trust-more">
+        <a class="btn-link" href="#data">How we checked your data and estimates</a>
+        <a class="btn-link" href="{{ url_for('improve') }}">{{ icon("settings") }}Improve accuracy with your own rates</a>
+      </p>
+      {% if settings_line %}
+      <p class="using-line">{{ icon("check") }}<span>{{ settings_line }} <a href="{{ url_for('improve') }}">Change</a></span></p>
+      {% endif %}
     </section>
 
     {# ----------------------------------------------------- Recommendations #}
@@ -220,6 +234,15 @@
       {% include "parts/recommendations.html" %}
     </section>
     {% endif %}
+
+    {# -------------------------------------------- Advanced, from here down #}
+    <div class="advanced-divider" id="advanced">
+      <h2>Advanced</h2>
+      <p>
+        Where the routes run, how the estimates were made and what they leave
+        out. None of it is needed to act on the changes above.
+      </p>
+    </div>
 
     {# ------------------------------------------------------------- Network #}
     <section class="report-section" id="network" data-step="network" aria-labelledby="network-title">

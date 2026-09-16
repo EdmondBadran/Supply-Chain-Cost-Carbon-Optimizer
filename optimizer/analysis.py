@@ -5,7 +5,7 @@ tonne-km moved, orders shipped, returns handled, and each lane's share of the
 warehouse it ships from.
 """
 
-from . import distance, factors
+from . import distance, factors, settings
 
 
 def tonne_km(weight_kg, straight_km, mode):
@@ -88,7 +88,13 @@ def lane_transit_days(distance_km, mode):
 
 
 def run(conn):
-    """Fill in cost and emission columns for every edge."""
+    """Fill in cost and emission columns for every edge.
+
+    Priced at the company's own rates wherever it has given them on the
+    Improve accuracy page, and at the published defaults everywhere else. A
+    workspace that has given none is priced exactly as it always was.
+    """
+    rates = settings.rates(conn)
     edges = conn.execute(
         """
         SELECT e.*, w.storage_cost_annual, w.energy_kwh_annual, w.grid_intensity
@@ -111,6 +117,7 @@ def run(conn):
             edge["mode"],
             edge["order_count"],
             edge["return_count"],
+            rate=rates[factors.normalise_mode(edge["mode"])],
         )
         emissions = lane_emissions(
             edge["total_weight_kg"],

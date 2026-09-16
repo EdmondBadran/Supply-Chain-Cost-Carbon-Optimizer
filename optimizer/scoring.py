@@ -7,7 +7,7 @@ ones where a single change pays twice, and those are what this ranks.
 
 from statistics import median
 
-from . import analysis, distance, factors, geo
+from . import analysis, distance, factors, geo, settings
 
 FLAG_THRESHOLD = 0.25
 
@@ -74,8 +74,13 @@ def plausible_modes(edge):
     return modes
 
 
-def alternatives(edge):
-    """What this lane would cost and emit under each other transport mode."""
+def alternatives(edge, rates=None):
+    """What this lane would cost and emit under each other transport mode.
+
+    `rates` is the company's own cost per tonne-km where it has given any.
+    Without it the published factors are used, which is what every caller did
+    before the Improve accuracy page existed.
+    """
     options = []
     for mode in plausible_modes(edge):
         costs = analysis.lane_costs(
@@ -84,6 +89,7 @@ def alternatives(edge):
             mode,
             edge["order_count"],
             edge["return_count"],
+            rate=rates[factors.normalise_mode(mode)] if rates else None,
         )
         emissions = analysis.lane_emissions(
             edge["total_weight_kg"],
@@ -104,13 +110,13 @@ def alternatives(edge):
     return options
 
 
-def best_switch(edge):
+def best_switch(edge, rates=None):
     """The mode change that cuts the most cost and carbon, if any does."""
     current_cost = edge["transport_cost"] + edge["returns_cost"]
     current_co2e = edge["transport_co2e"] + edge["returns_co2e"]
 
     best = None
-    for option in alternatives(edge):
+    for option in alternatives(edge, rates):
         saved_cost = current_cost - option["cost"]
         saved_co2e = current_co2e - option["co2e"]
         if saved_cost <= 0 or saved_co2e <= 0:
@@ -131,6 +137,7 @@ def best_switch(edge):
 
 def rank(conn):
     """Score every lane, flag the overlap, and attach the best mode switch."""
+    rates = settings.rates(conn)
     rows = conn.execute(
         """
         SELECT e.*,
@@ -174,7 +181,7 @@ def rank(conn):
         # smaller of the two is what makes it an overlap rather than a total,
         # so one big number cannot carry a lane on its own.
         lane["overlap"] = min(cost_score, co2e_score)
-        lane["switch"] = best_switch(lane)
+        lane["switch"] = best_switch(lane, rates)
 
     # A lane being large is not the same as a lane being fixable. What decides
     # a quick win is how much of itself a lane gives back when the mode
@@ -610,6 +617,7 @@ def simulate(conn, edge_id, mode=None, origin_id=None):
         new_mode,
         edge["order_count"],
         edge["return_count"],
+        rate=settings.rates(conn)[new_mode],
     )
     emissions = analysis.lane_emissions(
         edge["total_weight_kg"],

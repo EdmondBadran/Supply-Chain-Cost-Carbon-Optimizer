@@ -170,19 +170,34 @@ class Routes(unittest.TestCase):
                 self.assertIn('data-rail="' + section + '"', body)
         self.assertNotIn('id="step-1"', body)
 
-    def test_the_overview_leads_with_the_decision(self):
-        """The first thing on the results is how many changes were found, what
-        they are worth, and one button into the top one."""
+    def test_the_overview_leads_with_three_actions(self):
+        """The first screen is the decision: how many changes, what they are
+        worth, and the three to start with, each with what it saves, how sure
+        to be, where it stands and one button."""
         body = self.client.get("/report").get_data(as_text=True)
         overview = body[body.index('id="overview"'):body.index('id="recommendations"')]
         self.assertIn("We found 5 changes worth reviewing", overview)
         self.assertIn("$2,297", overview)
         self.assertIn("7.0 t CO₂e", overview)
-        self.assertIn("Review the top recommendation", overview)
-        self.assertEqual(overview.count("btn-primary"), 1)
-        for label in ("Potential annual cost saving", "Potential annual CO₂e reduction", "Recommended changes"):
+        self.assertIn("Start with these three", overview)
+        self.assertEqual(overview.count('class="top-action"'), 3)
+        self.assertEqual(overview.count("Review this change"), 3)
+        for label in ("Cost saving", "CO₂e reduction", "confidence"):
             with self.subTest(label=label):
                 self.assertIn(label, overview)
+
+    def test_the_overview_names_a_status_for_each_of_the_three(self):
+        body = self.client.get("/report").get_data(as_text=True)
+        overview = body[body.index('id="overview"'):body.index('id="recommendations"')]
+        self.assertEqual(overview.count('class="status status-'), 3)
+
+    def test_nothing_advanced_is_needed_to_read_the_three(self):
+        """The first screen holds no input, no setting and no empty field."""
+        body = self.client.get("/report").get_data(as_text=True)
+        overview = body[body.index('id="overview"'):body.index('id="recommendations"')]
+        for unwanted in ("<input", "<select", "<textarea"):
+            with self.subTest(unwanted=unwanted):
+                self.assertNotIn(unwanted, overview)
 
     def test_every_change_has_one_card_and_one_decision_view(self):
         """Each change is written up once as a card in the list and once as
@@ -192,7 +207,12 @@ class Routes(unittest.TestCase):
         self.assertGreater(cards, 0)
         self.assertEqual(cards, body.count('<template id="change-detail-'))
         self.assertEqual(cards, body.count("Why this is recommended"))
-        self.assertEqual(cards, body.count('data-open-change="') - 1)
+        # Every button that opens a change points at a rank that exists: the
+        # cards, the three on the overview, and the one the drawer carries.
+        opened = re.findall(r'data-open-change="(\d+)"', body)
+        self.assertTrue(opened)
+        for value in opened:
+            self.assertLessEqual(int(value), cards)
         self.assertNotIn("Not simulated", body)
 
     def test_how_it_works_is_two_boxes_and_an_email(self):
@@ -291,7 +311,7 @@ class Routes(unittest.TestCase):
                      "Export this recommendation", "Back to all changes",
                      "See calculation details", "Try a different transport mode or warehouse",
                      "Rename or reorder your supply chain stages", "Full uncertainty analysis",
-                     "Recommended now", "Needs more data to confirm"):
+                     "Ready to act", "Needs validation"):
             with self.subTest(text=text):
                 self.assertIn(text, body)
 
@@ -306,8 +326,8 @@ class Routes(unittest.TestCase):
         self.assertIn("182 of 182", body)
         self.assertIn("these are planning estimates", body)
 
-    def test_the_groups_follow_confidence_and_never_reorder(self):
-        """Grouping is presentation only. A stress-tested change goes by its
+    def test_the_statuses_follow_confidence_and_never_reorder(self):
+        """A status is presentation only. A stress-tested change goes by its
         confidence label, one that was not goes by what its figure rests on,
         and every change keeps the rank the engine gave it."""
         from optimizer import analysis, db, ingest
@@ -321,18 +341,18 @@ class Routes(unittest.TestCase):
         finally:
             conn.close()
         before = [(p["title"], p["cost_at_stake"], p["co2e_at_stake"]) for p in report["problems"]]
-        groups = application.decision_groups(report)
+        groups = application.decision_groups(report, {}, {})
         self.assertEqual(before, [(p["title"], p["cost_at_stake"], p["co2e_at_stake"]) for p in report["problems"]])
         self.assertEqual(sorted(groups["by_rank"]), list(range(1, len(report["problems"]) + 1)))
         for rank, problem in enumerate(report["problems"], start=1):
             group = groups["by_rank"][rank]
             with self.subTest(rank=rank):
                 if problem["confidence_label"] == "high":
-                    self.assertEqual(group["key"], "now")
-                    self.assertIsNone(group["basis"])
+                    self.assertEqual(group["key"], "ready")
+                    self.assertIsNone(group["reason"])
                 elif problem["confidence_label"] is None:
-                    self.assertNotEqual(group["key"], "now")
-                    self.assertTrue(group["basis"])
+                    self.assertNotEqual(group["key"], "ready")
+                    self.assertTrue(group["reason"])
         ranks = [rank for g in groups["groups"] for rank in g["ranks"]]
         self.assertEqual(sorted(ranks), list(range(1, len(report["problems"]) + 1)))
 

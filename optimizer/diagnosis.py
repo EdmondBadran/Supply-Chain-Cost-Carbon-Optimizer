@@ -10,7 +10,7 @@ from the loaded data, so an empty chain says so and a clean chain says that
 instead of inventing something to worry about.
 """
 
-from . import analysis, chain, distance, factors, scoring, stats
+from . import analysis, chain, distance, factors, scoring, settings, stats
 
 # How many problems make it into the report. Below five it stops looking like
 # a diagnosis, above ten nobody reads to the end.
@@ -95,8 +95,10 @@ def build(conn, limit=REPORT_LIMIT):
     totals = analysis.totals(conn)
     context = {
         "confidence": {
-            row["edge_id"]: row["confidence"] for row in stats.confidence(lanes)
+            row["edge_id"]: row["confidence"]
+            for row in stats.confidence(lanes, settings.rates(conn))
         },
+        "rates": settings.rates(conn),
         "cost_level": _levels(lanes, "cost"),
         "carbon_level": _levels(lanes, "co2e"),
     }
@@ -348,7 +350,7 @@ def _flow(stages):
     return {"stages": lines, "note": note}
 
 
-def _side(lane, mode, costs, emissions):
+def _side(lane, mode, costs, emissions, rates=None):
     """One side of a mode switch, current or proposed, with every input the
     audit needs to reproduce its totals."""
     straight = lane["distance_km"]
@@ -360,7 +362,7 @@ def _side(lane, mode, costs, emissions):
         "route_km": distance.by_mode(straight, mode),
         "tonne_km": analysis.tonne_km(lane["total_weight_kg"], straight, mode),
         "days": analysis.lane_transit_days(straight, mode),
-        "cost_factor": factors.cost_factor(mode),
+        "cost_factor": (rates or factors.COST_FACTORS)[factors.normalise_mode(mode)],
         "emission_factor": factors.emission_factor(mode),
         "freight_cost": costs["transport"],
         "returns_cost": costs["returns"],
@@ -378,6 +380,7 @@ def _route(lane, context):
     show for one mode switch. Worked out once, here, from the engine, so no
     template or script does arithmetic of its own."""
     switch = lane["switch"]
+    rates = context["rates"]
     args = (lane["total_weight_kg"], lane["distance_km"])
     counts = (lane["order_count"], lane["return_count"])
     now = _side(
@@ -391,12 +394,19 @@ def _route(lane, context):
             "transport": lane["transport_co2e"],
             "returns": lane["returns_co2e"],
         },
+        rates,
     )
     proposed = _side(
         lane,
         switch["mode"],
-        analysis.lane_costs(*args, switch["mode"], *counts),
+        analysis.lane_costs(
+            *args,
+            switch["mode"],
+            *counts,
+            rate=rates[factors.normalise_mode(switch["mode"])],
+        ),
         analysis.lane_emissions(*args, switch["mode"], *counts),
+        rates,
     )
     share = context["confidence"].get(lane["id"])
     return {
@@ -405,6 +415,7 @@ def _route(lane, context):
         "dest": lane["dest_name"],
         "leg": lane["leg"],
         "weight_t": lane["total_weight_kg"] / 1000.0,
+        "value": lane["total_value"] or 0.0,
         "orders": lane["order_count"],
         "returns": lane["return_count"],
         "straight_km": lane["distance_km"],
@@ -429,7 +440,7 @@ def _mode_switch_problem(lane, totals, context):
     from_mode, to_mode = lane["mode"], switch["mode"]
     route = _route(lane, context)
 
-    cost_ratio = factors.cost_factor(from_mode) / factors.cost_factor(to_mode)
+    cost_ratio = route["now"]["cost_factor"] / route["proposed"]["cost_factor"]
     co2e_ratio = factors.emission_factor(from_mode) / factors.emission_factor(to_mode)
 
     before_days = route["now"]["days"]

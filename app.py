@@ -14,7 +14,9 @@ from flask import (
     url_for,
 )
 
+import serve
 from optimizer import (
+    actions,
     analysis,
     chain,
     db,
@@ -26,6 +28,8 @@ from optimizer import (
     ingest,
     scoring,
     security,
+    settings,
+    status,
     stats,
     store,
     xlsx,
@@ -132,6 +136,7 @@ RATE_BUCKETS = {
     "findings_csv": "export",
     "findings_xlsx": "export",
     "summary_page": "export",
+    "actions_csv": "export",
     "change_brief": "export",
 }
 
@@ -257,11 +262,12 @@ def index():
     with store.workspace() as conn:
         ensure_data(conn)
         report = diagnosis.build(conn)
+        options, tracked = workspace_view(conn)
         return render_template(
             "landing.html",
             summary=db.summary(conn),
             report=report,
-            groups=decision_groups(report),
+            groups=decision_groups(report, options, tracked),
             using_sample=db.get_meta(conn, "source") == "sample",
             subject=subject_of(conn),
         )
@@ -313,82 +319,40 @@ def recommendation_payload(report):
     }
 
 
-# The three groups the report sorts its ranked changes into. Presentation
-# only: the ranking, the figures and the confidence are the engine's, and a
-# change keeps its rank whichever group it is shown in.
-GROUP_LABELS = {
-    "now": "Recommended now",
-    "review": "Worth reviewing",
-    "more_data": "Needs more data to confirm",
-}
+def decision_groups(report, options=None, tracked=None):
+    """Which of the five statuses each ranked change is in, keyed by its rank.
 
-
-def _untested_basis(problem):
-    """The group for a change that was not stress-tested, and what its figure
-    rests on, in one sentence. A figure built on an assumption the file cannot
-    confirm never sits beside a route change that survived every redraw."""
-    kind = problem["kind"]
-    if kind == "warehouse_grid":
-        return "review", (
-            "Worked out from this site's electricity use and the carbon "
-            "intensity of its local grid. Not stress-tested."
-        )
-    if kind == "supplier_on_time":
-        return "more_data", (
-            f"Depends on an assumption that {factors.EXPEDITE_SHARE_OF_LATE:.0%} "
-            "of late deliveries are flown in. Your own expedite records would "
-            "confirm it."
-        )
-    if kind == "returns":
-        return "more_data", (
-            "Your file shows how often orders on this route come back, but not why."
-        )
-    if kind == "cost_to_serve":
-        return "more_data", (
-            "The CO₂e change is not estimated, and the saving depends on a "
-            "nearer warehouse having room."
-        )
-    return "more_data", (
-        problem["checks"][0] if problem["checks"] else "Not stress-tested."
-    )
-
-
-def decision_groups(report):
-    """Which group each ranked change is shown in, keyed by its rank.
-
-    A change that was stress-tested goes by its confidence label: high is
-    recommended now, moderate is worth reviewing, low needs more data. One
-    that was not goes by what its figure rests on. Nothing is reordered.
+    Presentation only, and it never reorders anything: a change keeps the rank
+    the engine gave it whichever group it is shown in. The statuses themselves
+    are `optimizer/status.py`, so the results page, the tracking workspace,
+    the summary and the printed brief cannot call the same change two things.
     """
     if not report:
-        return {"by_rank": {}, "groups": [], "counts": {}, "all_cut_both": False}
-    by_rank = {}
-    for rank, problem in enumerate(report["problems"], start=1):
-        label = problem["confidence_label"]
-        if label is None:
-            key, basis = _untested_basis(problem)
-        else:
-            key = {"high": "now", "moderate": "review"}.get(label, "more_data")
-            basis = None
-        by_rank[rank] = {"key": key, "label": GROUP_LABELS[key], "basis": basis}
-    groups = []
-    for key, label in GROUP_LABELS.items():
-        ranks = [rank for rank, group in by_rank.items() if group["key"] == key]
-        if ranks:
-            groups.append({"key": key, "label": label, "ranks": ranks})
-    return {
-        "by_rank": by_rank,
-        "groups": groups,
-        "counts": {group["key"]: len(group["ranks"]) for group in groups},
-        # Whether the overview may say every change cuts both. A cleaner
-        # power supply saves carbon and no money, so it is not always true.
-        "all_cut_both": all(
-            problem["cost_at_stake"] > 0
-            and problem["co2e_at_stake"] > 0
-            and not problem["co2e_line"]
-            for problem in report["problems"]
-        ),
-    }
+        return {
+            "by_rank": {},
+            "groups": [],
+            "counts": {},
+            "top_ranks": [],
+            "ready": 0,
+            "blocked": 0,
+            "all_cut_both": False,
+        }
+    grouped = status.group(report["problems"], options or {}, tracked or {})
+    # Whether the overview may say every change cuts both. A cleaner power
+    # supply saves carbon and no money, so it is not always true.
+    grouped["all_cut_both"] = all(
+        problem["cost_at_stake"] > 0
+        and problem["co2e_at_stake"] > 0
+        and not problem["co2e_line"]
+        for problem in report["problems"]
+    )
+    return grouped
+
+
+def workspace_view(conn):
+    """The two things every page needs to read a status: what the company has
+    told the tool, and who has picked anything up."""
+    return settings.current(conn), actions.all_by_edge(conn)
 
 
 @app.route("/report")
@@ -402,6 +366,7 @@ def report_page():
         stages = chain.pictured(chain.build(conn))
         report = diagnosis.build(conn)
         regions = analysis.by_region(conn)
+        options, tracked = workspace_view(conn)
         return render_template(
             "report.html",
             summary=db.summary(conn),
@@ -409,7 +374,10 @@ def report_page():
             stages=stages,
             flow=chain.flow_layout(stages),
             report=report,
-            groups=decision_groups(report),
+            groups=decision_groups(report, options, tracked),
+            options=options,
+            settings_line=settings.summary(conn),
+            tracked=tracked,
             recommendations=recommendation_payload(report),
             stats=stats.build(conn),
             totals=analysis.totals(conn),
@@ -434,14 +402,19 @@ def summary_page():
     with store.workspace() as conn:
         ensure_data(conn)
         report = diagnosis.build(conn)
+        options, tracked = workspace_view(conn)
         return render_template(
             "summary.html",
             coverage=db.coverage(conn),
             summary=db.summary(conn),
             ingest=db.ingest_report(conn),
             report=report,
-            groups=decision_groups(report),
-            uncertainty=stats.uncertainty(scoring.rank(conn)) if report else None,
+            groups=decision_groups(report, options, tracked),
+            uncertainty=(
+                stats.uncertainty(scoring.rank(conn), settings.rates(conn))
+                if report
+                else None
+            ),
             subject=subject_of(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
             generated=date.today().strftime("%d %B %Y"),
@@ -462,13 +435,14 @@ def change_brief(rank):
         report = diagnosis.build(conn)
         if not report or not 1 <= rank <= len(report["problems"]):
             return redirect(url_for("report_page"))
+        options, tracked = workspace_view(conn)
         return render_template(
             "change.html",
             coverage=db.coverage(conn),
             report=report,
             problem=report["problems"][rank - 1],
             rank=rank,
-            group=decision_groups(report)["by_rank"][rank],
+            group=decision_groups(report, options, tracked)["by_rank"][rank],
             summary=db.summary(conn),
             subject=subject_of(conn),
             using_sample=db.get_meta(conn, "source") == "sample",
@@ -554,6 +528,114 @@ def edit_stages():
     )
 
 
+@app.route("/improve")
+def improve():
+    """Improve accuracy: the three optional inputs, and nothing else.
+
+    Everything here has a working default, so a person who never opens this
+    page gets the same answer they always did. It exists for the second visit,
+    not the first.
+    """
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        return render_template(
+            "improve.html",
+            options=settings.current(conn),
+            settings_line=settings.summary(conn),
+            modes_used=status.modes_in_use(report["problems"] if report else []),
+            has_values=bool(
+                conn.execute(
+                    "SELECT 1 FROM edges WHERE total_value > 0 LIMIT 1"
+                ).fetchone()
+            ),
+            rate_range=settings.RATE_RANGE,
+            saved=request.args.get("saved"),
+            error=request.args.get("error"),
+        )
+
+
+@app.post("/improve")
+def save_improve():
+    with store.workspace() as conn:
+        try:
+            changed = settings.save(conn, request.form)
+        except settings.SettingError as exc:
+            return redirect(url_for("improve", error=str(exc)))
+        # Rates change what every route costs, so the analysis is redone
+        # before anything reads it again.
+        analysis.run(conn)
+    security.audit("settings_saved", who=security.actor(), fields=changed)
+    return redirect(url_for("improve", saved=changed))
+
+
+@app.post("/improve/reset")
+def reset_improve():
+    with store.workspace() as conn:
+        settings.clear(conn)
+        analysis.run(conn)
+    security.audit("settings_cleared", who=security.actor())
+    return redirect(url_for("improve"))
+
+
+@app.route("/actions")
+def action_board():
+    """The tracking workspace. Deliberately a page of its own: the results
+    page answers what to do, and this answers whether anybody is doing it."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        options, tracked = workspace_view(conn)
+        problems = report["problems"] if report else []
+        return render_template(
+            "actions.html",
+            board=actions.board(problems, options, tracked),
+            states=actions.STATES,
+            subject=subject_of(conn),
+            using_sample=db.get_meta(conn, "source") == "sample",
+            idle_hours=store.IDLE_TIMEOUT_SECONDS // 3600,
+            error=request.args.get("error"),
+        )
+
+
+@app.post("/actions")
+def save_action():
+    with store.workspace() as conn:
+        try:
+            actions.save(
+                conn,
+                request.form.get("edge_id"),
+                owner=request.form.get("owner"),
+                due=request.form.get("due"),
+                state=request.form.get("state"),
+                note=request.form.get("note"),
+            )
+        except actions.ActionError as exc:
+            return redirect(url_for("action_board", error=str(exc)))
+    security.audit(
+        "action_saved", who=security.actor(), state=request.form.get("state") or "none"
+    )
+    target = request.form.get("back") or url_for("action_board")
+    return redirect(target)
+
+
+@app.route("/actions.csv")
+def actions_csv():
+    """The tracker as a file, because the workspace does not outlive the
+    session and the plan has to."""
+    with store.workspace() as conn:
+        ensure_data(conn)
+        report = diagnosis.build(conn)
+        options, tracked = workspace_view(conn)
+        board = actions.board(report["problems"] if report else [], options, tracked)
+        subject = subject_of(conn)
+    return attachment(
+        actions.to_csv(board, subject, date.today().isoformat()),
+        "text/csv",
+        "overlap-actions-" + date.today().isoformat() + ".csv",
+    )
+
+
 @app.route("/data")
 def upload_page():
     with store.workspace() as conn:
@@ -619,7 +701,11 @@ def export_context(conn, band=False):
         "subject": subject_of(conn),
         "sample": db.get_meta(conn, "source") == "sample",
         "coverage": db.coverage(conn),
-        "uncertainty": stats.uncertainty(lanes) if band and tested else None,
+        "rates": settings.rates(conn),
+        "settings": settings.current(conn),
+        "uncertainty": (
+            stats.uncertainty(lanes, settings.rates(conn)) if band and tested else None
+        ),
         "generated": date.today(),
         "contact_email": CONTACT_EMAIL,
     }
@@ -862,7 +948,10 @@ def network_payload(conn):
         )
     ]
     lanes = scoring.rank(conn)
-    held = {row["edge_id"]: row["confidence"] for row in stats.confidence(lanes)}
+    held = {
+        row["edge_id"]: row["confidence"]
+        for row in stats.confidence(lanes, settings.rates(conn))
+    }
     keep = (
         "id origin_id dest_id origin_name dest_name mode distance_km order_count leg "
         "total_weight_kg return_count cost co2e overlap flagged opportunity "
@@ -968,8 +1057,36 @@ def _cleanup(tmpdir):
     Path(tmpdir).rmdir()
 
 
+def run_options():
+    """How the local server runs, as two separate decisions.
+
+    Reloading and debugging arrived as one flag and are not one thing. The
+    reloader restarts the process when a .py file changes, so an edit is one
+    refresh away; the interactive debugger serves a Python console on any
+    stack trace, which is the part that must never reach a public address.
+
+    So a local run reloads and does not debug, a deployment does neither, and
+    FLASK_DEBUG=1 is what asks for the console. Templates and static files
+    need no restart at all: see security.configure.
+    """
+    deployment = bool(app.config["HTTPS_ONLY"])
+    debug = bool(app.config["DEBUG"])
+    return {
+        "port": int(os.environ.get("PORT", "5000")),
+        "debug": debug,
+        "use_reloader": not deployment,
+        "use_debugger": debug,
+    }
+
+
 if __name__ == "__main__":
-    # Debug is off unless FLASK_DEBUG=1 is set, and the reloader it turns on
-    # runs a second process, which makes the server awkward to stop by port.
-    port = int(os.environ.get("PORT", "5000"))
-    app.run(debug=app.config["DEBUG"], port=port)
+    options = run_options()
+    # Take the port rather than sharing it. Two servers on one port is not an
+    # error on Windows, it is a silently stale page: see serve.py.
+    #
+    # Only in the parent. The reloader starts the real server in a child with
+    # WERKZEUG_RUN_MAIN set, and that child is meant to inherit the port it
+    # has already claimed rather than fight its own parent for it.
+    if not os.environ.get("WERKZEUG_RUN_MAIN"):
+        serve.claim_or_exit(options["port"])
+    app.run(**options)

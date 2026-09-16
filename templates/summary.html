@@ -112,7 +112,7 @@
       {% endif %}
     </div>
     {% else %}
-    <p class="es-assumption"><span class="es-assumption-label">Depends on</span> {{ group.basis or (problem.checks[0] if problem.checks else problem.note) }}</p>
+    <p class="es-assumption"><span class="es-assumption-label">Depends on</span> {{ group.reason or (problem.checks[0] if problem.checks else problem.note) }}</p>
     {% endif %}
 
     <p class="es-card-actions">

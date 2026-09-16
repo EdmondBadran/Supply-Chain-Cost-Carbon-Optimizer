@@ -51,6 +51,8 @@ ${{ "{:,.0f}".format(value or 0) }}
 {%- elif name == "print" -%}<path d="M5.6 7.6V3.4h8.8v4.2"/><rect x="3" y="7.6" width="14" height="6.4" rx="1.4"/><path d="M5.6 12h8.8v4.6H5.6z"/>
 {%- elif name == "file" -%}<path d="M5 2.8h6.4L15 6.4v10.8H5z"/><path d="M11.2 2.8v3.8H15"/>
 {%- elif name == "table" -%}<rect x="3" y="4" width="14" height="12" rx="1.4"/><path d="M3 8.2h14"/><path d="M3 12.2h14"/><path d="M8.2 4v12"/>
+{%- elif name == "settings" -%}<path d="M4 6.2h12"/><path d="M4 13.8h12"/><circle cx="12.4" cy="6.2" r="2"/><circle cx="7.6" cy="13.8" r="2"/>
+{%- elif name == "person" -%}<circle cx="10" cy="7" r="3.1"/><path d="M4.4 16.6a5.6 5.6 0 0 1 11.2 0"/>
 {%- endif -%}
 </svg>
 {%- endmacro %}
@@ -112,10 +114,20 @@ Reduce returns on the {{ problem.title }} route
 <p class="sample-note"><span class="sample-note-tag">Example data</span><span>{{ subject ~ " is" if subject else "This is" }} not a real company. Its data is generated to follow realistic patterns.</span></p>
 {%- endmacro %}
 
-{# Which of the three groups a change is shown in, as a label that never rests
-   on colour alone: each has its own icon and its own words. #}
+{# Where a change stands, in one of five words. Never rests on colour alone:
+   each status has its own icon and its own words. #}
+{% set STATUS_ICON = {
+  "ready": "check", "validate": "search", "blocked": "alert",
+  "doing": "arrow-right", "done": "check",
+} %}
+
 {% macro group_badge(group) -%}
-<span class="status status-{{ group.key }}">{{ icon({"now": "check", "review": "search"}.get(group.key, "alert")) }}{{ group.label }}</span>
+<span class="status status-{{ group.key }}">{{ icon(STATUS_ICON.get(group.key, "alert")) }}{{ group.label }}</span>
+{%- endmacro %}
+
+{# The reason a change has the status it has, where there is one to give. #}
+{% macro status_reason(group) -%}
+{%- if group.reason %}<p class="status-reason">{{ group.reason }}</p>{% endif -%}
 {%- endmacro %}
 
 {% macro confidence(problem, short=False) -%}
@@ -138,7 +150,7 @@ Reduce returns on the {{ problem.title }} route
     with cost and emission rates varied up to {{ pct(factor_spread) }} either way,
     this change still cut both cost and CO₂e by at least {{ pct(flag_threshold) }}.
   {%- else -%}
-    <strong>Not stress-tested.</strong> {{ group.basis }}
+    <strong>Not stress-tested.</strong> {{ group.reason }}
   {%- endif -%}
   </span>
 </p>
@@ -246,6 +258,21 @@ Reduce returns on the {{ problem.title }} route
     prices.
   </p>
 </div>
+{%- endmacro %}
+
+{# One of the three changes the overview opens on. The whole decision in a
+   card: where it stands, what to do, what it is worth, how sure to be, and
+   one button. Everything else about it waits in the list below. #}
+{% macro top_action(problem, rank, group) -%}
+<li class="top-action" id="top-{{ rank }}">
+  <p class="ta-meta"><span class="rec-priority">Priority {{ rank }}</span>{{ group_badge(group) }}</p>
+  <h3 class="ta-title">{{ rec_headline(problem) }}</h3>
+  <p class="ta-do">{% if problem.route %}{{ change(problem) }}{% else %}<span>{{ problem.action }}</span>{% endif %}</p>
+  {{ impact(problem) }}
+  <p class="ta-sure">{{ meter(problem.confidence_label) }}<span>{% if problem.confidence_label %}{{ problem.confidence_label|capitalize }} confidence{% else %}Not stress-tested{% endif %}{% if problem.route %}, {{ days(problem.route.proposed.days) }} in transit{% endif %}</span></p>
+  {{ status_reason(group) }}
+  <button type="button" class="btn btn-primary ta-open" data-open-change="{{ rank }}">Review this change{{ icon("arrow-right") }}</button>
+</li>
 {%- endmacro %}
 
 {# A change in the recommendations list. Collapsed to what a manager needs to

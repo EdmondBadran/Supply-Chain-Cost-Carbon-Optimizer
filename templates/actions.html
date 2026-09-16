@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}Action tracker{% endblock %}
+{% block main_class %}page page-actions{% endblock %}
+{% block page_kind %}print-sheet{% endblock %}
+
+{% from "parts/_ui.html" import usd, icon, group_badge, sample_note with context %}
+{% from "parts/_units.html" import co2e %}
+
+{% block content %}
+
+{#
+  The tracking workspace. Separate from the results on purpose: the results
+  page answers what to do, and putting a column of empty owner fields in front
+  of somebody reading it for the first time answers a question they have not
+  asked yet.
+#}
+
+<section class="page-head" aria-labelledby="actions-title">
+  <p class="hero-kicker">Workspace</p>
+  <h1 id="actions-title">Action tracker</h1>
+  <p class="lede">
+    Every change from your results, with somewhere to put who owns it and how
+    far along it is. A status set here shows on the results page, and anything
+    picked up drops out of the three you are asked to start with.
+  </p>
+  <p class="hero-actions">
+    <a class="btn btn-secondary" href="{{ url_for('report_page') }}">{{ icon("arrow-left") }}Back to results</a>
+    <a class="btn btn-secondary" href="{{ url_for('actions_csv') }}" download>{{ icon("download") }}Download as CSV</a>
+  </p>
+</section>
+
+{% if using_sample %}{{ sample_note(subject) }}{% endif %}
+
+{% if error %}
+<div class="alert alert-error" role="alert">
+  {{ icon("alert") }}
+  <div><p class="alert-title">That could not be saved</p><p>{{ error }}</p></div>
+</div>
+{% endif %}
+
+{% if board.rows %}
+<ul class="track-tally" aria-label="Where the changes stand">
+  {% for key, label in [("ready", "Ready to act"), ("validate", "Needs validation"), ("blocked", "Blocked"), ("doing", "In progress"), ("done", "Complete")] %}
+  <li class="track-tally-item{{ ' is-zero' if not board.counts[key] }}">
+    <strong>{{ board.counts[key] }}</strong><span>{{ label }}</span>
+  </li>
+  {% endfor %}
+</ul>
+
+{% if board.committed_cost or board.delivered_cost %}
+<p class="track-progress">
+  {{ icon("check") }}
+  <span>
+    {% if board.committed_cost %}<strong class="cost-ink">{{ usd(board.committed_cost) }}</strong> a year is in progress.{% endif %}
+    {% if board.delivered_cost %}<strong class="cost-ink">{{ usd(board.delivered_cost) }}</strong> a year is marked complete.{% endif %}
+    Estimated, not measured: what was actually saved has to come from your own figures after the change.
+  </span>
+</p>
+{% endif %}
+
+<p class="track-warning">
+  {{ icon("alert") }}
+  <span>
+    This tracker lives in your session and is dropped after
+    {{ idle_hours }} hours without activity, like everything else you upload.
+    Download the CSV to keep it.
+  </span>
+</p>
+
+<div class="track-list">
+  {% for row in board.rows %}
+  <article class="track-row state-{{ row.status.key }}" aria-labelledby="track-{{ row.rank }}-title">
+    <div class="track-head">
+      <p class="track-meta">
+        <span class="rec-priority">Priority {{ row.rank }}</span>
+        {{ group_badge(row.status) }}
+      </p>
+      <h2 class="track-title" id="track-{{ row.rank }}-title">{{ row.title }}</h2>
+      {% if row.change %}<p class="track-change">{{ row.change }}</p>{% endif %}
+      <p class="track-impact">
+        {% if row.cost %}<span class="cost-ink">{{ usd(row.cost) }}</span> a year{% endif %}
+        {% if row.cost and row.co2e %} &middot; {% endif %}
+        {% if row.co2e %}<span class="carbon-ink">{{ co2e(row.co2e) }} CO₂e</span> a year{% endif %}
+      </p>
+      {% if row.status.reason %}<p class="status-reason">{{ row.status.reason }}</p>{% endif %}
+    </div>
+
+    <form class="track-form" method="post" action="{{ url_for('save_action') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="edge_id" value="{{ row.edge_id }}">
+      <input type="hidden" name="back" value="{{ url_for('action_board') }}#track-{{ row.rank }}-title">
+
+      <label class="field" for="owner-{{ row.rank }}">
+        <span class="field-label">Owner</span>
+        <input id="owner-{{ row.rank }}" type="text" name="owner" value="{{ row.owner }}"
+               maxlength="60" placeholder="Nobody yet" autocomplete="off">
+      </label>
+
+      <label class="field" for="due-{{ row.rank }}">
+        <span class="field-label">Due</span>
+        <input id="due-{{ row.rank }}" type="date" name="due" value="{{ row.due }}">
+      </label>
+
+      <label class="field" for="state-{{ row.rank }}">
+        <span class="field-label">Status</span>
+        <select id="state-{{ row.rank }}" name="state">
+          {% for value, label in states.items() %}
+          <option value="{{ value }}"{{ " selected" if value == row.state }}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="field field-wide" for="note-{{ row.rank }}">
+        <span class="field-label">Note</span>
+        <input id="note-{{ row.rank }}" type="text" name="note" value="{{ row.note }}"
+               maxlength="400" placeholder="Anything the next person needs to know">
+      </label>
+
+      <button class="btn btn-secondary btn-small" type="submit">Save</button>
+    </form>
+  </article>
+  {% endfor %}
+</div>
+{% else %}
+<div class="track-empty">
+  <p>There are no changes to track yet, because the loaded data has none.</p>
+  <p><a class="btn btn-primary" href="{{ url_for('upload_page') }}">Upload your orders{{ icon("arrow-right") }}</a></p>
+</div>
+{% endif %}
+
+{% endblock %}
