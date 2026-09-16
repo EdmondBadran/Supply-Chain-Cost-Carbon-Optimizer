@@ -1688,6 +1688,10 @@ details:not(.disclosure) > summary:hover {
     color: var(--ink-2);
 }
 
+.upload-volatile {
+    margin-top: 14px;
+}
+
 .upload-guide {
     padding: 26px 28px 28px;
     border: 1px solid var(--line);

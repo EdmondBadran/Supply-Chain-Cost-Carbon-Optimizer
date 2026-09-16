@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Data sources and licences{% endblock %}
+
+{% from "parts/_ui.html" import icon %}
+
+{% block content %}
+
+<section class="page-head" aria-labelledby="licences-title">
+  <h1 id="licences-title">Data sources and licences</h1>
+  <p class="lede">
+    Overlap ships with reference data it did not create. This page says where
+    each piece came from, what its licence asks for, and what was changed.
+  </p>
+</section>
+
+<div class="answers">
+  <section class="answer">
+    <h2>City coordinates: GeoNames</h2>
+    <p>
+      Every city in an uploaded file is turned into a latitude and longitude
+      using a table bundled with this tool, and that table is derived from the
+      <a href="https://www.geonames.org/" rel="noopener">GeoNames geographical
+      database</a>, used under
+      <a href="https://creativecommons.org/licenses/by/4.0/" rel="noopener">Creative
+      Commons Attribution 4.0 International (CC BY 4.0)</a>.
+    </p>
+    <p>
+      <strong>It has been reduced and modified for this product.</strong> The
+      bundled file is not the GeoNames database. It keeps city name, country
+      code, latitude, longitude and population, drops every other column,
+      drops smaller places, and is sorted by population so an ambiguous city
+      name resolves to the largest place of that name. Nothing in it was
+      corrected or invented: the rows that remain carry GeoNames' own values.
+    </p>
+    <p class="source">
+      The file is <code>data/cities.csv</code> and the same attribution is in
+      <code>LICENSE</code> in the repository, which is what travels with the
+      code.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>Emission factors: DEFRA and GLEC</h2>
+    <p>
+      Kilograms of CO2e per tonne-kilometre, per transport mode, follow
+      published figures from the UK Government's DEFRA conversion factors and
+      the GLEC framework. The figures used and the reasoning are in
+      <code>optimizer/factors.py</code>, and the report prints every one of
+      them under Data and assumptions rather than hiding them.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>Cost factors: not sourced</h2>
+    <p>
+      The cost per tonne-kilometre for each mode is the author's own default,
+      not a published dataset and not a carrier tariff. The tool says so
+      wherever the figures appear, and <a href="{{ url_for('improve') }}">your
+      own rates</a> replace them. This is the softest input in the tool and
+      the reason it describes itself as a screen rather than a quote.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>The example companies</h2>
+    <p>
+      Both sample datasets were invented for this project. They describe no
+      real company, no real customer and no real shipment. Their figures are
+      generated to follow realistic patterns so the tool behaves the way it
+      would on a real network, and every page, print and export that shows
+      them says they are not real.
+    </p>
+  </section>
+</div>
+
+<section class="answer">
+  <h2>Overlap itself</h2>
+  <p>
+    The application code is released under the MIT licence, copyright Edmond
+    Badran. That licence covers the code and nothing else: the bundled
+    GeoNames extract keeps its own CC BY 4.0 terms, which stay with the data
+    wherever it goes, and the MIT grant does not relicense it.
+  </p>
+  <p class="source">
+    Both are stated in full in <code>LICENSE</code>.
+  </p>
+</section>
+
+<section class="closing closing-compact">
+  <h2>Related</h2>
+  <p class="foot-links">
+    <a href="{{ url_for('terms') }}">Terms of use</a>
+    <a href="{{ url_for('privacy') }}">What happens to your file</a>
+    <a href="{{ url_for('method') }}">How it works</a>
+  </p>
+</section>
+
+{% endblock %}

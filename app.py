@@ -14,7 +14,6 @@ from flask import (
     url_for,
 )
 
-import serve
 from optimizer import (
     actions,
     analysis,
@@ -119,8 +118,19 @@ def sample_facts():
             conn.close()
     return facts
 
-app = Flask(__name__)
-app.config["MAX_CONTENT_LENGTH"] = 32 * 1024 * 1024
+# Stylesheets and scripts live in public/static rather than static, because
+# that is the one directory Vercel serves off its CDN. There the function
+# never sees a request for /static/style.css at all; locally Flask serves the
+# same files from the same URLs, so `url_for('static', ...)` is unchanged and
+# there is one copy of each file rather than two.
+app = Flask(__name__, static_folder="public/static", static_url_path="/static")
+
+# A Vercel function will not accept a request body over 4.5 MB: it answers 413
+# before the request reaches Python, with its own error page rather than ours.
+# So the app's own limit sits below the platform's, which is what makes an
+# oversized file land on the upload page with something useful to do next.
+MAX_UPLOAD_MB = 4
+app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
 # Debug off, a real secret key where one is set, secure cookies behind HTTPS,
 # and a refusal to start a deployment without a key. All of it is in
 # optimizer/security.py, which is also where the reasoning is.
@@ -196,6 +206,7 @@ def site_details():
         "factor_spread": stats.FACTOR_SPREAD,
         "expedite_share": factors.EXPEDITE_SHARE_OF_LATE,
         "idle_hours": store.IDLE_TIMEOUT_SECONDS // 3600,
+        "max_upload_mb": MAX_UPLOAD_MB,
         "required_fields": REQUIRED_FIELDS,
         # What the upload page needs to spot a missing column before the file
         # is sent: the loader's own names, meanings and aliases, so the two
@@ -699,6 +710,25 @@ def privacy():
     )
 
 
+@app.route("/terms")
+def terms():
+    """What the figures are and are not, as terms rather than as a caveat
+    halfway down a page. The tool says the same thing beside every number;
+    this is the version somebody can link to."""
+    return render_template("terms.html")
+
+
+@app.route("/licences")
+def licences():
+    """Where the bundled data came from and what its licence asks for.
+
+    cities.csv is GeoNames under CC BY 4.0, which asks for attribution and for
+    modifications to be stated. It is in LICENSE as well, and a licence file
+    is not something a visitor reads, so it is a page too.
+    """
+    return render_template("licences.html")
+
+
 def export_context(conn, band=False):
     """Everything an export needs, read while the workspace is held, so
     writing the file afterwards does not keep this visitor's database locked.
@@ -951,7 +981,7 @@ def not_found(_):
 
 @app.errorhandler(413)
 def too_large(_):
-    return render_error("That file is bigger than the 32 MB limit."), 413
+    return render_error(f"That file is bigger than the {MAX_UPLOAD_MB} MB limit."), 413
 
 
 def network_payload(conn):
@@ -1103,5 +1133,10 @@ if __name__ == "__main__":
     # WERKZEUG_RUN_MAIN set, and that child is meant to inherit the port it
     # has already claimed rather than fight its own parent for it.
     if not os.environ.get("WERKZEUG_RUN_MAIN"):
+        # Imported here rather than at the top: serve.py is a local
+        # convenience, and importing it at module scope would put it on the
+        # serverless cold start path for no reason.
+        import serve
+
         serve.claim_or_exit(options["port"])
     app.run(**options)

@@ -1,18 +1,28 @@
-"""The entry point a deployment runs. `python wsgi.py`, and nothing else.
+"""Optional. Runs Overlap on a machine you control, under waitress.
 
-Not `app.py`. That one runs the Werkzeug development server, which says on
-every start that it is not for production and means it, and it claims its port
-by stopping whatever else is on it, which is right on a laptop and completely
-wrong on a server.
+Vercel does not use this file and does not install waitress. The deployment
+is `vercel.json`, which hands `app.py` straight to the Python runtime; see the
+Deploying it section of the README. Nothing here is on the deployment path,
+and nothing in the app imports it.
 
-Waitress rather than gunicorn, and the reason is the architecture rather than
-taste. Every visitor's data lives in this process's memory, and so do the rate
-limit counters, so the app is safe across threads (it locks) and unsafe across
-processes (they would each hold a different set of visitors). Waitress is one
-process with a pool of threads, which is exactly that shape. Gunicorn with
-more than one worker would give visitors somebody else's empty workspace at
-random, and a deployment that scales this app scales it by making the
-workspaces shared, not by adding workers.
+It is kept because the architecture still has a self-hosted shape and this is
+the file that knows it. Every visitor's data lives in one process's memory,
+and so do the rate limit counters, so the app is safe across threads (it
+locks) and unsafe across processes (they would each hold a different set of
+visitors). Waitress is one process with a pool of threads, which is exactly
+that. Gunicorn with more than one worker would give visitors somebody else's
+empty workspace at random, and a host that scales this app scales it by
+making the workspaces shared, not by adding workers. Vercel is the same
+constraint wearing different clothes, and the README says what it costs
+there.
+
+It used to be called wsgi.py, which was a hazard rather than a name: Vercel's
+Flask preset looks for an `app` in app.py, index.py, server.py, main.py,
+wsgi.py or asgi.py, and this file exports one. Two candidate entry points in
+one repository is the kind of ambiguity that deploys the wrong thing quietly.
+
+    pip install -r requirements-local.txt
+    python local_server.py
 """
 
 import logging

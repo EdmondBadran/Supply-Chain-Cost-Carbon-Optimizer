@@ -24,3 +24,5 @@ data/Nordic test/
 .DS_Store
 
 TECHNICAL_VERIFICATION.md
+
+.vercel/

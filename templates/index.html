@@ -84,7 +84,7 @@
     <label class="dropzone" for="orders" data-dropzone>
       <span class="dropzone-icon">{{ icon("upload") }}</span>
       <span class="dropzone-title" data-drop-title>Drop your orders CSV here, or <span class="dropzone-browse">choose a file</span></span>
-      <span class="dropzone-hint" data-drop-hint>CSV only, up to 32 MB, one row per order</span>
+      <span class="dropzone-hint" data-drop-hint>CSV only, up to {{ max_upload_mb }} MB, one row per order</span>
       <input id="orders" class="dropzone-input" type="file" name="orders" accept=".csv,text/csv" required>
     </label>
     <p class="field-error" data-drop-error role="alert" hidden></p>
@@ -128,6 +128,14 @@
     <p class="upload-privacy">
       {{ icon("lock") }}
       <span>Your file is used to create this analysis. It is not stored, and the results are cleared after {{ idle_hours }} hours without activity. <a href="{{ url_for('privacy') }}">What happens to your file</a></span>
+    </p>
+    <p class="callout callout-caution upload-volatile">
+      {{ icon("info") }}
+      <span><strong>Your analysis is held in memory, not in a database.</strong>
+      This site runs as a serverless function, so a restart or a move to another
+      instance can end your session early and take the analysis with it. Export
+      anything you want to keep. Treat a long analysis as something to redo
+      rather than come back to.</span>
     </p>
   </form>
 

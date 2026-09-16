@@ -31,29 +31,34 @@ optional company name is printed on the results and exports. A file that
 cannot be read gets a plain explanation of what to fix, with the loader's own
 message underneath.
 
-**The results** open on the decision: how many changes are worth reviewing,
-what they could save a year in cost and CO2e, one button into the top change,
-and three cards. A short strip says how much of the file was used, how
-confident to be, and that these are planning estimates. A row of section
-links follows the reader down the page.
+**The results** open on the three changes worth starting with. Each one says
+what it saves in money and in CO2e, how sure to be, how much longer the goods
+take, where it stands, and has one button into it. Above them: how many
+changes were found and what they are worth together. Below them: a short strip
+saying how much of the file was used, what period it covers, how confident to
+be, and that these are planning estimates.
 
-**Recommendations** lists every change as a card, grouped by how ready it is
-to act on. Recommended now means the change held up when every cost and
-emission rate was redrawn; worth reviewing and needs more data say why not.
-Each card states what would change, the estimated annual saving, why it is
-recommended and how sure to be, and opens a decision view: today against
+**Recommendations** lists every change as a card, grouped by the same five
+statuses. Each card states what would change, the estimated annual saving, why
+it is recommended and how sure to be, and opens a decision view: today against
 proposed, what to check before acting, Mark for review, Export this
-recommendation as a one-page brief, and, folded away, the full calculation
-and a what-if that recalculates on the server.
+recommendation as a one-page brief, and, folded away, the full calculation and
+a what-if that recalculates on the server.
 
-**Network** is the baseline and the map, which follows whichever change is
+**Advanced**, below a rule that says none of it is needed to act, holds the
+network, the assumptions and the statistics.
+
+**Network**, under Advanced, is the baseline and the map, which follows whichever change is
 open and labels it before and after. The chain picture, effort ratings and a
 what-if for closing or opening a warehouse are one click down.
 
-**Data & assumptions** answers four questions in a sentence each: how much of
+**Data & assumptions**, also under Advanced, answers four questions in a sentence each: how much of
 the data was usable, how reliable the changes are, which assumptions matter,
 and what the analysis leaves out. Factors, formulas and the full statistics
 are behind their own disclosures.
+
+**Improve accuracy** and the **action tracker** are optional pages of their
+own, described further down. Nothing on the results needs either.
 
 **Exports** are an executive summary for leadership, an Excel workbook for
 analysts with every change, route, check and assumption, and a CSV for other
@@ -118,40 +123,126 @@ customer, company or filename.
 
 ## Deploying it
 
-`app.py` is the development server. A deployment runs `wsgi.py`, which serves
-the same app under waitress:
+It deploys to Vercel, as one Python function with a CDN in front of it. There
+is no always-running server, no database and no build step.
+
+`vercel.json` is the whole configuration:
+
+```json
+{
+  "framework": "flask",
+  "functions": {
+    "app.py": { "maxDuration": 60, "includeFiles": "data/**" }
+  }
+}
+```
+
+Vercel's Flask preset finds the `app` in `app.py` on its own. `includeFiles`
+is what puts the bundled GeoNames table and both samples inside the function,
+and without it the app boots and then cannot geocode a single city.
+`maxDuration` is 60 seconds because the workbook export runs two thousand
+reruns before it writes anything, and the default would bill for a hung one
+for five minutes.
+
+### Putting it on Vercel
+
+1. **Push to GitHub.** The repository root has to be the folder holding
+   `app.py` and `vercel.json`. If it sits under a subfolder in your repo, note
+   the path, it is needed in step 3.
+2. **Import it.** On [vercel.com](https://vercel.com), *Add New* then
+   *Project*, and pick the repository. Install the Vercel GitHub app when it
+   asks.
+3. **Set the root directory.** On the import screen, *Root Directory*, *Edit*,
+   and choose the folder containing `app.py`. Leave it as `./` if that is the
+   repository root. Getting this wrong is the most common failure: the build
+   finds no entrypoint and you get a 404 on every path.
+4. **Leave the build settings alone.** Framework should read *Flask*, picked
+   up from `vercel.json`. There is no build command and no output directory to
+   set. Python dependencies come from `requirements.txt`.
+5. **Add the environment variables** below, under *Environment Variables* on
+   the same screen, for Production, Preview and Development.
+6. **Deploy**, and open the URL it gives you. Check `/healthz` returns `ok`,
+   then `/` for the sample analysis and `/data` to upload a file.
+
+Changing a variable later is *Settings*, *Environment Variables*, and then
+*Deployments*, *Redeploy*: the running function reads them at start, so an
+edit alone changes nothing.
+
+### Environment variables
+
+| Variable | Value | Why |
+| --- | --- | --- |
+| `SECRET_KEY` | a long random string | Signs the session cookie, which is what ties a visitor to their workspace. The app refuses to start without it once `HTTPS_ONLY` is set. Generate one with `python -c "import secrets; print(secrets.token_hex(32))"`, paste it into Vercel, and keep it out of the repository. |
+| `HTTPS_ONLY` | `1` | Marks the cookie secure and sends HSTS. Vercel terminates TLS for you, so this is correct from the first deploy. |
+| `FLASK_DEBUG` | `0` | Off is already the default. Set it explicitly so nobody has to check: the flag serves an interactive Python console on any stack trace, and that must never be on a public address. |
+
+One more is worth setting and is not required: `BEHIND_PROXY=1`. The rate
+limiter counts against the session where there is one and against the caller's
+address where there is not, which is every visitor's first request. Behind
+Vercel that address is the platform's, so without this flag every new visitor
+in the world shares one bucket. With it the limiter reads `X-Forwarded-For`,
+which Vercel sets at its own edge and a caller cannot forge. Only ever set it
+where something in front genuinely does set that header.
+
+`PORT`, `HOST` and `THREADS` are read only by `local_server.py` and do nothing
+on Vercel.
+
+### What this deployment is and is not
+
+**It is fine for demos, a portfolio link and light use. It is not durable
+storage for multi-user analysis.** Every visitor's workspace is an in-memory
+SQLite database inside one function instance, and that was always the design:
+nothing uploaded is ever written to disk. Serverless makes the consequence
+sharper rather than different.
+
+- **An analysis can disappear mid-session.** Vercel starts, stops and replaces
+  instances on its own schedule. A visitor whose next request lands on a new
+  instance finds an empty workspace and the sample loaded back in. The upload
+  page and the privacy page both say so, and the exports are the way to keep
+  anything.
+- **Uploads are capped at 4 MB.** A Vercel function refuses a request body
+  over 4.5 MB before Python sees it, answering with its own error page. The
+  app's limit sits below that so an oversized file lands on the upload page
+  with something useful to do next.
+- **The rate limit counters are per instance**, like the workspaces, so the
+  real allowance across several warm instances is looser than the numbers in
+  `optimizer/security.py`. It is a brake on one visitor hammering one
+  instance, not a quota.
+- **The 64-workspace ceiling is per instance too.** More instances means more
+  total capacity and no more safety, because they share nothing.
+
+Fixing any of that means the workspaces stop living in process memory:
+somewhere shared for the analysis, and something durable for uploads. That is
+a different design, and it is deliberately not in this task. Until then the
+honest description of this deployment is a working demo of a real engine, not
+a place to keep work.
+
+### Running it on your own machine instead
+
+`local_server.py` serves the same app under waitress, for a laptop or a box
+you control:
 
 ```
-python wsgi.py
+pip install -r requirements-local.txt
+python local_server.py
 ```
 
-There is a `Procfile` for platforms that read one. Set these first:
+It was called `wsgi.py` until the Vercel work: the Flask preset resolves an
+`app` from `app.py`, `index.py`, `server.py`, `main.py`, `wsgi.py` or
+`asgi.py`, and two files exporting one is an ambiguity that deploys the wrong
+thing quietly.
 
-| Variable | Why |
-| --- | --- |
-| `SECRET_KEY` | Signs the session cookie. Without it every restart signs everybody out and loses what they uploaded. The app refuses to start without it once `HTTPS_ONLY` is set. |
-| `HTTPS_ONLY=1` | Marks the cookie secure and sends HSTS. Set it once TLS is in front. |
-| `PORT` | Defaults to 5000. Most platforms set this for you. |
-| `HOST` | Defaults to `0.0.0.0`. |
-| `THREADS` | Defaults to 8. |
-| `BEHIND_PROXY=1` | Makes the rate limiter read `X-Forwarded-For`. Only safe when something in front actually sets it. |
+**Run one process, and scale it with threads.** Every visitor's workspace
+lives in that process's memory, and so do the rate limit counters, so the app
+is safe across threads (it locks) and wrong across processes: a second worker
+would hand visitors an empty workspace at random. Waitress is one process with
+a thread pool, which is that shape exactly. Do not put gunicorn in front of
+this with `-w 2`.
 
-**Run one process, and scale it with threads.** Every visitor's workspace lives
-in this process's memory, and so do the rate limit counters, so the app is safe
-across threads (it locks) and wrong across processes: a second worker would
-hand visitors an empty workspace at random. Waitress is one process with a
-thread pool, which is that shape exactly. Do not put gunicorn in front of this
-with `-w 2`. Scaling past one process means making the workspaces shared
-first, and that is a different design.
-
-**Point your health check at `/healthz`**, not at `/`. Every visitor without a
-cookie gets a workspace and the front page fills it with the sample so it never
-opens empty, so a monitor polling `/` would mint a database and a copy of the
-sample on every poll. `/healthz` touches nothing and sets no cookie.
-
-One process holds at most 64 workspaces and drops anything idle for two hours,
-so the ceiling is roughly 64 people reading results at once. That is a
-deliberate consequence of keeping uploads out of any database, not an oversight.
+**Point a health check at `/healthz`**, not at `/`. Every visitor without a
+cookie gets a workspace and the front page fills it with the sample so it
+never opens empty, so a monitor polling `/` would mint a database and a copy
+of the sample on every poll. `/healthz` touches nothing and sets no cookie.
 
 ## What it is not
 
@@ -178,12 +269,16 @@ follow realistic patterns, and every page showing their figures says so.
     /report           the results: three actions first, then every change, then the working
     /improve          optional: your own rates, service limit and cost of capital
     /actions          optional: who owns each change and how far along it is
+    /actions.csv      the tracker as a file, since it does not outlive the session
     /report/summary   the executive summary, ready to print
     /findings.xlsx    the findings as a formatted workbook
     /findings.csv     every opportunity as plain data
     /method           how it works, in two boxes
     /data             upload your own CSV, or try a sample
     /privacy          what happens to a file you upload
+    /terms            what the figures are, and what they are not
+    /licences         where the bundled data came from and under what licence
+    /healthz          alive, touching nothing. Point uptime checks here
 
 The old `/chain`, `/dashboard`, `/diagnosis` and `/stats` addresses redirect
 to the matching part of the report.
@@ -399,14 +494,18 @@ textbook, and numpy would buy nothing but a wheel to install.
 ## Built with
 
 Python, Flask and SQLite, with D3 for the map. Flask is the only thing the
-analysis needs; waitress serves it in production and nothing imports it
-otherwise.
+analysis needs, and it is the only thing `requirements.txt` installs. Waitress
+is in `requirements-local.txt` because `local_server.py` is the only file that
+imports it, and the Vercel deployment does not run it.
 No build step, no frontend framework, no API keys. It runs offline.
 
 ## Layout
 
 ```
-app.py              routes, JSON endpoints and the summary
+app.py              routes, JSON endpoints and the summary, and the
+                    entrypoint Vercel deploys
+vercel.json         the whole deployment: one Python function, data bundled in
+local_server.py     optional: the same app under waitress, for self-hosting
 optimizer/
   geo.py            city lookup and great-circle distance
   distance.py       distance by transport mode
@@ -421,12 +520,12 @@ optimizer/
   exports.py        the workbook and the CSV
   xlsx.py           a small .xlsx writer on the standard library
   store.py          one in-memory workspace per visitor
-static/
+public/static/      served by the CDN on Vercel, by Flask locally
   dashboard.js      the map and the ranked routes
   workspace.js      the route panel, scenarios and comparison
   chain.js          the value chain stages
 data/               city reference table and the sample datasets
-tests/              180 tests: loading, thresholds, statistics, exports and the routes
+tests/              loading, thresholds, statistics, exports, routes and deployment
 tools/make_sample.py  regenerates the sample data
 ```
 
@@ -472,7 +571,23 @@ not the file you happened to load last.
 python -m unittest discover tests
 ```
 
-282 of them, stdlib unittest, no test dependency.
+345 of them, stdlib unittest, no test dependency.
+
+`tests/test_deploy.py` pins what a deployment needs: that the health check
+creates no workspace, that the entry point serves with threads and not
+workers, that the browser assets kept their URLs when they moved under
+`public/`, and that the bundled GeoNames data keeps its attribution.
+
+`tests/test_vercel.py` pins the deployment itself, and every failure it looks
+for is silent. That `app.py` is the only file in the repository Vercel's Flask
+preset would answer to, so there is nothing to resolve. That the bundled city
+table is found without relying on the working directory, which a function does
+not inherit. That the upload limit stays under the platform's 4.5 MB body
+limit. That `maxDuration` is set and inside the plan. That the footer links to
+the terms and the licences, that the licence page credits GeoNames and says the
+data was modified, and that no page claims GDPR compliance.
+
+`tests/test_serve.py` pins that only one server can hold the port.
 
 `tests/test_progressive.py` pins the rule the interface rests on: the first
 screen is three actions and asks for nothing, and every optional input is
@@ -514,8 +629,14 @@ Nothing you upload is written to disk. The file is spooled to a temporary
 path for as long as the CSV parser needs to read it and deleted before the
 request finishes. What survives is a graph in an in-memory SQLite database
 belonging to your browser session alone, dropped after two hours idle, when
-you press clear, or when the server restarts. Your browser holds one signed
-cookie carrying a random identifier and nothing else.
+you press clear, or when the process holding it stops. Your browser holds one
+signed cookie carrying a random identifier and nothing else.
+
+On Vercel that last one is not a rare event. The function is started, stopped
+and replaced on the platform's schedule, and a request that lands on a new
+instance finds an empty workspace. So the tool is a screen you run and export,
+not somewhere to keep an analysis, and the upload page says so before anybody
+uploads anything.
 
 That is deliberately not the same as claiming the server cannot read your
 data. It can, because it is the thing doing the arithmetic. Making that untrue

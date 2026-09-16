@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of use{% endblock %}
+
+{% from "parts/_ui.html" import icon %}
+
+{% block content %}
+
+<section class="page-head" aria-labelledby="terms-title">
+  <h1 id="terms-title">Terms of use</h1>
+  <p class="lede">
+    Overlap screens shipping data for routes where cost and carbon could both
+    come down. What it produces is an estimate to investigate, and these terms
+    are mostly about what that does and does not mean.
+  </p>
+</section>
+
+<p class="callout callout-caution">
+  {{ icon("info") }}
+  <span><strong>Draft.</strong> This is a practical product draft written by
+  the person who built the tool, not by a lawyer, and it has not been
+  reviewed by one. It describes how Overlap actually behaves today. Before
+  this tool is sold or relied on commercially, this page and the
+  <a href="{{ url_for('privacy') }}">privacy page</a> need a legal review.</span>
+</p>
+
+<div class="answers">
+  <section class="answer">
+    <h2>What the results are</h2>
+    <p>
+      Planning estimates. Every figure is modelled from your order data using
+      published emission factors, default cost factors and typical transit
+      speeds, all of which the tool prints under Data and assumptions. They
+      are produced to tell you which routes are worth a closer look and in
+      what order.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>What the results are not</h2>
+    <ul>
+      <li>
+        <strong>Not a carrier quote.</strong> No carrier has priced anything
+        here. Rates, surcharges, capacity, lane contracts and border
+        constraints are not modelled.
+      </li>
+      <li>
+        <strong>Not financial or investment advice.</strong> Nothing on these
+        pages is a recommendation about spending, budgeting or capital
+        allocation, and Overlap is not a regulated adviser.
+      </li>
+      <li>
+        <strong>Not a guaranteed saving.</strong> An estimated annual saving
+        is what the model produces under its own assumptions. It is not a
+        promise, a forecast, or a number to put in a budget or a report to a
+        board without checking it.
+      </li>
+      <li>
+        <strong>Not operational instructions.</strong> A change marked Ready
+        to act is ready to be reviewed, not ready to be executed. Do not
+        rebook freight, change a mode or close a site on the strength of this
+        tool alone.
+      </li>
+      <li>
+        <strong>Not an audit, certification or regulatory filing.</strong> The
+        emissions figures are screening estimates and are not prepared to any
+        reporting standard.
+      </li>
+    </ul>
+  </section>
+
+  <section class="answer">
+    <h2>Your data and your responsibility</h2>
+    <p>
+      You are responsible for having the right to upload whatever you upload,
+      and for the decisions you take afterwards. Do not upload anything you
+      are not allowed to share with a third party service. What happens to a
+      file once it arrives is set out on the
+      <a href="{{ url_for('privacy') }}">privacy page</a>.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>Availability</h2>
+    <p>
+      Overlap is offered as-is, with no guarantee of availability, and it is
+      hosted in a way that can end your session without warning. Your analysis
+      lives in memory only. Export what you need to keep.
+    </p>
+  </section>
+</div>
+
+<section class="answer answer-caveat">
+  <h2>Liability, plainly</h2>
+  <p>
+    To the extent the law allows, the software is provided without warranty
+    and its author is not liable for losses arising from its use. That is the
+    MIT licence the code is released under, and this page does not widen it.
+    Anyone acting on a figure from this tool is doing so on their own
+    commercial judgement, having checked it with the people who run the lane.
+  </p>
+  <p>
+    Questions about any of this go to
+    <a href="mailto:{{ contact_email }}">{{ contact_email }}</a>, the address
+    of Overlap's creator.
+  </p>
+</section>
+
+<section class="closing closing-compact">
+  <h2>Related</h2>
+  <p class="foot-links">
+    <a href="{{ url_for('privacy') }}">What happens to your file</a>
+    <a href="{{ url_for('licences') }}">Data sources and licences</a>
+    <a href="{{ url_for('method') }}">How it works</a>
+  </p>
+</section>
+
+{% endblock %}

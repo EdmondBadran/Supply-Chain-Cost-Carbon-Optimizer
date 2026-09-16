@@ -1,0 +1,4 @@
+# Only for running Overlap on a machine you control, with local_server.py.
+# Vercel installs requirements.txt and never reads this file.
+-r requirements.txt
+waitress>=3.0

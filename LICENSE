@@ -31,9 +31,14 @@ under the Creative Commons Attribution 4.0 licence.
     GeoNames, https://www.geonames.org/
     CC BY 4.0, https://creativecommons.org/licenses/by/4.0/
 
-It carries city names, country codes, coordinates and populations, reduced to
-the columns this project needs. Anyone redistributing this repository keeps
-that attribution with it.
+It has been modified. The file carries city names, country codes, coordinates
+and populations only: every other column was dropped, smaller places were
+dropped, and the rows were sorted by population so that an ambiguous city name
+resolves to the largest place of that name. No value in a remaining row was
+altered. CC BY 4.0 asks that changes be stated, and that is the change.
+
+Anyone redistributing this repository keeps that attribution with it. The MIT
+licence above covers the application code and does not relicense this data.
 
 The sample datasets in data/ are invented for this project and describe no
 real company.

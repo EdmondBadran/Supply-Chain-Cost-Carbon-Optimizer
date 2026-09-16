@@ -10,31 +10,112 @@
   <h1 id="privacy-title">What happens to the file you upload</h1>
   <p class="lede">
     Your file is used to create your analysis and nothing else. The results
-    live only in this server's memory, only for your session, and are gone
-    when you clear them, after {{ store_stats.idle_timeout_minutes // 60 }}
-    hours without activity, or when the server restarts.
+    live only in the memory of the process that answered your request, only
+    for your session, and are gone when you clear them, after
+    {{ store_stats.idle_timeout_minutes // 60 }} hours without activity, or
+    whenever that process stops.
   </p>
 </section>
 
+<p class="callout callout-caution">
+  {{ icon("info") }}
+  <span><strong>Draft.</strong> This is a practical product draft written by
+  the person who built the tool, not by a lawyer, and it has not been reviewed
+  by one. It is written to describe what the code actually does rather than to
+  claim compliance with any particular regime: it is not a statement of GDPR
+  compliance and no part of this tool has been certified by anybody. Before
+  Overlap is sold or relied on commercially, this page and the
+  <a href="{{ url_for('terms') }}">terms of use</a> need a legal review.</span>
+</p>
+
 <div class="answers">
+  <section class="answer">
+    <h2>Where this runs</h2>
+    <p>
+      Overlap is hosted on <a href="https://vercel.com/" rel="noopener">Vercel</a>
+      as a serverless function. Vercel is the processor that runs the code and
+      carries the traffic, so your request, including the file on it, passes
+      through their infrastructure, and their own terms and privacy notice
+      apply to that. There is no other third party in the path: no analytics,
+      no tracking pixels, no outbound API calls with your data in them, and no
+      accounts.
+    </p>
+    <p>
+      The function runs in a single region. Which one is a deployment setting
+      rather than a promise on this page, so if the location of processing
+      matters to you, ask before uploading.
+    </p>
+  </section>
+
   <section class="answer">
     <h2>Is my file stored?</h2>
     <p>
       No. The upload is written to a temporary file only long enough to read
       it, because a CSV reader needs something to read, and that file is
       deleted before the request finishes, whether the analysis worked or not.
-      What remains is the analysis, held in an in-memory database that never
-      touches the disk.
+      What remains is the analysis, in an in-memory database that is never
+      written to disk. There is no database behind this tool, no object
+      storage and no backups, so there is nothing holding your file after the
+      request that carried it.
     </p>
   </section>
 
   <section class="answer">
-    <h2>Who can see my data?</h2>
+    <h2>Your file may contain personal data</h2>
     <p>
-      Nobody else using the site. Your browser holds one cookie, signed so it
-      cannot be forged. It carries two random values and nothing else: which
-      workspace in memory is yours, and a token that proves a form you submit
-      came from a page we served you.
+      That is worth saying plainly, because order exports often do. A customer
+      name in a destination field, a delivery address, a contact, an
+      identifier that ties a shipment to a person: any of these can ride along
+      in a column the analysis does not even use. Overlap does not ask for
+      them and does not need them.
+    </p>
+    <p>
+      <strong>Strip what you can before uploading.</strong> The five columns
+      the tool requires are a place, a place, a weight, a mode and an origin
+      name. If the rest of the file can go, let it go. Whatever does arrive is
+      treated the same as the rest of the file: held in memory for your
+      session, never written to disk, never logged, and dropped with the
+      workspace.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>Cookies</h2>
+    <p>
+      One cookie, and it is necessary rather than optional, which is why there
+      is no banner asking you to accept it. It is signed so it cannot be
+      forged, it carries two random values and nothing else, and it expires
+      when you close your browser.
+    </p>
+    <ul>
+      <li>Which workspace in memory is yours.</li>
+      <li>
+        A token proving a form you submit came from a page this site served
+        you.
+      </li>
+    </ul>
+    <p>
+      There is no advertising cookie, no analytics cookie and no third party
+      cookie. Nothing in it identifies you, and it is useless to anybody who
+      copies it once the workspace behind it is gone.
+    </p>
+  </section>
+
+  <section class="answer">
+    <h2>What gets logged</h2>
+    <p>
+      State changes are written to the application log as one JSON line each:
+      that an upload was loaded, how many rows it had, how many were skipped,
+      how many routes came out, that a sample was loaded, that a workspace was
+      cleared, that somebody hit a rate limit. Deliberately counts rather than
+      content: no city, no customer, no company name, no filename, no column
+      from your file.
+    </p>
+    <p>
+      Vercel keeps its own request logs, which carry the usual things a web
+      server records, including IP address, and are retained under their
+      policy rather than this one. The audit log above is the only thing
+      Overlap itself writes, and it goes to the same place.
     </p>
   </section>
 
@@ -43,19 +124,16 @@
     <p>
       After {{ store_stats.idle_timeout_minutes }} minutes without a request,
       your workspace is dropped. Pressing <em>Clear this data</em> on the
-      upload page drops it immediately. Restarting the server drops all of
-      them.
+      upload page drops it immediately, which is the fastest deletion this
+      tool offers and needs no request to anybody. A serverless instance that
+      restarts or is replaced drops every workspace it was holding, including
+      yours, possibly sooner than either of those.
     </p>
-  </section>
-
-  <section class="answer">
-    <h2>Does anything leave this machine?</h2>
     <p>
-      Your data does not. There are no analytics, no outbound API calls and no
-      accounts. The browser fetches a web font from Google Fonts and the map
-      library and outlines from public code hosts, and none of those requests
-      carry anything about your supply chain. City lookups run against a
-      GeoNames extract bundled with the code.
+      There is no retention period to quote beyond that, because there is
+      nowhere for anything to be retained. Equally, there is no way to ask for
+      a copy of your data later, or to restore an analysis you lost: it does
+      not exist once the workspace is gone.
     </p>
   </section>
 </div>
@@ -70,9 +148,16 @@
     calculation there, which is a different and much larger piece of software.
   </p>
   <p>
+    <strong>This is not a GDPR compliance statement.</strong> No data
+    protection assessment has been done, there is no data processing agreement
+    on offer, and nothing here has been certified. What is written above is an
+    accurate description of the code, which is a different and smaller claim.
+  </p>
+  <p>
     So the honest version is the one above: nothing is stored, nothing is
-    shared between visitors, nothing is sent anywhere, and the window in which
-    it exists at all is your session.
+    shared between visitors, nothing is sent anywhere by this tool, and the
+    window in which your analysis exists at all is your session, on one
+    instance, which may end before you do.
   </p>
 </section>
 
@@ -81,25 +166,35 @@
   <ul>
     <li>Uploads are capped at {{ max_mb }} MB and must be CSV.</li>
     <li>
-      The server holds at most {{ store_stats.limit }} sessions at once. Past
-      that the least recently used one is dropped, which costs that visitor
-      their upload and nothing else.
+      The instance answering you holds at most {{ store_stats.limit }} sessions
+      at once. Past that the least recently used one is dropped, which costs
+      that visitor their upload and nothing else.
     </li>
     <li>
-      Right now it is holding {{ store_stats.live }}
-      workspace{{ "s" if store_stats.live != 1 }} in memory.
+      Right now this instance is holding {{ store_stats.live }}
+      workspace{{ "s" if store_stats.live != 1 }} in memory. Another instance
+      would give a different number, because they share nothing.
+    </li>
+    <li>
+      Nothing survives a restart, and a serverless deployment restarts and
+      moves between instances on its own schedule. Export anything you want
+      to keep.
     </li>
   </ul>
   <p class="source">
-    All of this is in <code>optimizer/store.py</code> and the upload handler in
-    <code>app.py</code>, which are about a hundred lines between them and are
-    worth reading rather than believing.
+    All of this is in <code>optimizer/store.py</code>, <code>optimizer/security.py</code>
+    and the upload handler in <code>app.py</code>, which are worth reading
+    rather than believing.
   </p>
 </section>
 
 <section class="closing closing-compact">
   <h2>Ready to upload?</h2>
   <a class="btn btn-primary btn-large" href="{{ url_for('upload_page') }}">{{ icon("upload") }}Upload your shipping data</a>
+  <p class="foot-links">
+    <a href="{{ url_for('terms') }}">Terms of use</a>
+    <a href="{{ url_for('licences') }}">Data sources and licences</a>
+  </p>
 </section>
 
 {% endblock %}

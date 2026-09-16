@@ -1,0 +1,19 @@
+# What the deployment does not need. Everything else is uploaded and, for
+# anything outside public/, bundled into the function.
+#
+# data/ is deliberately absent from this list: cities.csv and both sample
+# datasets are read at runtime and vercel.json includes them explicitly.
+
+.venv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+tests/
+tools/
+
+*.db
+*.sqlite3
+.env
+.env.*
